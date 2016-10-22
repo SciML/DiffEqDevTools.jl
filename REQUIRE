@@ -3,3 +3,4 @@ RecipesBase
 DiffEqBase
 StochasticDiffEq
 OrdinaryDiffEq
+FiniteElementDiffEq

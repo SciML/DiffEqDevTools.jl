@@ -1,6 +1,6 @@
 module DiffEqDevTools
 
-using DiffEqBase, RecipesBase, OrdinaryDiffEq, StochasticDiffEq
+using DiffEqBase, RecipesBase, OrdinaryDiffEq, StochasticDiffEq, FiniteElementDiffEq
 
 import Base: length
 
@@ -11,6 +11,8 @@ include("benchmark.jl")
 include("convergence.jl")
 include("plotrecipes.jl")
 include("test_solution.jl")
+include("ode_tableaus.jl")
+include("tableau_info.jl")
 
 export ConvergenceSimulation, Shootout, ShootoutSet, TestSolution
 
@@ -53,6 +55,7 @@ export constructEuler, constructKutta3, constructRK4, constructRK438Rule,
        constructTanakaKasugaYamashitaYazaki6D, constructTanakaKasugaYamashitaYazaki6C,
        constructTanakaKasugaYamashitaYazaki6B, constructTanakaKasugaYamashitaYazaki6A,
        constructMikkawyEisa, constructChummund6, constructChummund62,
-       constructHuta62, constructHuta6, constructRKF4
+       constructHuta62, constructHuta6, constructRKF4, constructVerner7, constructVerner8,
+       constructVerner9, constructVerner6
 
 end # module
