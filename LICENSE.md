@@ -1,4 +1,4 @@
-The DiffEqDevTools.jl package is licensed under the MIT "Expat" License:
+The DevToolsDiffEq.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2016: ChrisRackauckas.
 > 

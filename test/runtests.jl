@@ -2,4 +2,5 @@ using DiffEqDevTools
 using Base.Test
 
 # write your own tests here
-@test 1 == 2
+println("Benchmark Tests")
+@time @test include("benchmark_tests.jl")
