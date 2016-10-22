@@ -1,6 +1,6 @@
 module DiffEqDevTools
 
-using DiffEqBase, RecipesBase, OrdinaryDiffEq
+using DiffEqBase, RecipesBase, OrdinaryDiffEq, StochasticDiffEq
 
 import Base: length
 
