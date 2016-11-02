@@ -4,3 +4,4 @@ DiffEqBase
 StochasticDiffEq
 OrdinaryDiffEq
 FiniteElementDiffEq
+RecursiveArrayTools

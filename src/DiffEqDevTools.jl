@@ -1,6 +1,7 @@
 module DiffEqDevTools
 
-using DiffEqBase, RecipesBase, OrdinaryDiffEq, StochasticDiffEq, FiniteElementDiffEq
+using DiffEqBase, RecipesBase, OrdinaryDiffEq, StochasticDiffEq, FiniteElementDiffEq,
+      RecursiveArrayTools
 
 import Base: length
 
