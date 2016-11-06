@@ -105,9 +105,9 @@ solved over the given Δts.
 * `alg`: The algorithm to test. Defaults to "Euler".
 * `tableau`: The tableau used for generic methods. Defaults to ODE_DEFAULT_TABLEAU.
 """
-function test_convergence(Δts::AbstractArray,prob::AbstractODEProblem;tspan=[0,1],save_timeseries=true,adaptive=false,kwargs...)
+function test_convergence(Δts::AbstractArray,prob::AbstractODEProblem;save_timeseries=true,adaptive=false,kwargs...)
   N = length(Δts)
-  solutions = [solve(prob::ODEProblem,tspan;Δt=Δts[i],save_timeseries=save_timeseries,adaptive=adaptive,kwargs...) for i=1:N]
+  solutions = [solve(prob::ODEProblem;Δt=Δts[i],save_timeseries=save_timeseries,adaptive=adaptive,kwargs...) for i=1:N]
   auxdata = Dict(:Δts =>  Δts)
   ConvergenceSimulation(solutions,Δts,auxdata=auxdata)
 end
