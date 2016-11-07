@@ -102,12 +102,12 @@ solved over the given dts.
 * `T`: The final time. Default is 1
 * `save_timeseries`: Denotes whether to save at every timeseries_steps steps. Default is true.
 * `timeseries_steps`: Denotes the steps to save at if `save_timeseries=true`. Default is 1
-* `alg`: The algorithm to test. Defaults to "Euler".
+* `alg`: The algorithm to test.
 * `tableau`: The tableau used for generic methods. Defaults to ODE_DEFAULT_TABLEAU.
 """
-function test_convergence(dts::AbstractArray,prob::AbstractODEProblem;save_timeseries=true,adaptive=false,kwargs...)
+function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;save_timeseries=true,adaptive=false,kwargs...)
   N = length(dts)
-  solutions = [solve(prob::ODEProblem;dt=dts[i],save_timeseries=save_timeseries,adaptive=adaptive,kwargs...) for i=1:N]
+  solutions = [solve(prob::ODEProblem,alg;dt=dts[i],save_timeseries=save_timeseries,adaptive=adaptive,kwargs...) for i=1:N]
   auxdata = Dict(:dts =>  dts)
   ConvergenceSimulation(solutions,dts,auxdata=auxdata)
 end
