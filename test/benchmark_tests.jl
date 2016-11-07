@@ -19,8 +19,8 @@ setups = [Dict(:alg=>:RK4);Dict(:alg=>:Euler);Dict(:alg=>:BS3);
           Dict(:alg=>:Midpoint);Dict(:alg=>:BS5);Dict(:alg=>:DP5)]
 
 
-t1 = @elapsed sol = solve(prob::ODEProblem,tspan,alg=:RK4,Δt=1/2^(4))
-t2 = @elapsed sol2 = solve(prob::ODEProblem,tspan;Δt=1/2^(4),setups[1]...)
+t1 = @elapsed sol = solve(prob::ODEProblem,tspan,alg=:RK4,dt=1/2^(4))
+t2 = @elapsed sol2 = solve(prob::ODEProblem,tspan;dt=1/2^(4),setups[1]...)
 
 bool = (sol2[end] == sol[end])
 
@@ -28,13 +28,13 @@ bool = (sol2[end] == sol[end])
 
 println("Shootout Tests")
 
-shoot = ode_shootout(prob,tspan,setups,Δt=1/2^(4))
+shoot = ode_shootout(prob,tspan,setups,dt=1/2^(4))
 
 show(shoot)
 println(shoot)
 shoot[end]
 
-set = ode_shootoutset(probs,tspans,setups;Δt=1/2^(4))
+set = ode_shootoutset(probs,tspans,setups;dt=1/2^(4))
 
 println(set[1])
 println(set[:])
@@ -50,7 +50,7 @@ wp[:]
 wp[end]
 show(wp)
 
-wp_set = ode_workprecision_set(prob,tspan,abstols,reltols,setups;Δt=1/2^4,numruns=2)
+wp_set = ode_workprecision_set(prob,tspan,abstols,reltols,setups;dt=1/2^4,numruns=2)
 
 wp_set[1]
 wp_set[:]
