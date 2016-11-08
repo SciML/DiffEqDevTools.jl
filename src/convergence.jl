@@ -50,7 +50,7 @@ end
 
 function ConvergenceSimulation(solutions,convergence_axis;auxdata=nothing)
   N = size(solutions,1)
-  uEltype = eltype(solutions[1].u)
+  uEltype = eltype(solutions[1].u[1])
   errors = Dict() #Should add type information
   for k in keys(solutions[1].errors)
     errors[k] = reshape(uEltype[sol.errors[k] for sol in solutions],size(solutions)...)
@@ -107,7 +107,7 @@ solved over the given dts.
 """
 function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;save_timeseries=true,adaptive=false,kwargs...)
   N = length(dts)
-  solutions = [solve(prob::ODEProblem,alg;dt=dts[i],save_timeseries=save_timeseries,adaptive=adaptive,kwargs...) for i=1:N]
+  solutions = [solve(prob,alg;dt=dts[i],save_timeseries=save_timeseries,adaptive=adaptive,kwargs...) for i=1:N]
   auxdata = Dict(:dts =>  dts)
   ConvergenceSimulation(solutions,dts,auxdata=auxdata)
 end
