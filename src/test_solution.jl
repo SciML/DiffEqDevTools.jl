@@ -19,25 +19,25 @@ Uses the interpolant from the higher order solution sol2 to approximate
 errors for sol. If sol2 has no interpolant, only the final error is
 calculated.
 """
-function appxtrue!(sol::AbstractODESolution,sol2::TestSolution)
+function appxtrue(sol::AbstractODESolution,sol2::TestSolution)
   if sol2.u == nothing && sol2.dense
     sol2.u = sol2(sol.t[end])
   end
   errors = Dict(:final=>mean(abs.(sol[end]-sol2[end])))
   if sol2.dense
     timeseries_analytic = sol2(sol.t)
-    errors = Dict(:final=>mean(abs.(sol[end]-sol2[end])),:l∞=>maximum(vecvecapply((x)->abs.(x),sol[:]-timeseries_analytic)),:l2=>sqrt(mean(vecvecapply((x)->float(x).^2,sol[:]-timeseries_analytic))))
+    errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol[:]-timeseries_analytic))
+    errors[:l2] = sqrt(mean(vecvecapply((x)->float(x).^2,sol[:]-timeseries_analytic)))
     if !(typeof(sol) <: SDESolution) && sol.dense
       densetimes = collect(linspace(sol.t[1],sol.t[end],100))
       interp_u = sol(densetimes)
       interp_analytic = sol2(densetimes)
-      interp_errors = Dict(:L∞=>maximum(vecvecapply((x)->abs.(x),interp_u-interp_analytic)),:L2=>sqrt(mean(vecvecapply((x)->float(x).^2,interp_u-interp_analytic))))
+      interp_errors = Dict(:L∞=>maximum(vecvecapply((x)->abs.(x),interp_u-interp_analytic)),
+                           :L2=>sqrt(mean(vecvecapply((x)->float(x).^2,interp_u-interp_analytic))))
       errors = merge(errors,interp_errors)
     end
   end
-  sol.u_analytic = sol2.u
-  sol.errors = errors
-  nothing
+  build_ode_solution(sol,sol2.u,errors)
 end
 
 """
@@ -55,13 +55,13 @@ function appxtrue!(sol::AbstractFEMSolution,sol2::AbstractFEMSolution)
 end
 
 """
-`appxtrue!(sol::AbstractODESolution,sol2::AbstractODESolution)`
+`appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution)`
 
 Uses the interpolant from the higher order solution sol2 to approximate
 errors for sol. If sol2 has no interpolant, only the final error is
 calculated.
 """
-function appxtrue!(sol::AbstractODESolution,sol2::AbstractODESolution)
+function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution)
   errors = Dict(:final=>mean(abs.(sol[end]-sol2[end])))
   if !(typeof(sol2) <: SDESolution) && sol2.dense
     timeseries_analytic = sol2(sol.t)
@@ -74,8 +74,5 @@ function appxtrue!(sol::AbstractODESolution,sol2::AbstractODESolution)
       errors = merge(errors,interp_errors)
     end
   end
-
-  sol.u_analytic = sol2.u
-  sol.errors = errors
-  nothing
+  build_ode_solution(sol,sol2.u,errors)
 end

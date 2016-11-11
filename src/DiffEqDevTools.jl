@@ -20,7 +20,7 @@ export ConvergenceSimulation, Shootout, ShootoutSet, TestSolution
 #Benchmark Functions
 export ode_shootout, ode_shootoutset, ode_workprecision, ode_workprecision_set
 
-export test_convergence, appxtrue!
+export test_convergence, appxtrue!, appxtrue
 
 #Plot Functions
 export stability_region

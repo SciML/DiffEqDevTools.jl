@@ -42,12 +42,15 @@ function ode_shootout(prob::AbstractODEProblem,setups;appxsol=nothing,numruns=20
       sol = solve(prob,setups[i][:alg],sol[:],sol.t,sol.k;kwargs...,setups[i]...)
     end
     if appxsol != nothing
-      appxtrue!(sol,appxsol)
+      errsol = appxtrue(sol,appxsol)
+      errors[i] = errsol.errors[error_estimate]
+      solutions[i] = errsol
+    else
+      errors[i] = sol.errors[error_estimate]
+      solutions[i] = sol
     end
-    errors[i] = sol.errors[error_estimate]
-    t = t/numruns
     effs[i] = 1/(errors[i]*t)
-    solutions[i] = sol
+    t = t/numruns
     times[i] = t
   end
   for j in 1:N, i in 1:N
@@ -155,11 +158,13 @@ function ode_workprecision(prob::AbstractODEProblem,alg,abstols,reltols;name=not
       dense_errors = dense_errors)
     end
     t = t/numruns
-    if appxsol != nothing
-      appxtrue!(sol,appxsol)
-    end
 
-    errors[i] = sol.errors[error_estimate]
+    if appxsol != nothing
+      errsol = appxtrue(sol,appxsol)
+      errors[i] = errsol.errors[error_estimate]
+    else
+      errors[i] = sol.errors[error_estimate]
+    end
     times[i] = t
   end
   return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
