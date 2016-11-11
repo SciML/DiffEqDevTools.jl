@@ -49,8 +49,8 @@ end
   errors,times
 end
 
-@recipe function f(tab::ODERKTableau;Δx=1/100,Δy=1/100,xlim=[-6,1],ylim=[-5,5])
-  x = xlim[1]:Δx:xlim[2]
+@recipe function f(tab::ODERKTableau;dx=1/100,Δy=1/100,xlim=[-6,1],ylim=[-5,5])
+  x = xlim[1]:dx:xlim[2]
   y = ylim[1]:Δy:ylim[2]
   f = (u,v)-> abs(stability_region(u+v*im,tab))<1
   seriestype --> :contour
