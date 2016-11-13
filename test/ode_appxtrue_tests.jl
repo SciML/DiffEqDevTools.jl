@@ -18,7 +18,7 @@ test_sol = TestSolution(sol2)
 errsol2 = appxtrue(sol4,test_sol)
 
 sol5 =solve(prob,Euler;dt=1//2^(4))
-test_sol = TestSolution(sol2[end])
+test_sol = TestSolution(sol2.t,sol2[end])
 errsol3 = appxtrue(sol5,test_sol)
 
 errsol1.errors[:L2] ≈ 0.018865798306718855 && errsol1.errors[:L2] ≈ errsol2.errors[:L2]
