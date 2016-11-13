@@ -3,14 +3,15 @@ TestSolution
 
 """
 type TestSolution <: DESolution
+  t
   u
   interp
   dense
 end
 (T::TestSolution)(t) = T.interp(t)
-TestSolution(u) = TestSolution(u,nothing,false)
-TestSolution(u,interp) = TestSolution(u,interp,true)
-TestSolution(interp::DESolution) = TestSolution(nothing,interp,true)
+TestSolution(t,u) = TestSolution(t,u,nothing,false)
+TestSolution(t,u,interp) = TestSolution(t,u,interp,true)
+TestSolution(interp::DESolution) = TestSolution(nothing,nothing,interp,true)
 
 """
 `appxtrue(sol::AbstractODESolution,sol2::TestSolution)`
