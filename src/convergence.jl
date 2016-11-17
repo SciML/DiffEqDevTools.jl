@@ -25,12 +25,15 @@ function ConvergenceSimulation(solutions,convergence_axis;auxdata=nothing)
   return(ConvergenceSimulation(solutions,errors,N,auxdata,𝒪est,convergence_axis))
 end
 
-function test_convergence(dts::AbstractArray,prob::AbstractSDEProblem;tspan=[0,1],numMonte=10000,save_timeseries=true,timeseries_steps=1,adaptive=false,kwargs...)
+function test_convergence(dts::AbstractArray,prob::AbstractSDEProblem,alg;numMonte=10000,save_timeseries=true,timeseries_steps=1,adaptive=false,kwargs...)
   N = length(dts)
-  #solutions = DESolution[solve(prob::SDEProblem,dts[i],T,save_timeseries=save_timeseries,alg=alg) for j=1:numMonte,i=1:N]
   is = repmat(1:N,1,numMonte)'
-  solutions = pmap((i)->solve(prob,tspan;dt=dts[i],save_timeseries=save_timeseries,timeseries_steps=timeseries_steps,adaptive=adaptive,kwargs...),is)
-  solutions = convert(Array{SDESolution},solutions)
+  solutions = pmap((i)->solve(prob,alg;dt=dts[i],save_timeseries=save_timeseries,timeseries_steps=timeseries_steps,adaptive=adaptive,kwargs...),is)
+  if typeof(prob) <: SDEProblem
+    solutions = convert(Array{SDESolution},solutions)
+  elseif typeof(prob) <: SDETestProblem
+    solutions = convert(Array{SDETestSolution},solutions)
+  end
   solutions = reshape(solutions,numMonte,N)
   auxdata = Dict("dts" =>  dts)
   ConvergenceSimulation(solutions,dts,auxdata=auxdata)
