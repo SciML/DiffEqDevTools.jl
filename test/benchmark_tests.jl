@@ -22,7 +22,7 @@ setups = [Dict(:alg=>RK4);Dict(:alg=>Euler);Dict(:alg=>BS3);
 t1 = @elapsed sol = solve(prob,RK4,dt=1/2^(4))
 t2 = @elapsed sol2 = solve(prob,setups[1][:alg],dt=1/2^(4))
 
-bool = (sol2[end] == sol[end])
+@test (sol2[end] == sol[end])
 
 ## Shootout Tests
 
@@ -30,14 +30,14 @@ println("Shootout Tests")
 
 shoot = ode_shootout(prob,setups,dt=1/2^(4))
 
-show(shoot)
-println(shoot)
+#show(shoot)
+#println(shoot)
 shoot[end]
 
 set = ode_shootoutset(probs,setups;dt=1/2^(4))
 
-println(set[1])
-println(set[:])
+#println(set[1])
+#println(set[:])
 set[end]
 set[1][:]
 
@@ -48,15 +48,13 @@ wp = ode_workprecision(prob,DP5,abstols,reltols;name="Dormand-Prince 4/5")
 wp[1]
 wp[:]
 wp[end]
-show(wp)
+#show(wp)
 
 wp_set = ode_workprecision_set(prob,abstols,reltols,setups;dt=1/2^4,numruns=2)
 
 wp_set[1]
 wp_set[:]
 wp_set[end]
-println(wp_set)
-show(wp_set)
-bool2 = (minimum(diff(wp_set[1].errors).==0)) # The errors for a fixed timestep method should be constant
-
-bool && bool2
+#println(wp_set)
+#show(wp_set)
+@test (minimum(diff(wp_set[1].errors).==0)) # The errors for a fixed timestep method should be constant
