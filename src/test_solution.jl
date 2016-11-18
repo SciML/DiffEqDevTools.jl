@@ -39,7 +39,7 @@ function appxtrue{hasinterp}(sol::AbstractODESolution,sol2::TestSolution{hasinte
       errors = merge(errors,interp_errors)
     end
   end
-  build_ode_solution(sol,sol2.u,errors)
+  build_solution(sol,sol2.u,errors)
 end
 
 """
@@ -76,5 +76,5 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution)
       errors = merge(errors,interp_errors)
     end
   end
-  build_ode_solution(sol,sol2.u,errors)
+  build_solution(sol,sol2.u,errors)
 end

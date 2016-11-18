@@ -1,3 +1,4 @@
 DiffEqProblemLibrary
 OrdinaryDiffEq 0.1.1
 StochasticDiffEq 0.0.5
+FiniteElementDiffEq 0.0.5
