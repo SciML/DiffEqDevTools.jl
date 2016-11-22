@@ -9,7 +9,7 @@ sol =solve(prob,Euler();dt=1//2^(4))
 sol2 =solve(prob,Vern9();dt=1//2^(10))
 
 prob2 = ODETestProblem(f,1/2,analytic,(0.0,1.0))
-sol3 =solve(prob_ode_linear,Euler;dt=1//2^(4))
+sol3 =solve(prob_ode_linear,Euler();dt=1//2^(4))
 
 errsol1 = appxtrue(sol,sol2)
 

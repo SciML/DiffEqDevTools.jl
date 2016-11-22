@@ -71,7 +71,7 @@ for i = 1:2 # 1 = num, 2 = ExplicitRK
   dts = 1.//2.^(7:-1:4)
   tab = constructDormandPrince()
   sim = test_convergence(dts,prob,alg,tableau=tab)
-  sim2 = test_convergence(dts,prob,DP5)
+  sim2 = test_convergence(dts,prob,DP5())
   @test (abs(sim.𝒪est[:l∞]-5) < testTol && (maximum(sim[end][end]-sim2[end][end]) < 1e-10))
 
   tab = constructCashKarp()
