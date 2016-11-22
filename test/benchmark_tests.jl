@@ -15,11 +15,11 @@ abstols = 1./10.^(3:10)
 reltols = 1./10.^(3:10)
 
 
-setups = [Dict(:alg=>RK4);Dict(:alg=>Euler);Dict(:alg=>BS3);
-          Dict(:alg=>Midpoint);Dict(:alg=>BS5);Dict(:alg=>DP5)]
+setups = [Dict(:alg=>RK4());Dict(:alg=>Euler());Dict(:alg=>BS3());
+          Dict(:alg=>Midpoint());Dict(:alg=>BS5());Dict(:alg=>DP5())]
 
 
-t1 = @elapsed sol = solve(prob,RK4,dt=1/2^(4))
+t1 = @elapsed sol = solve(prob,RK4(),dt=1/2^(4))
 t2 = @elapsed sol2 = solve(prob,setups[1][:alg],dt=1/2^(4))
 
 @test (sol2[end] == sol[end])
@@ -43,7 +43,7 @@ set[1][:]
 
 ## WorkPrecision Tests
 println("WorkPrecision Tests")
-wp = ode_workprecision(prob,DP5,abstols,reltols;name="Dormand-Prince 4/5")
+wp = ode_workprecision(prob,DP5(),abstols,reltols;name="Dormand-Prince 4/5")
 
 wp[1]
 wp[:]

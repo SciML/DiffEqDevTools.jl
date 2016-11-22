@@ -27,7 +27,7 @@ println("Convergence Test on Linear")
 dts = 1.//2.^(8:-1:4)
 testTol = 0.3
 superduperbool = Vector{Bool}(2)
-alg = ExplicitRK
+alg = ExplicitRK()
 
 for i = 1:2 # 1 = num, 2 = ExplicitRK
   if i>1
