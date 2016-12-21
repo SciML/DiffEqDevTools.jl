@@ -46,7 +46,7 @@ function test_convergence(dts::AbstractArray,prob::AbstractSDEProblem,alg;numMon
   # Final
   m_final = mean([s[end] for s in solutions],1)
   m_final_analytic = mean([s.u_analytic[end] for s in solutions],1)
-  additional_errors[:weak_final] = mean.(abs.(m_final - m_final_analytic))
+  additional_errors[:weak_final] = mean.(vecvecapply((x)->abs.(x),m_final - m_final_analytic))
   if timeseries_errors
     l2_tmp = Vector{eltype(solutions[1][1])}(size(solutions,2))
     max_tmp = Vector{eltype(solutions[1][1])}(size(solutions,2))
