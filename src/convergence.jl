@@ -55,8 +55,8 @@ function test_convergence(dts::AbstractArray,prob::AbstractSDEProblem,alg;numMon
       m_errors = [mean([solcol[j][i] for j in 1:length(solcol)]) for i in 1:length(solcol[1])]
       m_errors_analytic = [mean([solcol[j].u_analytic[i] for j in 1:length(solcol)]) for i in 1:length(solcol[1])]
       ts_weak_errors = [abs.(m_errors[i] - m_errors_analytic[i]) for i in 1:length(m_errors)]
-      ts_l2_errors = [sqrt.(sumabs2(err)/length(err)) for err in ts_weak_errors]
-      l2_tmp[i] = sqrt(sumabs2(ts_l2_errors)/length(ts_l2_errors))
+      ts_l2_errors = [sqrt.(sum(abs2,err)/length(err)) for err in ts_weak_errors]
+      l2_tmp[i] = sqrt(sum(abs2,ts_l2_errors)/length(ts_l2_errors))
       max_tmp[i] = maximum([maximum(err) for err in ts_weak_errors])
     end
     additional_errors[:weak_l2] = l2_tmp
