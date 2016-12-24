@@ -31,7 +31,7 @@ function ode_shootout(prob::AbstractODEProblem,setups;appxsol=nothing,numruns=20
   timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
   dense_errors = error_estimate ∈ DENSE_ERRORS
   if names == nothing
-    names = [string(setups[i][:alg]) for i=1:N]
+    names = [typeof(string(setups[i][:alg])) for i=1:N]
   end
   for i in eachindex(setups)
     sol = solve(prob,setups[i][:alg];timeseries_errors=timeseries_errors,
@@ -65,7 +65,7 @@ function ode_shootoutset{T<:AbstractODEProblem}(probs::Vector{T},setups;probaux=
   shootouts = Vector{Shootout}(N)
   winners = Vector{String}(N)
   if names == nothing
-    names = [string(setups[i][:alg]) for i=1:length(setups)]
+    names = [string(typeof(setups[i][:alg])) for i=1:length(setups)]
   end
   if probaux == nothing
     probaux = Vector{Dict{Symbol,Any}}(N)
@@ -174,7 +174,7 @@ function ode_workprecision_set(prob::AbstractODEProblem,abstols,reltols,setups;n
   N = length(setups)
   wps = Vector{WorkPrecision}(N)
   if names == nothing
-    names = [string(setups[i][:alg]) for i=1:length(setups)]
+    names = [string(typeof(setups[i][:alg])) for i=1:length(setups)]
   end
   for i in 1:N
     wps[i] = ode_workprecision(prob,setups[i][:alg],abstols,reltols;numruns=numruns,appxsol=appxsol,name=names[i],kwargs...,setups[i]...)
