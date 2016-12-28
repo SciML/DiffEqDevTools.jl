@@ -42,18 +42,10 @@ function appxtrue{hasinterp}(sol::AbstractODESolution,sol2::TestSolution{hasinte
   build_solution(sol,sol2.u,errors)
 end
 
-"""
-`appxtrue!(sol::FEMSolution,sol2::FEMSolution)`
-
-Adds the solution from `sol2` to the `FEMSolution` object `sol`.
-Useful to add a quasi-true solution when none is known by
-computing once at a very small time/space step and taking
-that solution as the "true" solution
-"""
-function appxtrue!(sol::AbstractFEMSolution,sol2::AbstractFEMSolution)
-  sol.u_analytic = sol2.u
-  sol.errors = Dict(:l∞=>maximum(abs.(sol.u-sol.u_analytic)),:l2=>norm(sol.u-sol.u_analytic,2))
-  nothing
+function appxtrue(sol::AbstractFEMSolution,sol2::AbstractFEMSolution)
+  u_analytic = sol2[end]
+  errors = Dict(:l∞=>maximum(abs.(sol[end]-u_analytic)),:l2=>norm(sol[end]-u_analytic,2))
+  FEMSolution(sol,u_analytic,errors)
 end
 
 """

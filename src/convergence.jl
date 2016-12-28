@@ -72,6 +72,7 @@ function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;save_t
   ConvergenceSimulation(solutions,dts,auxdata=auxdata)
 end
 
+#=
 function test_convergence(dts::AbstractArray,dxs::AbstractArray,prob::AbstractHeatProblem,convergence_axis;T=1,alg=:Euler)
   if length(dts)!=length(dxs) error("Lengths of dts!=dxs. Invalid convergence simulation") end
   solutions = [solve(parabolic_squaremesh([0 1 0 1],dxs[i],dts[i],T,:dirichlet),prob,alg=alg) for i in eachindex(dts)]
@@ -82,13 +83,15 @@ function test_convergence(dts::AbstractArray,dxs::AbstractArray,prob::AbstractHe
             :Δνs => [sol.fem_mesh.ν  for sol in solutions])
   return(ConvergenceSimulation(solutions,convergence_axis,auxdata=auxdata))
 end
+=#
 
-function test_convergence(dxs::AbstractArray,prob::AbstractPoissonProblem)
-  solutions = [solve(notime_squaremesh([0 1 0 1],dxs[i],:dirichlet),prob,solver=:Direct) for i in eachindex(dxs)]
-  auxdata = Dict("dxs" => [sol.fem_mesh.dx for sol in solutions])
-  return(ConvergenceSimulation(solutions,dxs,auxdata=auxdata))
+function test_convergence(probs,convergence_axis;kwargs...)
+  ConvergenceSimulation([solve(prob;kwargs...) for prob in probs],convergence_axis)
 end
 
+function test_convergence(c::ConvergenceSetup;kwargs...)
+  test_convergence(c.probs,c.convergence_axis;kwargs...)
+end
 
 function calc𝒪estimates(error::Pair)
   key = error.first
@@ -111,24 +114,4 @@ Base.endof( sim::ConvergenceSimulation) = length(sim)
 Base.getindex(sim::ConvergenceSimulation,i::Int) = sim.solutions[i]
 Base.getindex(sim::ConvergenceSimulation,i::Int,I::Int...) = sim.solutions[i][I]
 
-#=
-function print(io::IO, sim::ConvergenceSimulation)
-  println(io,"$(typeof(sim)) of length $(length(sim)).")
-  print(io,"Convergence Estimates:")
-  for (k,v) in sim.𝒪est
-    print(" ($k,$v)")
-  end
-  println(io,"\n-----------Errors-----------")
-  for (k,v) in sim.errors
-    println(io,"$k: $v")
-  end
-end
-
-function show(io::IO,sim::ConvergenceSimulation)
-  println(io,"$(typeof(sim)) of length $(length(sim)).")
-  print(io,"Convergence Estimates:")
-  for (k,v) in sim.𝒪est
-    print(io," ($k,$v)")
-  end
-end
-=#
+Base.length(sim::ConvergenceSetup) = sim.probs
