@@ -85,12 +85,12 @@ function test_convergence(dts::AbstractArray,dxs::AbstractArray,prob::AbstractHe
 end
 =#
 
-function test_convergence(probs,convergence_axis;kwargs...)
-  ConvergenceSimulation([solve(prob;kwargs...) for prob in probs],convergence_axis)
+function test_convergence(probs,convergence_axis,alg;kwargs...)
+  ConvergenceSimulation([solve(prob,alg;kwargs...) for prob in probs],convergence_axis)
 end
 
-function test_convergence(c::ConvergenceSetup;kwargs...)
-  test_convergence(c.probs,c.convergence_axis;kwargs...)
+function test_convergence(c::ConvergenceSetup,alg::DEAlgorithm;kwargs...)
+  test_convergence(c.probs,c.convergence_axis,alg;kwargs...)
 end
 
 function calc𝒪estimates(error::Pair)
