@@ -1,4 +1,4 @@
-using OrdinaryDiffEq, DiffEqDevTools, DiffEqProblemLibrary, DiffEqBase
+using OrdinaryDiffEq, DiffEqDevTools, DiffEqProblemLibrary, DiffEqBase, Base.Test
 
 ## Setup Tests
 

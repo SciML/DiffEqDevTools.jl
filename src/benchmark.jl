@@ -31,7 +31,7 @@ function ode_shootout(prob::AbstractODEProblem,setups;appxsol=nothing,numruns=20
   timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
   dense_errors = error_estimate ∈ DENSE_ERRORS
   if names == nothing
-    names = [typeof(string(setups[i][:alg])) for i=1:N]
+    names = [string(typeof(setups[i][:alg])) for i=1:N]
   end
   for i in eachindex(setups)
     sol = solve(prob,setups[i][:alg];timeseries_errors=timeseries_errors,

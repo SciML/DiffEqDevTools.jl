@@ -27,7 +27,6 @@ println("Convergence Test on Linear")
 dts = 1.//2.^(8:-1:4)
 testTol = 0.3
 superduperbool = Vector{Bool}(2)
-alg = ExplicitRK()
 
 for i = 1:2 # 1 = num, 2 = ExplicitRK
   if i>1
@@ -41,375 +40,375 @@ for i = 1:2 # 1 = num, 2 = ExplicitRK
 
   # Order 2
 
-  tab = constructHeun()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructHeun())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-2) < testTol
 
-  tab = constructRalston()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructRalston())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-2) < testTol
 
   # Order 3
 
-  tab = constructBogakiShampine3()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructBogakiShampine3())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-3) < testTol
 
   # Order 4
 
-  tab = constructRKF4()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructRKF4())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-4) < testTol
 
   # Order 5
 
   dts = 1.//2.^(7:-1:4)
-  tab = constructRKF5()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructRKF5())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
   dts = 1.//2.^(7:-1:4)
-  tab = constructDormandPrince()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructDormandPrince())
+  sim = test_convergence(dts,prob,tabalg)
   sim2 = test_convergence(dts,prob,DP5())
   @test (abs(sim.𝒪est[:l∞]-5) < testTol && (maximum(sim[end][end]-sim2[end][end]) < 1e-10))
 
-  tab = constructCashKarp()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructCashKarp())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
   dts = 1.//2.^(7:-1:4)
-  tab = constructRungeFirst5()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructRungeFirst5())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
-  tab = constructCassity5()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructCassity5())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
-  tab = constructLawson5()
-  sim = test_convergence(dts,prob,alg,tableau=tab) #10
+  tabalg = ExplicitRK(tableau=constructLawson5())
+  sim = test_convergence(dts,prob,tabalg) #10
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
-  tab = constructLutherKonen5()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructLutherKonen5())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
-  tab = constructLutherKonen52()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructLutherKonen52())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
-  tab = constructLutherKonen53()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructLutherKonen53())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
-  tab = constructPapakostasPapaGeorgiou5()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructPapakostasPapaGeorgiou5())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
-  tab = constructPapakostasPapaGeorgiou52()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
-  @test abs(sim.𝒪est[:l∞]-5) < testTol
-
-  dts = 1.//2.^(6:-1:4)
-  tab = constructTsitouras5()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructPapakostasPapaGeorgiou52())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
   dts = 1.//2.^(6:-1:4)
-  tab = constructBogakiShampine5()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTsitouras5())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
-  tab = constructSharpSmart5()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  dts = 1.//2.^(6:-1:4)
+  tabalg = ExplicitRK(tableau=constructBogakiShampine5())
+  sim = test_convergence(dts,prob,tabalg)
+  @test abs(sim.𝒪est[:l∞]-5) < testTol
+
+  tabalg = ExplicitRK(tableau=constructSharpSmart5())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
 
   # Order 6
 
   dts = 1.//2.^(6:-1:4)
-  tab = constructButcher6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructButcher6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructButcher62()
-  sim = test_convergence(dts,prob,alg,tableau=tab) #20
+  tabalg = ExplicitRK(tableau=constructButcher62())
+  sim = test_convergence(dts,prob,tabalg) #20
   @test abs(sim.𝒪est[:l∞]-6) < testTol # Less stringent
 
   dts = 1.//2.^(6:-1:4)
-  tab = constructButcher63()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructButcher63())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
   dts = 1.//2.^(5:-1:1)
-  tab = constructDormandPrince6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructDormandPrince6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7) < testTol # Better on linear
 
-  tab = constructSharpVerner6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructSharpVerner6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructVerner916()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVerner916())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructVerner9162()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVerner9162())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructVernerRobust6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVernerRobust6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructVernerEfficient6(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVernerEfficient6(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6.6) < testTol
 
-  tab = constructPapakostas6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructPapakostas6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructLawson6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructLawson6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
   dts = 1.//2.^(3:-1:1)
-  tab = constructTsitourasPapakostas6()
-  sim = test_convergence(dts,prob,alg,tableau=tab) #30
+  tabalg = ExplicitRK(tableau=constructTsitourasPapakostas6())
+  sim = test_convergence(dts,prob,tabalg) #30
   @test abs(sim.𝒪est[:l∞]-6.7) < testTol # Better on linear
 
   dts = 1.//2.^(5:-1:1)
-  tab = constructDormandLockyerMcCorriganPrince6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructDormandLockyerMcCorriganPrince6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructTanakaKasugaYamashitaYazaki6D()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTanakaKasugaYamashitaYazaki6D())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
 
-  tab = constructTanakaKasugaYamashitaYazaki6C()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTanakaKasugaYamashitaYazaki6C())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructTanakaKasugaYamashitaYazaki6B()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTanakaKasugaYamashitaYazaki6B())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructTanakaKasugaYamashitaYazaki6A()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTanakaKasugaYamashitaYazaki6A())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructMikkawyEisa()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructMikkawyEisa())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6.53) < testTol # Odd behavior
 
-  tab = constructChummund6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructChummund6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructChummund62()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructChummund62())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructHuta6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructHuta6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5.5) < testTol # Low convergence, error noted in Stone notes
 
   dts = 1.//2.^(5:-1:1)
-  tab = constructHuta62()
-  sim = test_convergence(dts,prob,alg,tableau=tab)#40
+  tabalg = ExplicitRK(tableau=constructHuta62())
+  sim = test_convergence(dts,prob,tabalg)#40
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructVerner6()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVerner6())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6.7) < testTol # Better on linear
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructDverk()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructDverk())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
-  tab = constructClassicVerner6()
-  sim = test_convergence(dts,prob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructClassicVerner6())
+  sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6) < testTol
 
   # Order 7
 
   dts = 1.//2.^(5:-1:1)
-  tab = constructButcher7()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructButcher7())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7) < testTol
 
   dts = 1.//2.^(5:-1:2)
-  tab = constructClassicVerner7()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructClassicVerner7())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7) < testTol
 
-  tab = constructVernerRobust7()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVernerRobust7())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7) < testTol
 
 
   dts = 1.//2.^(5:-1:1)
-  tab = constructEnrightVerner7()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructEnrightVerner7())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7.15) < testTol # Better on linear
 
-  tab = constructTanakaYamashitaStable7()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTanakaYamashitaStable7())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7.3) < testTol
 
-  tab = constructTanakaYamashitaEfficient7(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTanakaYamashitaEfficient7(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7) < testTol
 
   dts = 1.//2.^(8:-1:3)
-  tab = constructSharpSmart7(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab) #50
+  tabalg = ExplicitRK(tableau=constructSharpSmart7(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg) #50
   @test abs(sim.𝒪est[:l∞]-7) < testTol
 
   dts = 1.//2.^(3:-1:1)
-  tab = constructSharpVerner7()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructSharpVerner7())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-6.5) < testTol # Coefficients aren't accurate enough, drop off error
 
-  tab = constructVernerEfficient7()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVernerEfficient7())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7) < testTol
 
-  tab = constructVerner7()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVerner7())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-7) < testTol
 
   # Order 8
   dts = 1.//2.^(4:-1:1)
-  tab = constructClassicVerner8()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructClassicVerner8())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol
 
   dts = 1.//2.^(5:-1:1)
-  tab = constructVerner8(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVerner8(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructCooperVerner8()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructCooperVerner8())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol #Coefficients not accurate enough
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructCooperVerner82()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructCooperVerner82())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol #Coefficients not accurate enough
 
-  tab = constructTsitourasPapakostas8(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTsitourasPapakostas8(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructdverk78(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructdverk78(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructEnrightVerner8(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructEnrightVerner8(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructCurtis8()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructCurtis8())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol
 
   dts = 1.//2.^(4:-1:1)
-  tab = constructRKF8(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructRKF8(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8) < testTol
 
-  tab = constructDormandPrince8(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructDormandPrince8(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8.4) < testTol
 
   dts = 1.//2.^(3:-1:1)
-  tab = constructDormandPrince8_64bit(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructDormandPrince8_64bit(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-8.4) < testTol
 
   # Order 9
 
-  tab = constructVernerRobust9(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVernerRobust9(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-9) < testTol
 
-  tab = constructVernerEfficient9(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructVernerEfficient9(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-9) < testTol
 
   dts = 1.//2.^(3:-1:1)
-  tab = constructSharp9(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructSharp9(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-9) < testTol #Only works to Float64 precision
 
   dts = 1.//2.^(2:-1:1)
-  tab = constructTsitouras9(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTsitouras9(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-10.5) < testTol #Only works to Float64
 
   dts = 1.//2.^(3:-1:1)
-  tab = constructTsitouras92(BigFloat)
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructTsitouras92(BigFloat))
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-9) < testTol  #Only works to Float64
 
   ## Order 10
 
   dts = 1.//2.^(5:-1:1)
-  tab = constructCurtis10()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructCurtis10())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-10) < testTol
 
-  tab = constructOno10()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructOno10())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-10) < testTol
 
   dts = 1.//2.^(5:-1:1)
-  tab = constructFeagin10Tableau()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructFeagin10Tableau())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-10) < testTol
 
-  tab = constructCurtis10()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructCurtis10())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-10) < testTol
 
   dts = 1.//2.^(6:-1:1)
-  tab = constructBaker10()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructBaker10())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-10.8) < testTol
 
 
-  tab = constructHairer10()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructHairer10())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-10.8) < testTol
 
   ## Order 12
 
   dts = 1.//2.^(6:-1:1)
-  tab = constructFeagin12Tableau()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructFeagin12Tableau())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-12.6) < testTol
 
-  tab = constructOno12()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructOno12())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-11.6) < testTol
 
   ## Order 14
 
   dts = 1.//2.^(6:-1:1)
-  tab = constructFeagin14Tableau()
-  sim = test_convergence(dts,bigprob,alg,tableau=tab)
+  tabalg = ExplicitRK(tableau=constructFeagin14Tableau())
+  sim = test_convergence(dts,bigprob,tabalg)
   @test abs(sim.𝒪est[:l∞]-15.5) < testTol
 end
