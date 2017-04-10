@@ -30,7 +30,7 @@ function appxtrue{hasinterp}(sol::AbstractODESolution,sol2::TestSolution{hasinte
     timeseries_analytic = sol2(sol.t)
     errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol[:]-timeseries_analytic))
     errors[:l2] = sqrt(mean(vecvecapply((x)->float(x).^2,sol[:]-timeseries_analytic)))
-    if !(typeof(sol) <: SDESolution) && sol.dense
+    if !(typeof(sol) <: AbstractRODESolution) && sol.dense
       densetimes = collect(linspace(sol.t[1],sol.t[end],100))
       interp_u = sol(densetimes)
       interp_analytic = sol2(densetimes)
@@ -57,10 +57,10 @@ calculated.
 """
 function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution)
   errors = Dict(:final=>mean(abs.(sol[end]-sol2[end])))
-  if !(typeof(sol2) <: SDESolution) && sol2.dense
+  if !(typeof(sol2) <: AbstractRODESolution) && sol2.dense
     timeseries_analytic = sol2(sol.t)
     errors = Dict(:final=>mean(abs.(sol[end]-sol2[end])),:l∞=>maximum(vecvecapply((x)->abs.(x),sol[:]-timeseries_analytic)),:l2=>sqrt(mean(vecvecapply((x)->float(x).^2,sol[:]-timeseries_analytic))))
-    if !(typeof(sol) <: SDESolution) && sol.dense
+    if !(typeof(sol) <: AbstractRODESolution) && sol.dense
       densetimes = collect(linspace(sol.t[1],sol.t[end],100))
       interp_u = sol(densetimes)
       interp_analytic = sol2(densetimes)
