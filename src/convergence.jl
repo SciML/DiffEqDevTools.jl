@@ -30,10 +30,10 @@ function ConvergenceSimulation(solutions,convergence_axis;auxdata=nothing,additi
   return(ConvergenceSimulation(solutions,errors,N,auxdata,𝒪est,convergence_axis))
 end
 
-function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},alg;numMonte=10000,save_timeseries=true,timeseries_steps=1,timeseries_errors=save_timeseries,adaptive=false,kwargs...)
+function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},alg;numMonte=10000,save_everystep=true,timeseries_steps=1,timeseries_errors=save_everystep,adaptive=false,kwargs...)
   N = length(dts)
   is = repmat(1:N,1,numMonte)'
-  _solutions = pmap((i)->solve(prob,alg;dt=dts[i],save_timeseries=save_timeseries,timeseries_steps=timeseries_steps,adaptive=adaptive,timeseries_errors=timeseries_errors,kwargs...),is)
+  _solutions = pmap((i)->solve(prob,alg;dt=dts[i],save_everystep=save_everystep,timeseries_steps=timeseries_steps,adaptive=adaptive,timeseries_errors=timeseries_errors,kwargs...),is)
   solutions = convert(Array{RODESolution},_solutions)
   solutions = reshape(solutions,numMonte,N)
   auxdata = Dict("dts" =>  dts)
@@ -61,9 +61,9 @@ function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,Abs
   ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors)
 end
 
-function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;save_timeseries=true,adaptive=false,kwargs...)
+function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;save_everystep=true,adaptive=false,kwargs...)
   N = length(dts)
-  solutions = [solve(prob,alg;dt=dts[i],save_timeseries=save_timeseries,adaptive=adaptive,kwargs...) for i=1:N]
+  solutions = [solve(prob,alg;dt=dts[i],save_everystep=save_everystep,adaptive=adaptive,kwargs...) for i=1:N]
   auxdata = Dict(:dts =>  dts)
   ConvergenceSimulation(solutions,dts,auxdata=auxdata)
 end
