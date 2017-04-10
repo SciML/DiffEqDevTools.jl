@@ -4,7 +4,7 @@ using OrdinaryDiffEq, DiffEqDevTools, DiffEqProblemLibrary, DiffEqBase, Base.Tes
 
 prob = prob_ode_linear
 
-probs = Vector{ODETestProblem}(2)
+probs = Vector{ODEProblem}(2)
 probs[1] = prob
 probs[2] = prob_ode_2Dlinear
 

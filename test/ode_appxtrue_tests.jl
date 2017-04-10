@@ -2,13 +2,13 @@ using OrdinaryDiffEq, DiffEqBase, DiffEqProblemLibrary, DiffEqDevTools
 
 f = (t,u) -> u
 prob = ODEProblem(f,1/2,(0.0,1.0))
-analytic = (t,u0) -> u0*exp(t)
+(p::typeof(f))(::Type{Val{:analytic}},t,u0) = u0*exp(t)
 
 sol =solve(prob,Euler();dt=1//2^(4))
 
 sol2 =solve(prob,Vern9();dt=1//2^(10))
 
-prob2 = ODETestProblem(f,1/2,analytic,(0.0,1.0))
+prob2 = ODEProblem(f,1/2,(0.0,1.0))
 sol3 =solve(prob_ode_linear,Euler();dt=1//2^(4))
 
 errsol1 = appxtrue(sol,sol2)
