@@ -1,20 +1,21 @@
 using OrdinaryDiffEq, DiffEqDevTools
-probArr = Vector{ODETestProblem}(2)
-bigprobArr = Vector{ODETestProblem}(2)
+probArr = Vector{ODEProblem}(2)
+bigprobArr = Vector{ODEProblem}(2)
 
 const linear_bigα = parse(BigFloat,"1.01")
 f = (t,u) -> (linear_bigα*u)
-analytic = (t,u0) -> u0*exp(linear_bigα*t)
+(p::typeof(f))(::Type{Val{:analytic}},t,u0) = u0*exp(linear_bigα*t)
 """Linear ODE on Float64"""
-prob_ode_bigfloatlinear = ODETestProblem(f,parse(BigFloat,"0.5"),analytic)
+prob_ode_bigfloatlinear = ODEProblem(f,parse(BigFloat,"0.5"),(0.0,1.0))
 
 f = (t,u,du) -> begin
   for i in 1:length(u)
     du[i] = linear_bigα*u[i]
   end
 end
+(p::typeof(f))(::Type{Val{:analytic}},t,u0) = u0*exp.(linear_bigα*t)
 """2D Linear ODE, bigfloats"""
-prob_ode_bigfloat2Dlinear = ODETestProblem(f,map(BigFloat,rand(4,2)).*ones(4,2)/2,analytic)
+prob_ode_bigfloat2Dlinear = ODEProblem(f,map(BigFloat,rand(4,2)).*ones(4,2)/2, (0.0,1.0))
 
 probArr[1] = prob_ode_linear
 probArr[2] = prob_ode_2Dlinear
