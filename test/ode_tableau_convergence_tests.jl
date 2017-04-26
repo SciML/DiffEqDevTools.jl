@@ -146,7 +146,7 @@ for i = 1:2 # 1 = num, 2 = ExplicitRK
   dts = 1.//2.^(5:-1:1)
   tabalg = ExplicitRK(tableau=constructDormandPrince6())
   sim = test_convergence(dts,prob,tabalg)
-  @test abs(sim.𝒪est[:l∞]-7) < testTol # Better on linear
+  @test abs(sim.𝒪est[:l∞]-7) < testTol+0.1 # Better on linear
 
   tabalg = ExplicitRK(tableau=constructSharpVerner6())
   sim = test_convergence(dts,prob,tabalg)
