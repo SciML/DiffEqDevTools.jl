@@ -1,4 +1,4 @@
-type ConvergenceSimulation{SolType<:DESolution}
+type ConvergenceSimulation{SolType}
   solutions::Array{SolType}
   errors
   N
