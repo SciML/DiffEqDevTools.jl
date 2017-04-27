@@ -40,16 +40,16 @@ function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,Abs
   # Now Calculate Weak Errors
   additional_errors = Dict()
   # Final
-  m_final = mean([s[end] for s in solutions],1)
-  m_final_analytic = mean([s.u_analytic[end] for s in solutions],1)
-  additional_errors[:weak_final] = mean.(vecvecapply((x)->abs.(x),m_final - m_final_analytic))
+  m_final = recursive_mean([s[end] for s in solutions],1)
+  m_final_analytic = recursive_mean([s.u_analytic[end] for s in solutions],1)
+  additional_errors[:weak_final] = recursive_mean.(vecvecapply((x)->abs.(x),m_final - m_final_analytic))
   if timeseries_errors
     l2_tmp = Vector{eltype(solutions[1][1])}(size(solutions,2))
     max_tmp = Vector{eltype(solutions[1][1])}(size(solutions,2))
     for i in 1:size(solutions,2)
       solcol = @view solutions[:,i]
-      m_errors = [mean([solcol[j][i] for j in 1:length(solcol)]) for i in 1:length(solcol[1])]
-      m_errors_analytic = [mean([solcol[j].u_analytic[i] for j in 1:length(solcol)]) for i in 1:length(solcol[1])]
+      m_errors = [recursive_mean([solcol[j][i] for j in 1:length(solcol)]) for i in 1:length(solcol[1])]
+      m_errors_analytic = [recursive_mean([solcol[j].u_analytic[i] for j in 1:length(solcol)]) for i in 1:length(solcol[1])]
       ts_weak_errors = [abs.(m_errors[i] - m_errors_analytic[i]) for i in 1:length(m_errors)]
       ts_l2_errors = [sqrt.(sum(abs2,err)/length(err)) for err in ts_weak_errors]
       l2_tmp[i] = sqrt(sum(abs2,ts_l2_errors)/length(ts_l2_errors))
