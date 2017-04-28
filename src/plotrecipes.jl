@@ -1,6 +1,6 @@
 @recipe function f(sim::ConvergenceSimulation)
-  if ndims(collect(values(sim.errors))[1])>1 #Monte Carlo
-    vals = [typeof(x)<:AbstractVector ? x : mean(x,1)' for x in values(sim.errors)]
+  if any((x)->ndims(x)>1,values(sim.errors)) #Monte Carlo
+    vals = [typeof(x)<:AbstractVector ? x : vec(mean(x,1)) for x in values(sim.errors)]
   else #Deterministic
     vals = [x for x in values(sim.errors)]
   end
@@ -8,6 +8,7 @@
   label  --> reshape([string(key) for key in keys(sim.errors)],1,length(keys(sim.errors)))
   xguide  --> "Convergence Axis"
   yguide  --> "Error"
+  linewidth --> 3
   xscale --> :log10
   yscale --> :log10
   sim.convergence_axis, vals
@@ -24,7 +25,7 @@ end
 @recipe function f(wp::WorkPrecision)
   seriestype --> :path
   label -->  wp.name
-  lw --> 3
+  linewidth --> 3
   yguide --> "Time (s)"
   xguide --> "Error"
   xscale --> :log10
@@ -35,7 +36,7 @@ end
 @recipe function f(wp_set::WorkPrecisionSet)
   seriestype --> :path
   label -->  reshape(wp_set.names,1,length(wp_set))
-  lw --> 3
+  linewidth --> 3
   yguide --> "Time (s)"
   xguide --> "Error"
   xscale --> :log10

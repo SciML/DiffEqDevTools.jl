@@ -42,7 +42,8 @@ function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,Abs
   # Final
   m_final = recursive_mean([s[end] for s in solutions],1)
   m_final_analytic = recursive_mean([s.u_analytic[end] for s in solutions],1)
-  additional_errors[:weak_final] = recursive_mean.(vecvecapply((x)->abs.(x),m_final - m_final_analytic))
+  res = m_final - m_final_analytic
+  additional_errors[:weak_final] = [norm(x) for x in res]
   if timeseries_errors
     l2_tmp = Vector{eltype(solutions[1][1])}(size(solutions,2))
     max_tmp = Vector{eltype(solutions[1][1])}(size(solutions,2))
