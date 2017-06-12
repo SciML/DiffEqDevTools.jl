@@ -7,12 +7,13 @@ type ConvergenceSimulation{SolType}
   convergence_axis
 end
 
-function ConvergenceSimulation(solutions,convergence_axis;auxdata=nothing,additional_errors=nothing)
+function ConvergenceSimulation(solutions,convergence_axis;
+                               auxdata=nothing,additional_errors=nothing)
   N = size(solutions,1)
   uEltype = eltype(solutions[1].u[1])
   errors = Dict() #Should add type information
   for k in keys(solutions[1].errors)
-    errors[k] = reshape(uEltype[sol.errors[k] for sol in solutions],size(solutions)...)
+    errors[k] = [mean(sol.errors[k]) for sol in solutions]
   end
   if additional_errors != nothing
     for k in keys(additional_errors)
@@ -30,34 +31,22 @@ function ConvergenceSimulation(solutions,convergence_axis;auxdata=nothing,additi
   return(ConvergenceSimulation(solutions,errors,N,auxdata,𝒪est,convergence_axis))
 end
 
-function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},alg;numMonte=10000,save_everystep=true,timeseries_steps=1,timeseries_errors=save_everystep,adaptive=false,kwargs...)
+function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},
+                          alg;numMonte=10000,save_everystep=true,timeseries_steps=1,
+                          timeseries_errors=save_everystep,adaptive=false,
+                          weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   N = length(dts)
-  is = repmat(1:N,1,numMonte)'
-  _solutions = pmap((i)->solve(prob,alg;dt=dts[i],save_everystep=save_everystep,timeseries_steps=timeseries_steps,adaptive=adaptive,timeseries_errors=timeseries_errors,kwargs...),is)
-  solutions = convert(Array{RODESolution},_solutions)
-  solutions = reshape(solutions,numMonte,N)
+  monte_prob = MonteCarloProblem(prob)
+  _solutions = [solve(monte_prob,alg;dt=dts[i],save_everystep=save_everystep,
+                      timeseries_steps=timeseries_steps,adaptive=adaptive,
+                      timeseries_errors=timeseries_errors,num_monte=numMonte,
+                      kwargs...) for i in 1:N]
+  solutions = [calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
   auxdata = Dict("dts" =>  dts)
   # Now Calculate Weak Errors
   additional_errors = Dict()
-  # Final
-  m_final = recursive_mean([s[end] for s in solutions],1)
-  m_final_analytic = recursive_mean([s.u_analytic[end] for s in solutions],1)
-  res = m_final - m_final_analytic
-  additional_errors[:weak_final] = [norm(x) for x in res]
-  if timeseries_errors
-    l2_tmp = Vector{eltype(solutions[1][1])}(size(solutions,2))
-    max_tmp = Vector{eltype(solutions[1][1])}(size(solutions,2))
-    for i in 1:size(solutions,2)
-      solcol = @view solutions[:,i]
-      m_errors = [recursive_mean([solcol[j][i] for j in 1:length(solcol)]) for i in 1:length(solcol[1])]
-      m_errors_analytic = [recursive_mean([solcol[j].u_analytic[i] for j in 1:length(solcol)]) for i in 1:length(solcol[1])]
-      ts_weak_errors = [abs.(m_errors[i] - m_errors_analytic[i]) for i in 1:length(m_errors)]
-      ts_l2_errors = [sqrt.(sum(abs2,err)/length(err)) for err in ts_weak_errors]
-      l2_tmp[i] = sqrt(sum(abs2,ts_l2_errors)/length(ts_l2_errors))
-      max_tmp[i] = maximum([maximum(err) for err in ts_weak_errors])
-    end
-    additional_errors[:weak_l2] = l2_tmp
-    additional_errors[:weak_l∞] = max_tmp
+  for k in keys(solutions[1].weak_errors)
+    additional_errors[k] = [sol.weak_errors[k] for sol in solutions]
   end
   ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors)
 end

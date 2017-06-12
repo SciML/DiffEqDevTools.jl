@@ -21,10 +21,15 @@ type ShootoutSet
   winners::Vector{String}
 end
 
-function ode_shootout(prob::AbstractODEProblem,setups;appxsol=nothing,numruns=20,names=nothing,error_estimate=:final,kwargs...)
+function ode_shootout(args...;kwargs...)
+  warn("ode_shootout is deprecated. Use ShootOut instead")
+  ShootOut(args...;kwargs...)
+end
+
+function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_estimate=:final,kwargs...)
   N = length(setups)
   errors = Vector{Float64}(N)
-  solutions = Vector{AbstractODESolution}(N)
+  solutions = Vector{DESolution}(N)
   effs = Vector{Float64}(N)
   times = Vector{Float64}(N)
   effratios = Matrix{Float64}(N,N)
@@ -38,6 +43,7 @@ function ode_shootout(prob::AbstractODEProblem,setups;appxsol=nothing,numruns=20
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
     sol = solve(prob,setups[i][:alg],sol[:],sol.t,sol.k;timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
+    gc()
     t = @elapsed for j in 1:numruns
       sol = solve(prob,setups[i][:alg],sol[:],sol.t,sol.k;kwargs...,setups[i]...)
     end
@@ -60,7 +66,12 @@ function ode_shootout(prob::AbstractODEProblem,setups;appxsol=nothing,numruns=20
   return Shootout(setups,times,errors,effs,effratios,solutions,names,N,bestidx,winner)
 end
 
-function ode_shootoutset{T<:AbstractODEProblem}(probs::Vector{T},setups;probaux=nothing,numruns=20,names=nothing,kwargs...)
+function ode_shootoutset(args...;kwargs...)
+  warn("ode_shootoutset is deprecated. Use ShootoutSet instead")
+  ShootoutSet(args...;kwargs...)
+end
+
+function ShootoutSet(probs,setups;probaux=nothing,numruns=20,names=nothing,kwargs...)
   N = length(probs)
   shootouts = Vector{Shootout}(N)
   winners = Vector{String}(N)
@@ -74,7 +85,7 @@ function ode_shootoutset{T<:AbstractODEProblem}(probs::Vector{T},setups;probaux=
     end
   end
   for i in eachindex(probs)
-    shootouts[i] = ode_shootout(probs[i],setups;numruns=numruns,names=names,kwargs...,probaux[i]...)
+    shootouts[i] = Shootout(probs[i],setups;numruns=numruns,names=names,kwargs...,probaux[i]...)
     winners[i] = shootouts[i].winner
   end
   return ShootoutSet(shootouts,probs,probaux,N,winners)
@@ -136,7 +147,9 @@ type WorkPrecisionSet
   names
 end
 
-function ode_workprecision(prob::AbstractODEProblem,alg,abstols,reltols;name=nothing,numruns=20,appxsol=nothing,error_estimate=:final,kwargs...)
+function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
+                       name=nothing,numruns=20,
+                       appxsol=nothing,error_estimate=:final,kwargs...)
   N = length(abstols)
   errors = Vector{Float64}(N)
   times = Vector{Float64}(N)
@@ -146,38 +159,161 @@ function ode_workprecision(prob::AbstractODEProblem,alg,abstols,reltols;name=not
   timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
   dense_errors = error_estimate ∈ DENSE_ERRORS
   for i in 1:N
-    sol = solve(prob,alg;kwargs...,abstol=abstols[i],
-    reltol=reltols[i],timeseries_errors=timeseries_errors,
-    dense_errors = dense_errors) # Compile and get result
-    sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
-    reltol=reltols[i],timeseries_errors=timeseries_errors,
-    dense_errors = dense_errors) # Compile and get result
-    t = @elapsed for j in 1:numruns
+    t = 0.0
+    if dts == nothing
+      sol = solve(prob,alg;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],timeseries_errors=timeseries_errors,
+      dense_errors = dense_errors) # Compile and get result
       sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
-      dense_errors = dense_errors)
+      dense_errors = dense_errors) # Compile and get result
+      gc()
+    else
+      sol = solve(prob,alg;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
+      dense_errors = dense_errors) # Compile and get result
+      sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
+      dense_errors = dense_errors) # Compile and get result
+      gc()
+    end
+    t = @elapsed for j in 1:numruns
+      if dts == nothing
+        sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,
+                                  abstol=abstols[i],
+                                  reltol=reltols[i],
+                                  timeseries_errors=timeseries_errors,
+                                  dense_errors = dense_errors)
+      else
+         sol = solve(prob,alg,sol[:],sol.t,sol.k;
+                                  kwargs...,abstol=abstols[i],
+                                  reltol=reltols[i],dt=dts[i],
+                                  timeseries_errors=timeseries_errors,
+                                  dense_errors = dense_errors)
+      end
+
     end
     t = t/numruns
 
     if appxsol != nothing
-      errsol = appxtrue(sol,appxsol)
-      errors[i] = errsol.errors[error_estimate]
+      errsol = calculate_errsol(prob,sol,approxsol)
+      errors[i] = mean(errsol.errors[error_estimate])
     else
-      errors[i] = sol.errors[error_estimate]
+      errors[i] = mean(sol.errors[error_estimate])
     end
     times[i] = t
   end
   return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
 end
 
-function ode_workprecision_set(prob::AbstractODEProblem,abstols,reltols,setups;numruns=20,names=nothing,appxsol=nothing,kwargs...)
+# This will only do strong errors
+function WorkPrecision(prob::Union{AbstractRODEProblem,AbstractSDEProblem},
+                       alg,abstols,reltols,dts=nothing;
+                       name=nothing,numruns=20,
+                       appxsol=nothing,error_estimate=:final,kwargs...)
+  N = length(abstols)
+  errors = Vector{Float64}(N)
+  times = Vector{Float64}(N)
+  local_errors = Vector{Float64}(numruns)
+  if name == nothing
+    name = "WP-Alg"
+  end
+  timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
+  dense_errors = error_estimate ∈ DENSE_ERRORS
+  for i in 1:N
+    t = 0.0
+    if dts == nothing
+      sol = solve(prob,alg;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],timeseries_errors=timeseries_errors,
+      dense_errors = dense_errors) # Compile and get result
+      sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],timeseries_errors=timeseries_errors,
+      dense_errors = dense_errors) # Compile and get result
+      gc()
+    else
+      sol = solve(prob,alg;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
+      dense_errors = dense_errors) # Compile and get result
+      sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
+      dense_errors = dense_errors) # Compile and get result
+      gc()
+    end
+    for j in 1:numruns
+      if dts == nothing
+        t += @elapsed sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,
+                                  abstol=abstols[i],
+                                  reltol=reltols[i],
+                                  timeseries_errors=timeseries_errors,
+                                  dense_errors = dense_errors)
+      else
+        t += @elapsed sol = solve(prob,alg,sol[:],sol.t,sol.k;
+                                  kwargs...,abstol=abstols[i],
+                                  reltol=reltols[i],dt=dts[i],
+                                  timeseries_errors=timeseries_errors,
+                                  dense_errors = dense_errors)
+      end
+      if appxsol != nothing
+        errsol = calculate_errsol(prob,sol,approxsol)
+        local_errors[j] = errsol.errors[error_estimate]
+      else
+        local_errors[j] = sol.errors[error_estimate]
+      end
+    end
+    t = t/numruns
+
+    errors[i] = mean(local_errors)
+    times[i] = t
+  end
+  return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
+end
+
+function calculate_errsol(prob,sol::AbstractODESolution,approxsol_setup::Dict)
+  true_sol = solve(prob,approxsol_setup[i][:alg];approxsol_setup[i]...)
+  appxtrue(sol,true_sol)
+end
+
+function calculate_errsol(prob::AbstractSDEProblem,sol::AbstractRODESolution,approxsol_setup::Dict)
+  prob2 = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,noise=NoiseWrapper(sol.W))
+  true_sol = solve(prob2,approxsol_setup[i][:alg];approxsol_setup[i]...)
+  appxtrue(sol,true_sol)
+end
+
+function calculate_errsol(prob,sol::AbstractODESolution,approxsol_setup::AbstractTimeseriesSolution)
+  appxtrue(sol,true_sol)
+end
+
+function calculate_errsol(prob::MonteCarloProblem,sol,approxsol_setup)
+  appxtrue(sol,true_sol)
+end
+
+function ode_workprecision(args...;kwargs...)
+  warn("ode_workprecision is deprected, use WorkPrecision")
+  WorkPrecision(args...;kwargs...)
+end
+
+function ode_workprecision_set(args...;kwargs...)
+  warn("ode_workprecision is deprected, use WorkPrecisionSet")
+  WorkPrecisionSet(args...;kwargs...)
+end
+
+
+function WorkPrecisionSet(prob,abstols,reltols,setups;numruns=20,names=nothing,appxsol=nothing,kwargs...)
   N = length(setups)
   wps = Vector{WorkPrecision}(N)
   if names == nothing
     names = [string(typeof(setups[i][:alg])) for i=1:length(setups)]
   end
   for i in 1:N
-    wps[i] = ode_workprecision(prob,setups[i][:alg],abstols,reltols;numruns=numruns,appxsol=appxsol,name=names[i],kwargs...,setups[i]...)
+    if haskey(setups[i],:dts)
+      wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols,setups[i][:dts];
+                                 numruns=numruns,appxsol=appxsol,
+                                 name=names[i],kwargs...,setups[i]...)
+    else
+      wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols;
+                                 numruns=numruns,appxsol=appxsol,
+                                 name=names[i],kwargs...,setups[i]...)
+    end
   end
   return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names)
 end

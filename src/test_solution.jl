@@ -34,13 +34,13 @@ function appxtrue(sol::AbstractODESolution,sol2::TestSolution)
   else
     _sol = sol2
   end
-  
+
   errors = Dict(:final=>recursive_mean(abs.(sol[end]-_sol[end])))
   if _sol.dense
     timeseries_analytic = _sol(sol.t)
     errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol[:]-timeseries_analytic))
     errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol[:]-timeseries_analytic)))
-    if !(typeof(sol) <: AbstractRODESolution) && sol.dense
+    if sol.dense
       densetimes = collect(linspace(sol.t[1],sol.t[end],100))
       interp_u = sol(densetimes)
       interp_analytic = _sol(densetimes)
@@ -65,12 +65,12 @@ Uses the interpolant from the higher order solution sol2 to approximate
 errors for sol. If sol2 has no interpolant, only the final error is
 calculated.
 """
-function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution)
+function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_errors=sol2.dense,dense_errors=sol2.dense)
   errors = Dict(:final=>recursive_mean(abs.(sol[end]-sol2[end])))
-  if !(typeof(sol2) <: AbstractRODESolution) && sol2.dense
+  if sol2.dense
     timeseries_analytic = sol2(sol.t)
     errors = Dict(:final=>recursive_mean(abs.(sol[end]-sol2[end])),:l∞=>maximum(vecvecapply((x)->abs.(x),sol[:]-timeseries_analytic)),:l2=>sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol[:]-timeseries_analytic))))
-    if !(typeof(sol) <: AbstractRODESolution) && sol.dense
+    if sol.dense
       densetimes = collect(linspace(sol.t[1],sol.t[end],100))
       interp_u = sol(densetimes)
       interp_analytic = sol2(densetimes)
@@ -79,4 +79,17 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution)
     end
   end
   build_solution(sol,sol2.u,errors)
+end
+
+function appxtrue(sim::MonteCarloSolution,appx_setup;kwargs...)
+  _new_sols = Vector{DESolution}(length(sim.u))
+  for i in eachindex(sim)
+    @show i
+    prob = sim[i].prob
+    prob2 = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,noise=NoiseWrapper(sim[i].W))
+    true_sol = solve(prob2,appx_setup[:alg];appx_setup...)
+    _new_sols[i] = appxtrue(sim[i],true_sol)
+  end
+  new_sols = convert(Vector{typeof(_new_sols[1])},_new_sols)
+  calculate_monte_errors(new_sols;converged=sim.converged,elapsedTime=sim.elapsedTime,kwargs...)
 end
