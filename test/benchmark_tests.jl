@@ -28,13 +28,13 @@ t2 = @elapsed sol2 = solve(prob,setups[1][:alg],dt=1/2^(4))
 
 println("Shootout Tests")
 
-shoot = ode_shootout(prob,setups,dt=1/2^(4))
+shoot = Shootout(prob,setups,dt=1/2^(4))
 
 #show(shoot)
 #println(shoot)
 shoot[end]
 
-set = ode_shootoutset(probs,setups;dt=1/2^(4))
+set = ShootoutSet(probs,setups;dt=1/2^(4))
 
 #println(set[1])
 #println(set[:])
@@ -43,14 +43,14 @@ set[1][:]
 
 ## WorkPrecision Tests
 println("WorkPrecision Tests")
-wp = ode_workprecision(prob,DP5(),abstols,reltols;name="Dormand-Prince 4/5")
+wp = WorkPrecision(prob,DP5(),abstols,reltols;name="Dormand-Prince 4/5")
 
 wp[1]
 wp[:]
 wp[end]
 #show(wp)
 
-wp_set = ode_workprecision_set(prob,abstols,reltols,setups;dt=1/2^4,numruns=2)
+wp_set = WorkPrecisionSet(prob,abstols,reltols,setups;dt=1/2^4,numruns=2)
 
 wp_set[1]
 wp_set[:]
