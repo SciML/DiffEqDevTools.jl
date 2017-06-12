@@ -2,7 +2,8 @@ __precompile__()
 
 module DiffEqDevTools
 
-using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase
+using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase,
+      DiffEqMonteCarlo, DiffEqNoiseProcess
 
 import Base: length
 
@@ -19,7 +20,7 @@ include("tableau_info.jl")
 export ConvergenceSimulation, Shootout, ShootoutSet, TestSolution
 
 #Benchmark Functions
-export ode_shootout, ode_shootoutset, ode_workprecision, ode_workprecision_set
+export Shootout, ShootoutSet, WorkPrecision, WorkPrecisionSet
 
 export test_convergence, appxtrue!, appxtrue
 
