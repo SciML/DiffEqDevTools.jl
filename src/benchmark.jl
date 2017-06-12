@@ -226,7 +226,7 @@ function WorkPrecision(prob::Union{AbstractRODEProblem,AbstractSDEProblem},
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
+      sol = solve(prob,alg,sol[:],sol.t;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
       gc()
@@ -234,20 +234,20 @@ function WorkPrecision(prob::Union{AbstractRODEProblem,AbstractSDEProblem},
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
+      sol = solve(prob,alg,sol[:],sol.t;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
       gc()
     end
     for j in 1:numruns
       if dts == nothing
-        t += @elapsed sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,
+        t += @elapsed sol = solve(prob,alg,sol[:],sol.t;kwargs...,
                                   abstol=abstols[i],
                                   reltol=reltols[i],
                                   timeseries_errors=timeseries_errors,
                                   dense_errors = dense_errors)
       else
-        t += @elapsed sol = solve(prob,alg,sol[:],sol.t,sol.k;
+        t += @elapsed sol = solve(prob,alg,sol[:],sol.t;
                                   kwargs...,abstol=abstols[i],
                                   reltol=reltols[i],dt=dts[i],
                                   timeseries_errors=timeseries_errors,
