@@ -7,19 +7,20 @@ type TestSolution{T,N,hasinterp,tType,uType,iType} <: AbstractTimeseriesSolution
   u::uType
   interp::iType
   dense::Bool
+  retcode::Symbol
 end
 (T::TestSolution)(t) = T.interp(t)
 function TestSolution(t,u)
   T = eltype(eltype(u))
   N = length((size(u[1])..., length(u)))
-  TestSolution{T,N,false,typeof(t),typeof(u),Void}(t,u,nothing,false)
+  TestSolution{T,N,false,typeof(t),typeof(u),Void}(t,u,nothing,false,:Success)
 end
 function TestSolution(t,u,interp)
   T = eltype(eltype(u))
   N = length((size(u[1])..., length(u)))
-  TestSolution{T,N,true,typeof(t),typeof(u),typeof(interp)}(t,u,interp,true)
+  TestSolution{T,N,true,typeof(t),typeof(u),typeof(interp)}(t,u,interp,true,:Success)
 end
-TestSolution(interp::DESolution) = TestSolution{Void,0,true,Void,Void,typeof(interp)}(nothing,nothing,interp,true)
+TestSolution(interp::DESolution) = TestSolution{Void,0,true,Void,Void,typeof(interp)}(nothing,nothing,interp,true,:Success)
 hasinterp{T,N,hi,tType,uType,iType}(::TestSolution{T,N,hi,tType,uType,iType}) = hi
 """
 `appxtrue(sol::AbstractODESolution,sol2::TestSolution)`

@@ -196,7 +196,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
     t = t/numruns
 
     if appxsol != nothing
-      errsol = calculate_errsol(prob,sol,approxsol)
+      errsol = calculate_errsol(prob,sol,appxsol)
       errors[i] = mean(errsol.errors[error_estimate])
     else
       errors[i] = mean(sol.errors[error_estimate])
@@ -254,7 +254,7 @@ function WorkPrecision(prob::Union{AbstractRODEProblem,AbstractSDEProblem},
                                   dense_errors = dense_errors)
       end
       if appxsol != nothing
-        errsol = calculate_errsol(prob,sol,approxsol)
+        errsol = calculate_errsol(prob,sol,appxsol)
         local_errors[j] = errsol.errors[error_estimate]
       else
         local_errors[j] = sol.errors[error_estimate]
@@ -268,22 +268,22 @@ function WorkPrecision(prob::Union{AbstractRODEProblem,AbstractSDEProblem},
   return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
 end
 
-function calculate_errsol(prob,sol::AbstractODESolution,approxsol_setup::Dict)
-  true_sol = solve(prob,approxsol_setup[i][:alg];approxsol_setup[i]...)
+function calculate_errsol(prob,sol::AbstractODESolution,appxsol_setup::Dict)
+  true_sol = solve(prob,appxsol_setup[i][:alg];appxsol_setup[i]...)
   appxtrue(sol,true_sol)
 end
 
-function calculate_errsol(prob::AbstractSDEProblem,sol::AbstractRODESolution,approxsol_setup::Dict)
+function calculate_errsol(prob::AbstractSDEProblem,sol::AbstractRODESolution,appxsol_setup::Dict)
   prob2 = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,noise=NoiseWrapper(sol.W))
-  true_sol = solve(prob2,approxsol_setup[i][:alg];approxsol_setup[i]...)
+  true_sol = solve(prob2,appxsol_setup[i][:alg];appxsol_setup[i]...)
   appxtrue(sol,true_sol)
 end
 
-function calculate_errsol(prob,sol::AbstractODESolution,approxsol_setup::AbstractTimeseriesSolution)
+function calculate_errsol(prob,sol::AbstractODESolution,true_sol::AbstractTimeseriesSolution)
   appxtrue(sol,true_sol)
 end
 
-function calculate_errsol(prob::MonteCarloProblem,sol,approxsol_setup)
+function calculate_errsol(prob::MonteCarloProblem,sol,true_sol)
   appxtrue(sol,true_sol)
 end
 
