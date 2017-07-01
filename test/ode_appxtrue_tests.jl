@@ -1,12 +1,11 @@
-using OrdinaryDiffEq, DiffEqBase, DiffEqProblemLibrary, DiffEqDevTools
+using OrdinaryDiffEq, DiffEqBase, DiffEqProblemLibrary, DiffEqDevTools, Base.Test
 
 f = (t,u) -> u
 prob = ODEProblem(f,1/2,(0.0,1.0))
 (p::typeof(f))(::Type{Val{:analytic}},t,u0) = u0*exp(t)
 
-sol =solve(prob,Euler();dt=1//2^(4))
-
-sol2 =solve(prob,Vern9();dt=1//2^(10))
+sol =solve(prob,Euler();dt=1//2^(4),dense_errors=true)
+sol2 =solve(prob,Vern9();dt=1//2^(10),abstol=1e-14,reltol=1e-14)
 
 prob2 = ODEProblem(f,1/2,(0.0,1.0))
 sol3 =solve(prob_ode_linear,Euler();dt=1//2^(4))
@@ -22,3 +21,9 @@ test_sol = TestSolution(sol2.t,sol2[end])
 errsol3 = appxtrue(sol5,test_sol)
 
 @test errsol1.errors[:L2] ≈ 0.018865798306718855 && errsol1.errors[:L2] ≈ errsol2.errors[:L2]
+
+@test errsol1.errors[:final] ≈ sol.errors[:final]
+@test errsol1.errors[:l2] ≈ sol.errors[:l2]
+@test errsol1.errors[:l∞] ≈ sol.errors[:l∞]
+@test errsol1.errors[:L∞] ≈ sol.errors[:L∞]
+@test errsol1.errors[:L2] ≈ sol.errors[:L2]
