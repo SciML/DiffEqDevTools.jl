@@ -20,7 +20,8 @@ sol5 =solve(prob,Euler();dt=1//2^(4))
 test_sol = TestSolution(sol2.t,sol2[end])
 errsol3 = appxtrue(sol5,test_sol)
 
-@test errsol1.errors[:L2] ≈ 0.018865798306718855 && errsol1.errors[:L2] ≈ errsol2.errors[:L2]
+@test errsol1.errors[:L2] ≈ 0.018865798306718855
+@test errsol1.errors[:L2] ≈ errsol2.errors[:L2]
 
 @test errsol1.errors[:final] ≈ sol.errors[:final]
 @test errsol1.errors[:l2] ≈ sol.errors[:l2]
