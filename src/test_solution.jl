@@ -39,8 +39,8 @@ function appxtrue(sol::AbstractODESolution,sol2::TestSolution)
   errors = Dict(:final=>recursive_mean(abs.(sol[end]-_sol[end])))
   if _sol.dense
     timeseries_analytic = _sol(sol.t)
-    errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol[:]-timeseries_analytic))
-    errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol[:]-timeseries_analytic)))
+    errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol-timeseries_analytic))
+    errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
     if sol.dense
       densetimes = collect(linspace(sol.t[1],sol.t[end],100))
       interp_u = sol(densetimes)
@@ -70,12 +70,14 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_
   errors = Dict(:final=>recursive_mean(abs.(sol[end]-sol2[end])))
   if sol2.dense
     timeseries_analytic = sol2(sol.t)
-    errors = Dict(:final=>recursive_mean(abs.(sol[end]-sol2[end])),:l∞=>maximum(vecvecapply((x)->abs.(x),sol[:]-timeseries_analytic)),:l2=>sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol[:]-timeseries_analytic))))
+    errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol-timeseries_analytic))
+    errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
     if sol.dense
       densetimes = collect(linspace(sol.t[1],sol.t[end],100))
       interp_u = sol(densetimes)
       interp_analytic = sol2(densetimes)
-      interp_errors = Dict(:L∞=>maximum(vecvecapply((x)->abs.(x),interp_u-interp_analytic)),:L2=>sqrt(recursive_mean(vecvecapply((x)->float(x).^2,interp_u-interp_analytic))))
+      interp_errors = Dict(:L∞=>maximum(vecvecapply((x)->abs.(x),interp_u-interp_analytic)),
+                           :L2=>sqrt(recursive_mean(vecvecapply((x)->float(x).^2,interp_u-interp_analytic))))
       errors = merge(errors,interp_errors)
     end
   end
