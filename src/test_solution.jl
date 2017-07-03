@@ -49,8 +49,10 @@ function appxtrue(sol::AbstractODESolution,sol2::TestSolution)
                            :L2=>sqrt(recursive_mean(vecvecapply((x)->float(x).^2,interp_u-interp_analytic))))
       errors = merge(errors,interp_errors)
     end
+  else
+    timeseries_analytic = sol2.u
   end
-  build_solution(sol,_sol.u,errors)
+  build_solution(sol,timeseries_analytic,errors)
 end
 
 function appxtrue(sol::AbstractFEMSolution,sol2::AbstractFEMSolution)
@@ -81,7 +83,7 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_
       errors = merge(errors,interp_errors)
     end
   end
-  build_solution(sol,sol2.u,errors)
+  build_solution(sol,timeseries_analytic,errors)
 end
 
 function appxtrue(sim::MonteCarloSolution,appx_setup;kwargs...)
