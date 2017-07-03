@@ -51,6 +51,10 @@ function appxtrue(sol::AbstractODESolution,sol2::TestSolution)
     end
   else
     timeseries_analytic = sol2.u
+    if sol.t == sol2.t
+      errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol-timeseries_analytic))
+      errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
+    end
   end
   build_solution(sol,timeseries_analytic,errors)
 end
@@ -81,6 +85,12 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_
       interp_errors = Dict(:L∞=>maximum(vecvecapply((x)->abs.(x),interp_u-interp_analytic)),
                            :L2=>sqrt(recursive_mean(vecvecapply((x)->float(x).^2,interp_u-interp_analytic))))
       errors = merge(errors,interp_errors)
+    end
+  else
+    timeseries_analytic = sol2.u
+    if sol.t == sol2.t
+      errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol-timeseries_analytic))
+      errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
     end
   end
   build_solution(sol,timeseries_analytic,errors)
