@@ -139,6 +139,73 @@ function constructRK438Rule(T::Type = Float64)
 end
 
 """
+Explicit SSP method of order 2 using 2 stages.
+"""
+function constructSSPRK22(T::Type = Float64)
+  A = [0 0
+       1 0]
+  c = [0; 1]
+  α = [1//2; 1//2]
+  A = map(T,A)
+  α = map(T,α)
+  c = map(T,c)
+  return(ExplicitRKTableau(A,c,α,2))
+end
+
+"""
+Explicit SSP method of order 3 using 3 stages.
+"""
+function constructSSPRK33(T::Type = Float64)
+  A = [0 0 0
+       1 0 0
+       1//4 1//4 0]
+  c = [0; 1; 1//2]
+  α = [1//6; 1//6; 2//3]
+  A = map(T,A)
+  α = map(T,α)
+  c = map(T,c)
+  return(ExplicitRKTableau(A,c,α,3))
+end
+
+"""
+Explicit SSP method of order 3 using 4 stages.
+"""
+function constructSSPRK43(T::Type = Float64)
+  A = [0 0 0 0
+       1//2 0 0 0
+       1//2 1//2 0 0
+       1//6 1//6 1//6 0]
+  c = [0; 1//2; 1; 1//2]
+  α = [1//6; 1//6; 1//6; 1//2]
+  A = map(T,A)
+  α = map(T,α)
+  c = map(T,c)
+  return(ExplicitRKTableau(A,c,α,3))
+end
+
+"""
+Explicit SSP method of order 4 using 10 stages.
+"""
+function constructSSPRK104(T::Type = Float64)
+  A = [0 0 0 0 0 0 0 0 0 0
+       1//6 0 0 0 0 0 0 0 0 0
+       1//6 1//6 0 0 0 0 0 0 0 0
+       1//6 1//6 1//6 0 0 0 0 0 0 0
+       1//6 1//6 1//6 1//6 0 0 0 0 0 0
+       1//15 1//15 1//15 1//15 1//15 0 0 0 0 0
+       1//15 1//15 1//15 1//15 1//15 1//6 0 0 0 0
+       1//15 1//15 1//15 1//15 1//15 1//6 1//6 0 0 0
+       1//15 1//15 1//15 1//15 1//15 1//6 1//6 1//6 0 0
+       1//15 1//15 1//15 1//15 1//15 1//6 1//6 1//6 1//6 0]
+  c = [0; 1//6; 1//3; 1//2; 2//3; 1//3; 1//2; 2//3; 5//6; 1]
+  α = [1//10; 1//10; 1//10; 1//10; 1//10; 1//10; 1//10; 1//10; 1//10; 1//10]
+  A = map(T,A)
+  α = map(T,α)
+  c = map(T,c)
+  return(ExplicitRKTableau(A,c,α,4))
+end
+
+"""
 Implicit Euler Method
 """
 function constructImplicitEuler(T::Type = Float64)

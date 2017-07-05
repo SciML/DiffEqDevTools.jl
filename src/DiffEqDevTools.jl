@@ -59,6 +59,7 @@ export constructEuler, constructKutta3, constructRK4, constructRK438Rule,
        constructTanakaKasugaYamashitaYazaki6B, constructTanakaKasugaYamashitaYazaki6A,
        constructMikkawyEisa, constructChummund6, constructChummund62,
        constructHuta62, constructHuta6, constructRKF4, constructVerner7, constructVerner8,
-       constructVerner9, constructVerner6
+       constructVerner9, constructVerner6, constructSSPRK22, constructSSPRK33,
+       constructSSPRK43, constructSSPRK104
 
 end # module

@@ -49,15 +49,31 @@ for i = 1:2 # 1 = num, 2 = ExplicitRK
   sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-2) < testTol
 
+  tabalg = ExplicitRK(tableau=constructSSPRK22())
+  sim = test_convergence(dts,prob,tabalg)
+  @test abs(sim.𝒪est[:l∞]-2) < testTol
+
   # Order 3
 
   tabalg = ExplicitRK(tableau=constructBogakiShampine3())
   sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-3) < testTol
 
+  tabalg = ExplicitRK(tableau=constructSSPRK33())
+  sim = test_convergence(dts,prob,tabalg)
+  @test abs(sim.𝒪est[:l∞]-3) < testTol
+
+  tabalg = ExplicitRK(tableau=constructSSPRK43())
+  sim = test_convergence(dts,prob,tabalg)
+  @test abs(sim.𝒪est[:l∞]-3) < testTol
+
   # Order 4
 
   tabalg = ExplicitRK(tableau=constructRKF4())
+  sim = test_convergence(dts,prob,tabalg)
+  @test abs(sim.𝒪est[:l∞]-4) < testTol
+
+  tabalg = ExplicitRK(tableau=constructSSPRK104())
   sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-4) < testTol
 
