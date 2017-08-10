@@ -57,4 +57,4 @@ wp_set[:]
 wp_set[end]
 #println(wp_set)
 #show(wp_set)
-@test (minimum(diff(wp_set[1].errors).==0)) # The errors for a fixed timestep method should be constant
+@test (minimum(diff(wp_set[2].errors).==0)) # The errors for a fixed timestep method should be constant
