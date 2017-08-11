@@ -87,7 +87,7 @@ function ShootoutSet(probs,setups;probaux=nothing,numruns=20,
     end
   end
   for i in eachindex(probs)
-    print_names && print(names[i])
+    print_names && println(names[i])
     shootouts[i] = Shootout(probs[i],setups;numruns=numruns,names=names,kwargs...,probaux[i]...)
     winners[i] = shootouts[i].winner
   end
@@ -298,7 +298,7 @@ function WorkPrecisionSet(prob,abstols,reltols,setups;numruns=20,
     names = [string(typeof(setups[i][:alg])) for i=1:length(setups)]
   end
   for i in 1:N
-    print_names && print(names[i])
+    print_names && println(names[i])
     if haskey(setups[i],:dts)
       wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols,setups[i][:dts];
                                  numruns=numruns,appxsol=appxsol,
