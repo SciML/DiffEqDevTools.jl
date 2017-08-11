@@ -41,11 +41,12 @@ function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_est
   for i in eachindex(setups)
     sol = solve(prob,setups[i][:alg];timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
-    sol = solve(prob,setups[i][:alg],sol[:],sol.t,sol.k;timeseries_errors=timeseries_errors,
+    sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
     gc()
     t = @elapsed for j in 1:numruns
-      sol = solve(prob,setups[i][:alg],sol[:],sol.t,sol.k;kwargs...,setups[i]...)
+      sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;
+                  kwargs...,setups[i]...,timeseries_errors=false,dense_errors=false)
     end
     if appxsol != nothing
       errsol = appxtrue(sol,appxsol)
@@ -164,7 +165,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
+      sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
       gc()
@@ -172,24 +173,24 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,abstol=abstols[i],
+      sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
       gc()
     end
     t = @elapsed for j in 1:numruns
       if dts == nothing
-        sol = solve(prob,alg,sol[:],sol.t,sol.k;kwargs...,
+        solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,
                                   abstol=abstols[i],
                                   reltol=reltols[i],
-                                  timeseries_errors=timeseries_errors,
-                                  dense_errors = dense_errors)
+                                  timeseries_errors=false,
+                                  dense_errors = false)
       else
-         sol = solve(prob,alg,sol[:],sol.t,sol.k;
+         solve(prob,alg,sol.u,sol.t,sol.k;
                                   kwargs...,abstol=abstols[i],
                                   reltol=reltols[i],dt=dts[i],
-                                  timeseries_errors=timeseries_errors,
-                                  dense_errors = dense_errors)
+                                  timeseries_errors=false,
+                                  dense_errors = false)
       end
 
     end
@@ -226,7 +227,7 @@ function WorkPrecision(prob::Union{AbstractRODEProblem,AbstractSDEProblem},
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      sol = solve(prob,alg,sol[:],sol.t;kwargs...,abstol=abstols[i],
+      sol = solve(prob,alg,sol.u,sol.t;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
       gc()
@@ -234,24 +235,24 @@ function WorkPrecision(prob::Union{AbstractRODEProblem,AbstractSDEProblem},
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      sol = solve(prob,alg,sol[:],sol.t;kwargs...,abstol=abstols[i],
+      sol = solve(prob,alg,sol.u,sol.t;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
       gc()
     end
-    for j in 1:numruns
+    t = @elapsed for j in 1:numruns
       if dts == nothing
-        t += @elapsed sol = solve(prob,alg,sol[:],sol.t;kwargs...,
+        solve(prob,alg,sol.u,sol.t;kwargs...,
                                   abstol=abstols[i],
                                   reltol=reltols[i],
-                                  timeseries_errors=timeseries_errors,
-                                  dense_errors = dense_errors)
+                                  timeseries_errors=false,
+                                  dense_errors = false)
       else
-        t += @elapsed sol = solve(prob,alg,sol[:],sol.t;
+        solve(prob,alg,sol.u,sol.t;
                                   kwargs...,abstol=abstols[i],
                                   reltol=reltols[i],dt=dts[i],
-                                  timeseries_errors=timeseries_errors,
-                                  dense_errors = dense_errors)
+                                  timeseries_errors=false,
+                                  dense_errors = false)
       end
       if appxsol != nothing
         errsol = calculate_errsol(prob,sol,appxsol)
