@@ -94,13 +94,13 @@ function ShootoutSet(probs,setups;probaux=nothing,numruns=20,
   return ShootoutSet(shootouts,probs,probaux,N,winners)
 end
 
-length(shoot::Shootout) = shoot.N
+Base.length(shoot::Shootout) = shoot.N
 Base.size(shoot::Shootout) = length(shoot)
 Base.endof(shoot::Shootout) = length(shoot)
 Base.getindex(shoot::Shootout,i::Int) = shoot.effs[i]
 Base.getindex(shoot::Shootout,::Colon) = shoot.effs
 
-function print(io::IO, shoot::Shootout)
+function Base.print(io::IO, shoot::Shootout)
   println(io,"Names: $(shoot.names), Winner: $(shoot.winner)")
   println(io,"Efficiencies: $(shoot.effs)")
   println(io,"EffRatios: $(shoot.effratios[shoot.bestidx,:])")
@@ -108,23 +108,23 @@ function print(io::IO, shoot::Shootout)
   println(io,"Errors: $(shoot.errors)")
 end
 
-function show(io::IO, shoot::Shootout)
+function Base.show(io::IO, shoot::Shootout)
   println(io,"Winner: $(shoot.winner)")
   println(io,"EffRatios: $(shoot.effratios[shoot.bestidx,:])")
 end
 
-length(set::ShootoutSet) = set.N
+Base.length(set::ShootoutSet) = set.N
 Base.size(set::ShootoutSet) = length(set)
 Base.endof(set::ShootoutSet) = length(set)
 Base.getindex(set::ShootoutSet,i::Int) = set.shootouts[i]
 Base.getindex(set::ShootoutSet,::Colon) = set.shootouts
 
-function print(io::IO, set::ShootoutSet)
+function Base.print(io::IO, set::ShootoutSet)
   println(io,"ShootoutSet of $(set.N) shootouts")
   println(io,"Winners: $(set.winners)")
 end
 
-function show(io::IO, set::ShootoutSet)
+function Base.show(io::IO, set::ShootoutSet)
   println(io,"ShootoutSet of $(set.N) shootouts ")
 end
 
@@ -312,35 +312,35 @@ function WorkPrecisionSet(prob,abstols,reltols,setups;numruns=20,
   return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names)
 end
 
-length(wp::WorkPrecision) = wp.N
+Base.length(wp::WorkPrecision) = wp.N
 Base.size(wp::WorkPrecision) = length(wp)
 Base.endof(wp::WorkPrecision) = length(wp)
 Base.getindex(wp::WorkPrecision,i::Int) = wp.times[i]
 Base.getindex(wp::WorkPrecision,::Colon) = wp.times
 
-function print(io::IO, wp::WorkPrecision)
+function Base.print(io::IO, wp::WorkPrecision)
   println(io,"Name: $(wp.name)")
   println(io,"Times: $(wp.times)")
   println(io,"Errors: $(wp.errors)")
 end
 
-function show(io::IO, wp::WorkPrecision)
+function Base.show(io::IO, wp::WorkPrecision)
   println(io,"Name: $(wp.name)")
   println(io,"Times: $(wp.times)")
   println(io,"Errors: $(wp.errors)")
 end
 
-length(wp_set::WorkPrecisionSet) = wp_set.N
+Base.length(wp_set::WorkPrecisionSet) = wp_set.N
 Base.size(wp_set::WorkPrecisionSet) = length(wp_set)
 Base.endof(wp_set::WorkPrecisionSet) = length(wp_set)
 Base.getindex(wp_set::WorkPrecisionSet,i::Int) = wp_set.wps[i]
 Base.getindex(wp_set::WorkPrecisionSet,::Colon) = wp_set.wps
 
-function print(io::IO, wp_set::WorkPrecisionSet)
+function Base.print(io::IO, wp_set::WorkPrecisionSet)
   println(io,"WorkPrecisionSet of $(wp_set.N) wps")
   println(io,"Names: $(wp_set.names)")
 end
 
-function show(io::IO, wp_set::WorkPrecisionSet)
+function Base.show(io::IO, wp_set::WorkPrecisionSet)
   println(io,"WorkPrecisionSet of $(wp_set.N) wps")
 end
