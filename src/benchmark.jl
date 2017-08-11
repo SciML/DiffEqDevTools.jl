@@ -72,7 +72,8 @@ function ode_shootoutset(args...;kwargs...)
   ShootoutSet(args...;kwargs...)
 end
 
-function ShootoutSet(probs,setups;probaux=nothing,numruns=20,names=nothing,kwargs...)
+function ShootoutSet(probs,setups;probaux=nothing,numruns=20,
+                     names=nothing,print_names=false,kwargs...)
   N = length(probs)
   shootouts = Vector{Shootout}(N)
   winners = Vector{String}(N)
@@ -86,6 +87,7 @@ function ShootoutSet(probs,setups;probaux=nothing,numruns=20,names=nothing,kwarg
     end
   end
   for i in eachindex(probs)
+    print_names && print(names[i])
     shootouts[i] = Shootout(probs[i],setups;numruns=numruns,names=names,kwargs...,probaux[i]...)
     winners[i] = shootouts[i].winner
   end
@@ -288,24 +290,15 @@ function calculate_errsol(prob::MonteCarloProblem,sol,true_sol)
   appxtrue(sol,true_sol)
 end
 
-function ode_workprecision(args...;kwargs...)
-  warn("ode_workprecision is deprected, use WorkPrecision")
-  WorkPrecision(args...;kwargs...)
-end
-
-function ode_workprecision_set(args...;kwargs...)
-  warn("ode_workprecision is deprected, use WorkPrecisionSet")
-  WorkPrecisionSet(args...;kwargs...)
-end
-
-
-function WorkPrecisionSet(prob,abstols,reltols,setups;numruns=20,names=nothing,appxsol=nothing,kwargs...)
+function WorkPrecisionSet(prob,abstols,reltols,setups;numruns=20,
+                          print_names=false,names=nothing,appxsol=nothing,kwargs...)
   N = length(setups)
   wps = Vector{WorkPrecision}(N)
   if names == nothing
     names = [string(typeof(setups[i][:alg])) for i=1:length(setups)]
   end
   for i in 1:N
+    print_names && print(names[i])
     if haskey(setups[i],:dts)
       wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols,setups[i][:dts];
                                  numruns=numruns,appxsol=appxsol,
