@@ -12,6 +12,9 @@ function ConvergenceSimulation(solutions,convergence_axis;
   N = size(solutions,1)
   uEltype = eltype(solutions[1].u[1])
   errors = Dict() #Should add type information
+  if isempty(solutions[1].errors)
+    error("Errors dictionary is empty. No analytical solution set.")
+  end
   for k in keys(solutions[1].errors)
     errors[k] = [mean(sol.errors[k]) for sol in solutions]
   end
