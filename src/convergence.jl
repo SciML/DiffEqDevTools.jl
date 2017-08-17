@@ -54,6 +54,41 @@ function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,Abs
   ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors)
 end
 
+function analyticless_test_convergence(dts::AbstractArray,
+                          prob::Union{AbstractRODEProblem,AbstractSDEProblem},
+                          alg,test_dt;numMonte=10000,
+                          save_everystep=true,timeseries_steps=1,
+                          timeseries_errors=save_everystep,adaptive=false,
+                          weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
+  _solutions = []
+  for i in 1:length(dts)
+    tmp_solutions = []
+    for j in 1:numMonte
+      t = prob.tspan[1]:test_dt:prob.tspan[2]
+      brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+      _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
+                         noise=NoiseGrid(t,brownian_values),
+                         noise_rate_prototype=prob.noise_rate_prototype);
+      sol = solve(_prob,alg;dt=dts[i],adaptive=adaptive);
+      _prob2 = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
+                         noise=NoiseGrid(t,brownian_values),
+                         noise_rate_prototype=prob.noise_rate_prototype);
+      true_sol = solve(_prob2,alg;adaptive=adaptive,dt=test_dt);
+      err_sol = appxtrue(sol,true_sol)
+      push!(tmp_solutions,err_sol)
+    end
+    push!(_solutions,MonteCarloSolution(tmp_solutions,0.0,true))
+  end
+  solutions = [calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
+  auxdata = Dict("dts" =>  dts)
+  # Now Calculate Weak Errors
+  additional_errors = Dict()
+  for k in keys(solutions[1].weak_errors)
+    additional_errors[k] = [sol.weak_errors[k] for sol in solutions]
+  end
+  ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors)
+end
+
 function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;save_everystep=true,adaptive=false,kwargs...)
   N = length(dts)
   solutions = [solve(prob,alg;dt=dts[i],save_everystep=save_everystep,adaptive=adaptive,kwargs...) for i=1:N]
