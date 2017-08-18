@@ -96,6 +96,16 @@ function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;save_e
   ConvergenceSimulation(solutions,dts,auxdata=auxdata)
 end
 
+function analyticless_test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg,appxsol_setup;
+                                       save_everystep=true,adaptive=false,kwargs...)
+  true_sol = solve(prob,appxsol_setup[:alg];appxsol_setup...);
+  N = length(dts)
+  _solutions = [solve(prob,alg;dt=dts[i],save_everystep=save_everystep,adaptive=adaptive,kwargs...) for i=1:N]
+  solutions = [appxtrue(sol,true_sol) for sol in _solutions]
+  auxdata = Dict(:dts =>  dts)
+  ConvergenceSimulation(solutions,dts,auxdata=auxdata)
+end
+
 #=
 function test_convergence(dts::AbstractArray,dxs::AbstractArray,prob::AbstractHeatProblem,convergence_axis;T=1,alg=:Euler)
   if length(dts)!=length(dxs) error("Lengths of dts!=dxs. Invalid convergence simulation") end
