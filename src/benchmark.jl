@@ -100,14 +100,6 @@ Base.endof(shoot::Shootout) = length(shoot)
 Base.getindex(shoot::Shootout,i::Int) = shoot.effs[i]
 Base.getindex(shoot::Shootout,::Colon) = shoot.effs
 
-function Base.print(io::IO, shoot::Shootout)
-  println(io,"Names: $(shoot.names), Winner: $(shoot.winner)")
-  println(io,"Efficiencies: $(shoot.effs)")
-  println(io,"EffRatios: $(shoot.effratios[shoot.bestidx,:])")
-  println(io,"Times: $(shoot.times)")
-  println(io,"Errors: $(shoot.errors)")
-end
-
 function Base.show(io::IO, shoot::Shootout)
   println(io,"Winner: $(shoot.winner)")
   println(io,"EffRatios: $(shoot.effratios[shoot.bestidx,:])")
@@ -118,15 +110,8 @@ Base.size(set::ShootoutSet) = length(set)
 Base.endof(set::ShootoutSet) = length(set)
 Base.getindex(set::ShootoutSet,i::Int) = set.shootouts[i]
 Base.getindex(set::ShootoutSet,::Colon) = set.shootouts
+Base.show(io::IO, set::ShootoutSet) = print(io,"ShootoutSet of $(set.N) shootouts ")
 
-function Base.print(io::IO, set::ShootoutSet)
-  println(io,"ShootoutSet of $(set.N) shootouts")
-  println(io,"Winners: $(set.winners)")
-end
-
-function Base.show(io::IO, set::ShootoutSet)
-  println(io,"ShootoutSet of $(set.N) shootouts ")
-end
 
 ## WorkPrecisions
 
@@ -318,12 +303,6 @@ Base.endof(wp::WorkPrecision) = length(wp)
 Base.getindex(wp::WorkPrecision,i::Int) = wp.times[i]
 Base.getindex(wp::WorkPrecision,::Colon) = wp.times
 
-function Base.print(io::IO, wp::WorkPrecision)
-  println(io,"Name: $(wp.name)")
-  println(io,"Times: $(wp.times)")
-  println(io,"Errors: $(wp.errors)")
-end
-
 function Base.show(io::IO, wp::WorkPrecision)
   println(io,"Name: $(wp.name)")
   println(io,"Times: $(wp.times)")
@@ -336,11 +315,4 @@ Base.endof(wp_set::WorkPrecisionSet) = length(wp_set)
 Base.getindex(wp_set::WorkPrecisionSet,i::Int) = wp_set.wps[i]
 Base.getindex(wp_set::WorkPrecisionSet,::Colon) = wp_set.wps
 
-function Base.print(io::IO, wp_set::WorkPrecisionSet)
-  println(io,"WorkPrecisionSet of $(wp_set.N) wps")
-  println(io,"Names: $(wp_set.names)")
-end
-
-function Base.show(io::IO, wp_set::WorkPrecisionSet)
-  println(io,"WorkPrecisionSet of $(wp_set.N) wps")
-end
+Base.show(io::IO, wp_set::WorkPrecisionSet) = println(io,"WorkPrecisionSet of $(wp_set.N) wps")
