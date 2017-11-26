@@ -9,6 +9,11 @@ import Base: length
 
 const TIMESERIES_ERRORS = Set([:l2,:l∞,:L2,:L∞])
 const DENSE_ERRORS = Set([:L2,:L∞])
+const WEAK_TIMESERIES_ERRORS = Set([:weak_final])
+const WEAK_DENSE_ERRORS = Set([:weak_L2])
+
+parameterless_type(T::Type) = Base.typename(T).wrapper
+parameterless_type(x) = parameterless_type(typeof(x))
 
 include("benchmark.jl")
 include("convergence.jl")
