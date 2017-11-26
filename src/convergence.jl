@@ -56,29 +56,28 @@ end
 
 function analyticless_test_convergence(dts::AbstractArray,
                           prob::Union{AbstractRODEProblem,AbstractSDEProblem},
-                          alg,test_dt;numMonte=10000,
+                          alg,test_dt;numMonte=100,
                           save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   _solutions = []
-  for i in 1:length(dts)
-    tmp_solutions = []
-    for j in 1:numMonte
-      t = prob.tspan[1]:test_dt:prob.tspan[2]
-      brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
-      _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
-                         noise=NoiseGrid(t,brownian_values),
-                         noise_rate_prototype=prob.noise_rate_prototype);
+  tmp_solutions = Array{DESolution}(numMonte,length(dts))
+  @progress for j in 1:numMonte
+    t = prob.tspan[1]:test_dt:prob.tspan[2]
+    brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    np = NoiseGrid(t,brownian_values,brownian_values2)
+    _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
+                       noise=np,
+                       noise_rate_prototype=prob.noise_rate_prototype);
+    true_sol = solve(_prob,alg;adaptive=adaptive,dt=test_dt);
+    for i in 1:length(dts)
       sol = solve(_prob,alg;dt=dts[i],adaptive=adaptive);
-      _prob2 = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
-                         noise=NoiseGrid(t,brownian_values),
-                         noise_rate_prototype=prob.noise_rate_prototype);
-      true_sol = solve(_prob2,alg;adaptive=adaptive,dt=test_dt);
       err_sol = appxtrue(sol,true_sol)
-      push!(tmp_solutions,err_sol)
+      tmp_solutions[j,i] = err_sol
     end
-    push!(_solutions,MonteCarloSolution(tmp_solutions,0.0,true))
   end
+  _solutions = [MonteCarloSolution(tmp_solutions[:,i],0.0,true) for i in 1:length(dts)]
   solutions = [calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
   auxdata = Dict("dts" =>  dts)
   # Now Calculate Weak Errors
@@ -89,14 +88,16 @@ function analyticless_test_convergence(dts::AbstractArray,
   ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors)
 end
 
-function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;save_everystep=true,adaptive=false,kwargs...)
+function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;
+                          save_everystep=true,adaptive=false,kwargs...)
   N = length(dts)
   solutions = [solve(prob,alg;dt=dts[i],save_everystep=save_everystep,adaptive=adaptive,kwargs...) for i=1:N]
   auxdata = Dict(:dts =>  dts)
   ConvergenceSimulation(solutions,dts,auxdata=auxdata)
 end
 
-function analyticless_test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg,appxsol_setup;
+function analyticless_test_convergence(dts::AbstractArray,prob::AbstractODEProblem,
+                                       alg,appxsol_setup;
                                        save_everystep=true,adaptive=false,kwargs...)
   true_sol = solve(prob,appxsol_setup[:alg];appxsol_setup...);
   N = length(dts)

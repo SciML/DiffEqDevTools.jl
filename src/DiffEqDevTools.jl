@@ -3,7 +3,7 @@ __precompile__()
 module DiffEqDevTools
 
 using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase,
-      DiffEqMonteCarlo, DiffEqNoiseProcess
+      DiffEqMonteCarlo, DiffEqNoiseProcess, Juno
 
 import Base: length
 

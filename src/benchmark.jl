@@ -257,13 +257,13 @@ function WorkPrecision(prob::Union{AbstractRODEProblem,AbstractSDEProblem},
 end
 
 function calculate_errsol(prob,sol::AbstractODESolution,appxsol_setup::Dict)
-  true_sol = solve(prob,appxsol_setup[i][:alg];appxsol_setup[i]...)
+  true_sol = solve(prob,appxsol_setup[:alg];appxsol_setup...)
   appxtrue(sol,true_sol)
 end
 
 function calculate_errsol(prob::AbstractSDEProblem,sol::AbstractRODESolution,appxsol_setup::Dict)
   prob2 = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,noise=NoiseWrapper(sol.W))
-  true_sol = solve(prob2,appxsol_setup[i][:alg];appxsol_setup[i]...)
+  true_sol = solve(prob2,appxsol_setup[:alg];appxsol_setup...)
   appxtrue(sol,true_sol)
 end
 
