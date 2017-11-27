@@ -22,4 +22,4 @@ test_dt = 2/10^5
 appxsol_setup = Dict(:alg=>SRIW1(),:abstol=>1e-7,:reltol=>1e-7)
 wp = WorkPrecisionSet(prob,abstols,reltols,setups,test_dt;
                                      appxsol_setup = appxsol_setup,
-                                     numruns=5,names=names,error_estimate=:l2)
+                                     numruns=5,names=names,error_estimate=:weak_final)

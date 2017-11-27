@@ -287,7 +287,11 @@ function WorkPrecisionSet(prob,abstols,reltols,setups,test_dt=nothing;
   tmp_solutions
   _solutions_k = [[MonteCarloSolution(tmp_solutions[:,j,k],0.0,true) for j in 1:M] for k in 1:N]
   solutions = [[calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in sol_k] for sol_k in _solutions_k]
-  errors = [[solutions[j][i].error_means[error_estimate] for i in 1:M] for j in 1:N]
+  if error_estimate ∈ WEAK_ERRORS
+    errors = [[solutions[j][i].weak_errors[error_estimate] for i in 1:M] for j in 1:N]
+  else
+    errors = [[solutions[j][i].error_means[error_estimate] for i in 1:M] for j in 1:N]
+  end
 
   # Now time it
   for k in 1:N
