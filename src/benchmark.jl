@@ -220,7 +220,7 @@ function WorkPrecisionSet(prob::AbstractODEProblem,abstols,reltols,setups;numrun
 end
 
 function WorkPrecisionSet(prob,abstols,reltols,setups,test_dt=nothing;
-                          numruns=20,numruns_error = numruns,
+                          numruns=20,numruns_error = 20,
                           print_names=false,names=nothing,appxsol_setup=nothing,
                           error_estimate=:final,kwargs...)
 
@@ -230,14 +230,14 @@ function WorkPrecisionSet(prob,abstols,reltols,setups,test_dt=nothing;
   dense_errors = has_analytic(prob.f) && error_estimate ∈ DENSE_ERRORS
   N = length(setups); M = length(abstols)
   times = Array{Float64}(M,N)
-  tmp_solutions = Array{DESolution}(numruns,M,N)
+  tmp_solutions = Array{DESolution}(numruns_error,M,N)
   if names == nothing
     names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
   end
   time_tmp = Vector{Float64}(numruns)
 
   # First calculate all of the errors
-  @progress for i in 1:numruns
+  Threads.@threads for i in 1:numruns_error
     if !has_analytic(prob.f)
       t = prob.tspan[1]:test_dt:prob.tspan[2]
       brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
