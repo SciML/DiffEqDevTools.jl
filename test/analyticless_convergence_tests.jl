@@ -29,5 +29,6 @@ using StochasticDiffEq
 
 dts = 1./2.^(6:-1:3)
 test_dt = 1/2^8
-sim1 = analyticless_test_convergence(dts,prob,SRIW1(),test_dt,numMonte=200)
+srand(100)
+sim1 = analyticless_test_convergence(dts,prob,SRIW1(),test_dt,numMonte=400)
 @test sim1.𝒪est[:final]-1.5 < 0.3
