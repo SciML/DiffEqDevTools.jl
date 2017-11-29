@@ -317,7 +317,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
     else
       sol = solve(prob,setups[1][:alg];
             kwargs...,abstol=abstols[1],
-            reltol=reltols[1],dt=setups[1][:dts][j],
+            reltol=reltols[1],dt=setups[1][:dts][1],
             timeseries_errors=timeseries_errors,
             dense_errors = dense_errors)
     end
