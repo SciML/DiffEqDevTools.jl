@@ -219,10 +219,60 @@ function WorkPrecisionSet(prob::AbstractODEProblem,abstols,reltols,setups;numrun
   return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names)
 end
 
-function WorkPrecisionSet(prob,abstols,reltols,setups,test_dt=nothing;
+@def error_calculation begin
+  if !has_analytic(prob.f)
+    t = prob.tspan[1]:test_dt:prob.tspan[2]
+    brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    np = NoiseGrid(t,brownian_values,brownian_values2)
+    _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
+                       noise=np,
+                       noise_rate_prototype=prob.noise_rate_prototype);
+    true_sol = solve(_prob,appxsol_setup[:alg];kwargs...,appxsol_setup...)
+  else
+    _prob = prob
+  end
+
+  # Get a cache
+  if !haskey(setups[1],:dts)
+    sol = solve(_prob,setups[1][:alg];
+          kwargs...,
+          abstol=abstols[1],
+          reltol=reltols[1],
+          timeseries_errors=false,
+          dense_errors = false)
+  else
+    sol = solve(_prob,setups[1][:alg];
+          kwargs...,abstol=abstols[1],
+          reltol=reltols[1],dt=setups[1][:dts][1],
+          timeseries_errors=false,
+          dense_errors = false)
+  end
+
+  for j in 1:M, k in 1:N
+    if !haskey(setups[k],:dts)
+      sol = solve(_prob,setups[k][:alg],sol.u,sol.t;
+            kwargs...,
+            abstol=abstols[j],
+            reltol=reltols[j],
+            timeseries_errors=timeseries_errors,
+            dense_errors = dense_errors)
+    else
+      sol = solve(_prob,setups[k][:alg],sol.u,sol.t;
+            kwargs...,abstol=abstols[j],
+            reltol=reltols[j],dt=setups[k][:dts][j],
+            timeseries_errors=timeseries_errors,
+            dense_errors = dense_errors)
+    end
+    has_analytic(prob.f) ? err_sol = sol : err_sol = appxtrue(sol,true_sol)
+    tmp_solutions[i,j,k] = err_sol
+  end
+end
+
+function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_dt=nothing;
                           numruns=20,numruns_error = 20,
                           print_names=false,names=nothing,appxsol_setup=nothing,
-                          error_estimate=:final,kwargs...)
+                          error_estimate=:final,parallel_type = :none,kwargs...)
 
   timeseries_errors = has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
@@ -237,54 +287,15 @@ function WorkPrecisionSet(prob,abstols,reltols,setups,test_dt=nothing;
   time_tmp = Vector{Float64}(numruns)
 
   # First calculate all of the errors
-  Threads.@threads for i in 1:numruns_error
-    if !has_analytic(prob.f)
-      t = prob.tspan[1]:test_dt:prob.tspan[2]
-      brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
-      brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
-      np = NoiseGrid(t,brownian_values,brownian_values2)
-      _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
-                         noise=np,
-                         noise_rate_prototype=prob.noise_rate_prototype);
-      true_sol = solve(_prob,appxsol_setup[:alg];kwargs...,appxsol_setup...)
+  if parallel_type == :threads
+    Threads.@threads for i in 1:numruns_error
+      @error_calculation
     end
-
-    # Get a cache
-    if !haskey(setups[1],:dts)
-      sol = solve(prob,setups[1][:alg];
-            kwargs...,
-            abstol=abstols[1],
-            reltol=reltols[1],
-            timeseries_errors=false,
-            dense_errors = false)
-    else
-      sol = solve(prob,setups[1][:alg];
-            kwargs...,abstol=abstols[1],
-            reltol=reltols[1],dt=setups[1][:dts][1],
-            timeseries_errors=false,
-            dense_errors = false)
-    end
-
-    for j in 1:M, k in 1:N
-      if !haskey(setups[k],:dts)
-        sol = solve(prob,setups[k][:alg],sol.u,sol.t;
-              kwargs...,
-              abstol=abstols[j],
-              reltol=reltols[j],
-              timeseries_errors=timeseries_errors,
-              dense_errors = dense_errors)
-      else
-        sol = solve(prob,setups[k][:alg],sol.u,sol.t;
-              kwargs...,abstol=abstols[j],
-              reltol=reltols[j],dt=setups[k][:dts][j],
-              timeseries_errors=timeseries_errors,
-              dense_errors = dense_errors)
-      end
-      has_analytic(prob.f) ? err_sol = sol : err_sol = appxtrue(sol,true_sol)
-      tmp_solutions[i,j,k] = err_sol
+  elseif parallel_type == :none
+    @progress for i in 1:numruns_error
+      @error_calculation
     end
   end
-  tmp_solutions
   _solutions_k = [[MonteCarloSolution(tmp_solutions[:,j,k],0.0,true) for j in 1:M] for k in 1:N]
   solutions = [[calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in sol_k] for sol_k in _solutions_k]
   if error_estimate ∈ WEAK_ERRORS
@@ -337,6 +348,7 @@ function WorkPrecisionSet(prob,abstols,reltols,setups,test_dt=nothing;
   wps = [WorkPrecision(prob,abstols,reltols,errors[i],times[:,i],names[i],N) for i in 1:N]
   WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names)
 end
+
 Base.length(wp::WorkPrecision) = wp.N
 Base.size(wp::WorkPrecision) = length(wp)
 Base.endof(wp::WorkPrecision) = length(wp)
