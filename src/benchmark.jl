@@ -29,7 +29,7 @@ end
 function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_estimate=:final,kwargs...)
   N = length(setups)
   errors = Vector{Float64}(N)
-  solutions = Vector{DESolution}(N)
+  solutions = Vector{Any}(N)
   effs = Vector{Float64}(N)
   times = Vector{Float64}(N)
   effratios = Matrix{Float64}(N,N)
@@ -280,7 +280,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   dense_errors = has_analytic(prob.f) && error_estimate ∈ DENSE_ERRORS
   N = length(setups); M = length(abstols)
   times = Array{Float64}(M,N)
-  tmp_solutions = Array{DESolution}(numruns_error,M,N)
+  tmp_solutions = Array{Any}(numruns_error,M,N)
   if names == nothing
     names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
   end

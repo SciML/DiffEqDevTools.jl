@@ -61,7 +61,7 @@ function analyticless_test_convergence(dts::AbstractArray,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   _solutions = []
-  tmp_solutions = Array{DESolution}(numMonte,length(dts))
+  tmp_solutions = Array{Any}(numMonte,length(dts))
   @progress for j in 1:numMonte
     t = prob.tspan[1]:test_dt:prob.tspan[2]
     brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
