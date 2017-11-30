@@ -377,7 +377,7 @@ function get_sample_errors(prob::AbstractRODEProblem,test_dt=nothing;
                           appxsol_setup=nothing,
                           numruns=20,std_estimation_runs = maximum(numruns),
                           error_estimate=:final,parallel_type = :none,kwargs...)
-  analytical_solution_ends = Vector{typeof(norm(prob.u0))}(std_estimation_runs)
+  analytical_solution_ends = Vector{typeof(norm(prob.u0))}(Int(std_estimation_runs))
   if parallel_type == :threads
     Threads.@threads for i in 1:std_estimation_runs
       @sample_errors
