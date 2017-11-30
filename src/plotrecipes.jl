@@ -34,7 +34,7 @@ end
 end
 
 @recipe function f(wp_set::WorkPrecisionSet;
-                   plot_sample_error = wp_set.sample_error != nothing)
+                   plot_sample_error = wp_set.error_estimate ∈ WEAK_ERRORS)
   seriestype --> :path
   linewidth --> 3
   yguide --> "Time (s)"

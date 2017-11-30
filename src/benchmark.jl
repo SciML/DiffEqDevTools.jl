@@ -134,6 +134,7 @@ type WorkPrecisionSet
   setups
   names
   sample_error
+  error_estimate
 end
 
 function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
@@ -199,6 +200,7 @@ end
 
 function WorkPrecisionSet(prob::AbstractODEProblem,abstols,reltols,setups;numruns=20,
                           print_names=false,names=nothing,appxsol=nothing,
+                          error_estimate=:final,
                           test_dt=nothing,kwargs...)
   N = length(setups)
   wps = Vector{WorkPrecision}(N)
@@ -210,14 +212,16 @@ function WorkPrecisionSet(prob::AbstractODEProblem,abstols,reltols,setups;numrun
     if haskey(setups[i],:dts)
       wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols,setups[i][:dts];
                                  numruns=numruns,appxsol=appxsol,
+                                 error_estimate=error_estimate,
                                  name=names[i],kwargs...,setups[i]...)
     else
       wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols;
                                  numruns=numruns,appxsol=appxsol,
+                                 error_estimate=error_estimate,
                                  name=names[i],kwargs...,setups[i]...)
     end
   end
-  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,nothing)
+  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,nothing,error_estimate)
 end
 
 @def error_calculation begin
@@ -349,7 +353,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   end
 
   wps = [WorkPrecision(prob,abstols,reltols,errors[i],times[:,i],names[i],N) for i in 1:N]
-  WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,sample_error)
+  WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,sample_error,error_estimate)
 end
 
 @def sample_errors begin
