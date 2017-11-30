@@ -314,7 +314,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
 
   # precompile
   for k in 1:N
-    if !haskey(setups[1],:dts)
+    if !haskey(setups[k],:dts)
       sol = solve(prob,setups[k][:alg];
             kwargs...,
             abstol=abstols[1],
@@ -370,7 +370,7 @@ end
     else
       W = sqrt(_dt)*randn(size(prob.u0))
     end
-    analytical_solution_ends[i] = prob.f(Val{:analytic},prob.tspan[2],prob.u0,W)
+    analytical_solution_ends[i] = norm(prob.f(Val{:analytic},prob.tspan[2],prob.u0,W))
   end
 end
 
