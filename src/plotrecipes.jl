@@ -50,13 +50,13 @@ end
   if plot_sample_error
     @series begin
       linestyle := :dash
-      label := "Sample Error"
+      label := "Sample Error: $(wp_set.numruns)"
       color := :red
       xs = [wp_set.sample_error,wp_set.sample_error]
       ys = [minimum(minimum(t) for t in times),maximum(maximum(t) for t in times)]
       xs,ys
     end
-    label -->  reshape(["Sample Error";wp_set.names],1,1+length(wp_set))
+    label -->  reshape(["Sample Error: $(wp_set.numruns)";wp_set.names],1,1+length(wp_set))
   else
     label -->  reshape(wp_set.names,1,length(wp_set))
   end
