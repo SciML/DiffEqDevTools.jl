@@ -47,6 +47,17 @@ end
     push!(errors,wp_set[i].errors)
     push!(times,wp_set[i].times)
   end
+  if wp_set.sample_error != nothing
+    @series begin
+      linestyle := :dash
+      label := "Sample Error"
+      color := :red
+      xs = [wp_set.sample_error,wp_set.sample_error]
+      ys = [minimum(minimum(t) for t in times),maximum(maximum(t) for t in times)]
+      @show xs,ys
+      xs,ys
+    end
+  end
   errors,times
 end
 

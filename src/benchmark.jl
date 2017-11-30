@@ -133,6 +133,7 @@ type WorkPrecisionSet
   prob
   setups
   names
+  sample_error
 end
 
 function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
@@ -216,7 +217,7 @@ function WorkPrecisionSet(prob::AbstractODEProblem,abstols,reltols,setups;numrun
                                  name=names[i],kwargs...,setups[i]...)
     end
   end
-  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names)
+  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,nothing)
 end
 
 @def error_calculation begin
@@ -251,14 +252,14 @@ end
 
   for j in 1:M, k in 1:N
     if !haskey(setups[k],:dts)
-      sol = solve(_prob,setups[k][:alg],sol.u,sol.t;
+      sol = solve(_prob,setups[k][:alg];
             kwargs...,
             abstol=abstols[j],
             reltol=reltols[j],
             timeseries_errors=timeseries_errors,
             dense_errors = dense_errors)
     else
-      sol = solve(_prob,setups[k][:alg],sol.u,sol.t;
+      sol = solve(_prob,setups[k][:alg];
             kwargs...,abstol=abstols[j],
             reltol=reltols[j],dt=setups[k][:dts][j],
             timeseries_errors=timeseries_errors,
@@ -296,6 +297,8 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
       @error_calculation
     end
   end
+  analytical_solution_ends = [tmp_solutions[i,1,1].u_analytic[end] for i in 1:numruns_error]
+  sample_error = 1.96std(analytical_solution_ends)/sqrt(numruns_error)
   _solutions_k = [[MonteCarloSolution(tmp_solutions[:,j,k],0.0,true) for j in 1:M] for k in 1:N]
   solutions = [[calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in sol_k] for sol_k in _solutions_k]
   if error_estimate ∈ WEAK_ERRORS
@@ -326,14 +329,14 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
     for j in 1:M
       for i in 1:numruns
         time_tmp[i] = @elapsed if !haskey(setups[k],:dts)
-          sol = solve(prob,setups[k][:alg],sol.u,sol.t;
+          sol = solve(prob,setups[k][:alg];
                 kwargs...,
                 abstol=abstols[j],
                 reltol=reltols[j],
                 timeseries_errors=false,
                 dense_errors = false)
         else
-          sol = solve(prob,setups[k][:alg],sol.u,sol.t;
+          sol = solve(prob,setups[k][:alg];
                 kwargs...,abstol=abstols[j],
                 reltol=reltols[j],dt=setups[k][:dts][j],
                 timeseries_errors=false,
@@ -346,7 +349,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   end
 
   wps = [WorkPrecision(prob,abstols,reltols,errors[i],times[:,i],names[i],N) for i in 1:N]
-  WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names)
+  WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,sample_error)
 end
 
 Base.length(wp::WorkPrecision) = wp.N
