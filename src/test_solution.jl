@@ -78,7 +78,7 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_
     timeseries_analytic = sol2(sol.t)
     errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol-timeseries_analytic))
     errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
-    if sol.dense
+    if dense_errors && sol.dense
       densetimes = collect(linspace(sol.t[1],sol.t[end],100))
       interp_u = sol(densetimes)
       interp_analytic = sol2(densetimes)
@@ -88,7 +88,7 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_
     end
   else
     timeseries_analytic = sol2.u
-    if sol.t == sol2.t
+    if timeseries_errors && sol.t == sol2.t
       errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol-timeseries_analytic))
       errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
     end
