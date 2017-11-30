@@ -312,25 +312,26 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
     errors = [[solutions[j][i].error_means[error_estimate] for i in 1:M] for j in 1:N]
   end
 
-  # Now time it
+  # precompile
   for k in 1:N
-    # Get a cache and precompile
     if !haskey(setups[1],:dts)
-      sol = solve(prob,setups[1][:alg];
+      sol = solve(prob,setups[k][:alg];
             kwargs...,
             abstol=abstols[1],
             reltol=reltols[1],
             timeseries_errors=timeseries_errors,
             dense_errors = dense_errors)
     else
-      sol = solve(prob,setups[1][:alg];
+      sol = solve(prob,setups[k][:alg];
             kwargs...,abstol=abstols[1],
-            reltol=reltols[1],dt=setups[1][:dts][1],
+            reltol=reltols[1],dt=setups[k][:dts][1],
             timeseries_errors=timeseries_errors,
             dense_errors = dense_errors)
     end
-    gc()
-
+  end
+  gc()
+  # Now time it
+  for k in 1:N
     for j in 1:M
       for i in 1:numruns
         time_tmp[i] = @elapsed if !haskey(setups[k],:dts)
@@ -377,7 +378,6 @@ function get_sample_errors(prob::AbstractRODEProblem,test_dt=nothing;
                           appxsol_setup=nothing,
                           numruns=20,std_estimation_runs = maximum(numruns),
                           error_estimate=:final,parallel_type = :none,kwargs...)
-  analytical_solution_ends = Vector{typeof(norm(prob.u0))}(Int(std_estimation_runs))
   if parallel_type == :threads
     Threads.@threads for i in 1:std_estimation_runs
       @sample_errors
