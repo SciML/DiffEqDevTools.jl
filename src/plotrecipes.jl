@@ -33,7 +33,8 @@ end
   wp.errors,wp.times
 end
 
-@recipe function f(wp_set::WorkPrecisionSet)
+@recipe function f(wp_set::WorkPrecisionSet;
+                   plot_sample_error = wp_set.sample_error != nothing)
   seriestype --> :path
   linewidth --> 3
   yguide --> "Time (s)"
@@ -46,7 +47,7 @@ end
     push!(errors,wp_set[i].errors)
     push!(times,wp_set[i].times)
   end
-  if wp_set.sample_error != nothing
+  if plot_sample_error
     @series begin
       linestyle := :dash
       label := "Sample Error"

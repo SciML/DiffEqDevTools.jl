@@ -352,6 +352,50 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,sample_error)
 end
 
+@def sample_errors begin
+  if !has_analytic(prob.f)
+    t = prob.tspan[1]:test_dt:prob.tspan[2]
+    brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    np = NoiseGrid(t,brownian_values,brownian_values2)
+    _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
+                       noise=np,
+                       noise_rate_prototype=prob.noise_rate_prototype);
+    true_sol = solve(_prob,appxsol_setup[:alg];kwargs...,appxsol_setup...,
+                     save_everystep=false)
+    analytical_solution_ends[i] = true_sol.u[end]
+  else
+    _dt = prob.tspan[2] - prob.tspan[1]
+    if typeof(prob.u0) <: Number
+      W = sqrt(_dt)*randn()
+    else
+      W = sqrt(_dt)*randn(size(prob.u0))
+    end
+    analytical_solution_ends[i] = prob.f(Val{:analytic},prob.tspan[2],prob.u0,W)
+  end
+end
+
+function get_sample_errors(prob::AbstractRODEProblem,test_dt=nothing;
+                          appxsol_setup=nothing,
+                          numruns=20,
+                          error_estimate=:final,parallel_type = :none,kwargs...)
+  analytical_solution_ends = Vector{typeof(prob.u0)}(maximum(numruns))
+  if parallel_type == :threads
+    Threads.@threads for i in 1:maximum(numruns)
+      @sample_errors
+    end
+  elseif parallel_type == :none
+    @progress for i in 1:maximum(numruns)
+      @sample_errors
+    end
+  end
+  if typeof(numruns) <: Number
+    return 1.96std(norm.(analytical_solution_ends))/sqrt(numruns)
+  else
+    return [1.96std(norm.(analytical_solution_ends))/sqrt(_numruns) for _numruns in numruns]
+  end
+end
+
 Base.length(wp::WorkPrecision) = wp.N
 Base.size(wp::WorkPrecision) = length(wp)
 Base.endof(wp::WorkPrecision) = length(wp)

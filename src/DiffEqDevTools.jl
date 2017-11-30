@@ -31,6 +31,8 @@ export Shootout, ShootoutSet, WorkPrecision, WorkPrecisionSet
 
 export test_convergence, analyticless_test_convergence, appxtrue!, appxtrue
 
+export get_sample_errors
+
 #Plot Functions
 export stability_region
 
