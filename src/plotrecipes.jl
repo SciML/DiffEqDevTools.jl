@@ -35,7 +35,6 @@ end
 
 @recipe function f(wp_set::WorkPrecisionSet)
   seriestype --> :path
-  label -->  reshape(wp_set.names,1,length(wp_set))
   linewidth --> 3
   yguide --> "Time (s)"
   xguide --> "Error"
@@ -54,10 +53,13 @@ end
       color := :red
       xs = [wp_set.sample_error,wp_set.sample_error]
       ys = [minimum(minimum(t) for t in times),maximum(maximum(t) for t in times)]
-      @show xs,ys
       xs,ys
     end
+    label -->  reshape(["Sample Error";wp_set.names],1,1+length(wp_set))
+  else
+    label -->  reshape(wp_set.names,1,length(wp_set))
   end
+
   errors,times
 end
 
