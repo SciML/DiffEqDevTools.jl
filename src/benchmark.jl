@@ -170,13 +170,13 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
     end
 
     if appxsol != nothing
-      errsol = appxtrue(prob,sol,appxsol)
+      errsol = appxtrue(sol,appxsol)
       errors[i] = mean(errsol.errors[error_estimate])
     else
       errors[i] = mean(sol.errors[error_estimate])
     end
 
-    t= 0.0
+    t = 0.0
     for j in 1:numruns
       t_tmp = @elapsed if dts == nothing
         solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,

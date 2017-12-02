@@ -58,3 +58,41 @@ wp_set[end]
 #println(wp_set)
 #show(wp_set)
 @test (minimum(diff(wp_set[2].errors).==0)) # The errors for a fixed timestep method should be constant
+
+
+# 2D Linear ODE
+function f(t,u,du)
+  for i in 1:length(u)
+    du[i] = 1.01*u[i]
+  end
+end
+function (p::typeof(f))(::Type{Val{:analytic}},t,u₀)
+  u₀*exp(1.01*t)
+end
+tspan = (0.0,10.0)
+prob = ODEProblem(f,rand(100,100),tspan)
+
+abstols = 1./10.^(3:7)
+reltols = 1./10.^(0:4)
+
+setups = [Dict(:alg=>DP5())
+          Dict(:alg=>Tsit5())]
+wp = WorkPrecisionSet(prob,abstols,reltols,setups;save_everystep=false)
+
+function lotka(t,u,du)
+  du[1] = 1.5 * u[1] - u[1]*u[2]
+  du[2] = -3 * u[2] + u[1]*u[2]
+end
+
+prob = ODEProblem(lotka,[1.0;1.0],(0.0,10.0))
+
+abstols = 1./10.^(6:9)
+reltols = 1./10.^(3:6)
+sol = solve(prob,Vern7(),abstol=1/10^14,reltol=1/10^14)
+test_sol = TestSolution(sol)
+
+setups = [Dict(:alg=>DP5())
+          Dict(:alg=>Tsit5())
+          Dict(:alg=>Vern6())
+          ]
+wp = WorkPrecisionSet(prob,abstols,reltols,setups;appxsol=test_sol,save_everystep=false,numruns=20,maxiters=10000)
