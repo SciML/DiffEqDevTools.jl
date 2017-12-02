@@ -61,16 +61,16 @@ wp_set[end]
 
 
 # 2D Linear ODE
-function f(t,u,du)
+function f_2dlin(t,u,du)
   for i in 1:length(u)
     du[i] = 1.01*u[i]
   end
 end
-function (p::typeof(f))(::Type{Val{:analytic}},t,u₀)
+function (p::typeof(f_2dlin))(::Type{Val{:analytic}},t,u₀)
   u₀*exp(1.01*t)
 end
 tspan = (0.0,10.0)
-prob = ODEProblem(f,rand(100,100),tspan)
+prob = ODEProblem(f_2dlin,rand(100,100),tspan)
 
 abstols = 1./10.^(3:7)
 reltols = 1./10.^(0:4)
