@@ -3,17 +3,17 @@ probArr = Vector{ODEProblem}(2)
 bigprobArr = Vector{ODEProblem}(2)
 
 const linear_bigα = parse(BigFloat,"1.01")
-f = (t,u) -> (linear_bigα*u)
-(p::typeof(f))(::Type{Val{:analytic}},t,u0) = u0*exp(linear_bigα*t)
+f = (u,p,t) -> (linear_bigα*u)
+(::typeof(f))(::Type{Val{:analytic}},u0,p,t) = u0*exp(linear_bigα*t)
 """Linear ODE on Float64"""
 prob_ode_bigfloatlinear = ODEProblem(f,parse(BigFloat,"0.5"),(0.0,1.0))
 
-f = (t,u,du) -> begin
+f = (du,u,p,t) -> begin
   for i in 1:length(u)
     du[i] = linear_bigα*u[i]
   end
 end
-(p::typeof(f))(::Type{Val{:analytic}},t,u0) = u0*exp.(linear_bigα*t)
+(::typeof(f))(::Type{Val{:analytic}},u0,p,t) = u0*exp.(linear_bigα*t)
 """2D Linear ODE, bigfloats"""
 prob_ode_bigfloat2Dlinear = ODEProblem(f,map(BigFloat,rand(4,2)).*ones(4,2)/2, (0.0,1.0))
 

@@ -20,7 +20,7 @@ wp = WorkPrecisionSet(prob,abstols,reltols,setups,test_dt;
 se = get_sample_errors(prob,numruns=1000)
 se = get_sample_errors(prob,numruns=[5;10;25;50])
 
-prob2 = SDEProblem((t,u,du)->prob.f(t,u,du),prob.g,prob.u0,(0.0,1.0))
+prob2 = SDEProblem((du,u,p,t)->prob.f(du,u,p,t),prob.g,prob.u0,(0.0,1.0))
 test_dt = 2/10^5
 appxsol_setup = Dict(:alg=>SRIW1(),:abstol=>1e-7,:reltol=>1e-7)
 wp = WorkPrecisionSet(prob2,abstols,reltols,setups,test_dt;

@@ -370,7 +370,7 @@ end
     else
       W = sqrt(_dt)*randn(size(prob.u0))
     end
-    analytical_solution_ends[i] = norm(prob.f(Val{:analytic},prob.tspan[2],prob.u0,W))
+    analytical_solution_ends[i] = norm(prob.f(Val{:analytic},prob.u0,prob.p,prob.tspan[2],W))
   end
 end
 

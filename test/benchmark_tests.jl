@@ -61,12 +61,12 @@ wp_set[end]
 
 
 # 2D Linear ODE
-function f_2dlin(t,u,du)
+function f_2dlin(du,u,p,t)
   for i in 1:length(u)
     du[i] = 1.01*u[i]
   end
 end
-function (p::typeof(f_2dlin))(::Type{Val{:analytic}},t,u₀)
+function (::typeof(f_2dlin))(::Type{Val{:analytic}},u₀,p,t)
   u₀*exp(1.01*t)
 end
 tspan = (0.0,10.0)
@@ -79,7 +79,7 @@ setups = [Dict(:alg=>DP5())
           Dict(:alg=>Tsit5())]
 wp = WorkPrecisionSet(prob,abstols,reltols,setups;save_everystep=false)
 
-function lotka(t,u,du)
+function lotka(du,u,p,t)
   du[1] = 1.5 * u[1] - u[1]*u[2]
   du[2] = -3 * u[2] + u[1]*u[2]
 end

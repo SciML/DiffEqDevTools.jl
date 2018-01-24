@@ -1,9 +1,9 @@
 using OrdinaryDiffEq, ParameterizedFunctions, Base.Test
 
-f = @ode_def_nohes LotkaVolterra begin
-  dx = a*x - b*x*y
-  dy = -c*y + d*x*y
-end a=1.5 b=1 c=3 d=1
+f = @ode_def LotkaVolterra begin
+  dx = 1.5x - x*y
+  dy = -3y + x*y
+end
 
 prob = ODEProblem(f,big.([1.0;1.0]),(big(0.0),big(10.0)))
 
@@ -17,10 +17,10 @@ sim2 = analyticless_test_convergence(dts,prob,Vern9(),test_setup)
 @test sim1.𝒪est[:final]-5 < 0.2
 @test sim2.𝒪est[:final]-9 < 0.2
 
-function f2(t,u,du)
+function f2(du,u,p,t)
   du .= 1.01u
 end
-function g2(t,u,du)
+function g2(du,u,p,t)
   du .= 1.01u
 end
 prob = SDEProblem(f2,g2,[1.0;1.0],(0.0,10.0))
