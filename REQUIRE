@@ -2,7 +2,7 @@ julia 0.6
 RecipesBase 0.1.0
 DiffEqBase 3.0.0
 RecursiveArrayTools 0.4.0
-DiffEqPDEBase
+DiffEqPDEBase 0.4.0
 DiffEqMonteCarlo
 DiffEqNoiseProcess
 Juno

@@ -57,12 +57,6 @@ function appxtrue(sol::AbstractODESolution,sol2::TestSolution)
   build_solution(sol,timeseries_analytic,errors)
 end
 
-function appxtrue(sol::AbstractFEMSolution,sol2::AbstractFEMSolution)
-  u_analytic = sol2[end]
-  errors = Dict(:l∞=>maximum(abs.(sol[end]-u_analytic)),:l2=>norm(sol[end]-u_analytic,2))
-  FEMSolution(sol,u_analytic,errors)
-end
-
 """
 `appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution)`
 

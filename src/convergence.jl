@@ -107,19 +107,6 @@ function analyticless_test_convergence(dts::AbstractArray,prob::AbstractODEProbl
   ConvergenceSimulation(solutions,dts,auxdata=auxdata)
 end
 
-#=
-function test_convergence(dts::AbstractArray,dxs::AbstractArray,prob::AbstractHeatProblem,convergence_axis;T=1,alg=:Euler)
-  if length(dts)!=length(dxs) error("Lengths of dts!=dxs. Invalid convergence simulation") end
-  solutions = [solve(parabolic_squaremesh([0 1 0 1],dxs[i],dts[i],T,:dirichlet),prob,alg=alg) for i in eachindex(dts)]
-  auxdata = Dict(
-            :dts => [sol.fem_mesh.dt for sol in solutions],
-            :dxs => [sol.fem_mesh.dx for sol in solutions],
-            :Δμs => [sol.fem_mesh.μ  for sol in solutions],
-            :Δνs => [sol.fem_mesh.ν  for sol in solutions])
-  return(ConvergenceSimulation(solutions,convergence_axis,auxdata=auxdata))
-end
-=#
-
 function test_convergence(probs,convergence_axis,alg;kwargs...)
   ConvergenceSimulation([solve(prob,alg;kwargs...) for prob in probs],convergence_axis)
 end
