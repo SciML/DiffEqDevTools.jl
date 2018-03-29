@@ -231,7 +231,7 @@ end
     brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
     brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
     np = NoiseGrid(t,brownian_values,brownian_values2)
-    _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
+    _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,prob.p,
                        noise=np,
                        noise_rate_prototype=prob.noise_rate_prototype);
     true_sol = solve(_prob,appxsol_setup[:alg];kwargs...,appxsol_setup...)
