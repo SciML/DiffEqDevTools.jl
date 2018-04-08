@@ -1,4 +1,4 @@
-using OrdinaryDiffEq, DiffEqDevTools, DiffEqProblemLibrary, DiffEqBase, Base.Test
+using OrdinaryDiffEq, DelayDiffEq, DiffEqDevTools, DiffEqProblemLibrary, DiffEqBase, Base.Test
 
 ## Setup Tests
 
@@ -96,3 +96,15 @@ setups = [Dict(:alg=>DP5())
           Dict(:alg=>Vern6())
           ]
 wp = WorkPrecisionSet(prob,abstols,reltols,setups;appxsol=test_sol,save_everystep=false,numruns=20,maxiters=10000)
+
+# DDE problem
+prob = prob_dde_1delay
+
+abstols = 1./10.^(7:10)
+reltols = 1./10.^(4:7)
+sol = solve(prob, MethodOfSteps(Vern9(), max_fixedpoint_iters=1000); reltol=1e-14, abstol=1e-14)
+test_sol = TestSolution(sol)
+
+setups = [Dict(:alg => MethodOfSteps(BS3()))
+          Dict(:alg => MethodOfSteps(Tsit5()))]
+wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol)
