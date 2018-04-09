@@ -199,7 +199,9 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
   return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
 end
 
-function WorkPrecisionSet(prob::AbstractODEProblem,abstols,reltols,setups;numruns=20,
+function WorkPrecisionSet(prob::Union{AbstractODEProblem,AbstractDDEProblem,
+                                      AbstractDAEProblem},
+                          abstols,reltols,setups;numruns=20,
                           print_names=false,names=nothing,appxsol=nothing,
                           error_estimate=:final,
                           test_dt=nothing,kwargs...)
