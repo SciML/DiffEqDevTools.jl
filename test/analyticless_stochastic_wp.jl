@@ -24,7 +24,7 @@ println("Now weak error")
 
 prob2 = SDEProblem((du,u,p,t)->prob.f(du,u,p,t),prob.g,prob.u0,(0.0,1.0))
 test_dt = 2/10^5
-appxsol_setup = Dict(:alg=>SRIW1(),:abstol=>1e-7,:reltol=>1e-7)
+appxsol_setup = Dict(:alg=>SRIW1(),:abstol=>1e-6,:reltol=>1e-6)
 wp = WorkPrecisionSet(prob2,abstols,reltols,setups,test_dt;
                                      appxsol_setup = appxsol_setup,
                                      numruns=5,names=names,error_estimate=:weak_final)
