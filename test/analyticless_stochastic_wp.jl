@@ -22,7 +22,7 @@ se = get_sample_errors(prob,numruns=[5;10;25;50])
 
 println("Now weak error")
 
-prob2 = SDEProblem((du,u,p,t)->prob.f(du,u,p,t),prob.g,prob.u0,(0.0,1.0))
+prob2 = SDEProblem((du,u,p,t)->prob.f(du,u,p,t),prob.g,prob.u0,(0.0,0.1))
 test_dt = 1/10^5
 appxsol_setup = Dict(:alg=>SRIW1(),:abstol=>1e-5,:reltol=>1e-5)
 wp = WorkPrecisionSet(prob2,abstols,reltols,setups,test_dt;
