@@ -29,6 +29,8 @@ wp = WorkPrecisionSet(prob2,abstols,reltols,setups,test_dt;
                                      appxsol_setup = appxsol_setup,
                                      numruns=5,names=names,error_estimate=:weak_final)
 
+println("Get sample errors")
+
 se2 = get_sample_errors(prob2,test_dt,appxsol_setup = appxsol_setup,
                        numruns=5)
 se2 = get_sample_errors(prob2,test_dt,appxsol_setup = appxsol_setup,
