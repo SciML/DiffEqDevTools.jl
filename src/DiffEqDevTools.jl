@@ -7,6 +7,12 @@ using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase,
 
 import Base: length
 
+import DiffEqBase: AbstractODEProblem, AbstractDDEProblem,
+       AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
+       AbstractDAEProblem, @def, ConvergenceSetup, DEAlgorithm,
+       ODERKTableau, AbstractTimeseriesSolution, ExplicitRKTableau
+
+
 const TIMESERIES_ERRORS = Set([:l2,:l∞,:L2,:L∞])
 const DENSE_ERRORS = Set([:L2,:L∞])
 const WEAK_TIMESERIES_ERRORS = Set([:weak_l2,:weak_l∞])
