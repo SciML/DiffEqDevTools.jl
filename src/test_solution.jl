@@ -2,7 +2,7 @@
 TestSolution
 
 """
-type TestSolution{T,N,hasinterp,tType,uType,iType} <: AbstractTimeseriesSolution{T,N}
+mutable struct TestSolution{T,N,hasinterp,tType,uType,iType} <: AbstractTimeseriesSolution{T,N}
   t::tType
   u::uType
   interp::iType
@@ -13,15 +13,15 @@ end
 function TestSolution(t,u)
   T = eltype(eltype(u))
   N = length((size(u[1])..., length(u)))
-  TestSolution{T,N,false,typeof(t),typeof(u),Void}(t,u,nothing,false,:Success)
+  TestSolution{T,N,false,typeof(t),typeof(u),Nothing}(t,u,nothing,false,:Success)
 end
 function TestSolution(t,u,interp)
   T = eltype(eltype(u))
   N = length((size(u[1])..., length(u)))
   TestSolution{T,N,true,typeof(t),typeof(u),typeof(interp)}(t,u,interp,true,:Success)
 end
-TestSolution(interp::DESolution) = TestSolution{Void,0,true,Void,Void,typeof(interp)}(nothing,nothing,interp,true,:Success)
-hasinterp{T,N,hi,tType,uType,iType}(::TestSolution{T,N,hi,tType,uType,iType}) = hi
+TestSolution(interp::DESolution) = TestSolution{Nothing,0,true,Nothing,Nothing,typeof(interp)}(nothing,nothing,interp,true,:Success)
+hasinterp(::TestSolution{T,N,hi,tType,uType,iType}) where {T,N,hi,tType,uType,iType} = hi
 """
 `appxtrue(sol::AbstractODESolution,sol2::TestSolution)`
 
@@ -41,7 +41,7 @@ function appxtrue(sol::AbstractODESolution,sol2::TestSolution)
     timeseries_analytic = _sol(sol.t)
     errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol-timeseries_analytic))
     errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
-    densetimes = collect(linspace(sol.t[1],sol.t[end],100))
+    densetimes = collect(range(sol.t[1],stop=sol.t[end],length=100))
     interp_u = sol(densetimes)
     interp_analytic = _sol(densetimes)
     interp_errors = Dict(:L∞=>maximum(vecvecapply((x)->abs.(x),interp_u-interp_analytic)),
@@ -54,7 +54,7 @@ function appxtrue(sol::AbstractODESolution,sol2::TestSolution)
       errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
     end
   end
-  build_solution(sol,timeseries_analytic,errors)
+  DiffEqBase.build_solution(sol,timeseries_analytic,errors)
 end
 
 """
@@ -71,7 +71,7 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_
     errors[:l∞] = maximum(vecvecapply((x)->abs.(x),sol-timeseries_analytic))
     errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
     if dense_errors
-      densetimes = collect(linspace(sol.t[1],sol.t[end],100))
+      densetimes = collect(range(sol.t[1],stop=sol.t[end],length=100))
       interp_u = sol(densetimes)
       interp_analytic = sol2(densetimes)
       interp_errors = Dict(:L∞=>maximum(vecvecapply((x)->abs.(x),interp_u-interp_analytic)),
@@ -85,7 +85,7 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_
       errors[:l2] = sqrt(recursive_mean(vecvecapply((x)->float(x).^2,sol-timeseries_analytic)))
     end
   end
-  build_solution(sol,timeseries_analytic,errors)
+  DiffEqBase.build_solution(sol,timeseries_analytic,errors)
 end
 
 function appxtrue(sim::MonteCarloSolution,appx_setup;kwargs...)

@@ -1,18 +1,20 @@
-using OrdinaryDiffEq, DelayDiffEq, DiffEqDevTools, DiffEqProblemLibrary, DiffEqBase, Base.Test
+using OrdinaryDiffEq, DelayDiffEq, DiffEqDevTools, DiffEqBase, Test
+using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
+import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear
 
 ## Setup Tests
 
 prob = prob_ode_linear
 
-probs = Vector{ODEProblem}(2)
+probs = Vector{ODEProblem}(undef, 2)
 probs[1] = prob
 probs[2] = prob_ode_2Dlinear
 
 tspan = [0,1]
-tspans = Vector{Vector{Int64}}(2)
+tspans = Vector{Vector{Int64}}(undef, 2)
 tspans[1] = tspan; tspans[2] = tspan
-abstols = 1./10.^(3:10)
-reltols = 1./10.^(3:10)
+abstols = 1. /10 .^(3:10)
+reltols = 1 ./10 .^(3:10)
 
 
 setups = [Dict(:alg=>RK4());Dict(:alg=>Euler());Dict(:alg=>BS3());
@@ -72,8 +74,8 @@ end
 tspan = (0.0,10.0)
 prob = ODEProblem(f_2dlin,rand(100,100),tspan)
 
-abstols = 1./10.^(3:7)
-reltols = 1./10.^(0:4)
+abstols = 1 ./10 .^(3:7)
+reltols = 1 ./10 .^(0:4)
 
 setups = [Dict(:alg=>DP5())
           Dict(:alg=>Tsit5())]
@@ -86,8 +88,8 @@ end
 
 prob = ODEProblem(lotka,[1.0;1.0],(0.0,10.0))
 
-abstols = 1./10.^(6:9)
-reltols = 1./10.^(3:6)
+abstols = 1 ./10 .^(6:9)
+reltols = 1 ./10 .^(3:6)
 sol = solve(prob,Vern7(),abstol=1/10^14,reltol=1/10^14)
 test_sol = TestSolution(sol)
 
@@ -100,8 +102,8 @@ wp = WorkPrecisionSet(prob,abstols,reltols,setups;appxsol=test_sol,save_everyste
 # DDE problem
 prob = prob_dde_1delay
 
-abstols = 1./10.^(7:10)
-reltols = 1./10.^(4:7)
+abstols = 1 ./10 .^(7:10)
+reltols = 1 ./10 .^(4:7)
 sol = solve(prob, MethodOfSteps(Vern9(), max_fixedpoint_iters=1000); reltol=1e-8, abstol=1e-8)
 test_sol = TestSolution(sol)
 

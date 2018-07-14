@@ -1,4 +1,4 @@
-type ConvergenceSimulation{SolType}
+mutable struct ConvergenceSimulation{SolType}
   solutions::Array{SolType}
   errors
   N
