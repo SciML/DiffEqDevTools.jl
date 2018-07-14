@@ -5,6 +5,8 @@ module DiffEqDevTools
 using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase,
       DiffEqMonteCarlo, DiffEqNoiseProcess, Juno
 
+using Statistics
+
 import Base: length
 
 import DiffEqBase: AbstractODEProblem, AbstractDDEProblem,
