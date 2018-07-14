@@ -23,7 +23,8 @@ function ConvergenceSimulation(solutions,convergence_axis;
       errors[k] = additional_errors[k]
     end
   end
-  𝒪est = Dict(map(calc𝒪estimates,errors))
+  𝒪est = Dict((calc𝒪estimates(p) for p = pairs(errors)))
+  #𝒪est = Dict(map(calc𝒪estimates,errors))
   𝒪esttmp = Dict() #Makes Dict of Any to be more compatible
   for (k,v) in 𝒪est
     if length(v)==1 push!(𝒪esttmp,Pair(k,v[1]))
@@ -119,11 +120,11 @@ function calc𝒪estimates(error::Pair)
   key = error.first
   error =error.second
   if ndims(error)>1 error=mean(error,1) end
-  S = Vector{eltype(error)}(length(error)-1)
+  S = Vector{eltype(error)}(undef, length(error)-1)
   for i=1:length(error)-1
     S[i] = log2(error[i+1]/error[i])
   end
-  return(Pair(key,abs.(mean(S,1))))
+  return(Pair(key,abs.(mean(S,dims=1))))
 end
 
 """
