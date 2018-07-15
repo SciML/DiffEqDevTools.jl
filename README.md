@@ -6,9 +6,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/JuliaDiffEq/DiffEqDevTools.jl/badge.svg)](https://coveralls.io/github/JuliaDiffEq/DiffEqDevTools.jl)
 [![codecov.io](http://codecov.io/github/ChrisRackauckas/DevToolsDiffEq.jl/coverage.svg?branch=master)](http://codecov.io/github/ChrisRackauckas/DevToolsDiffEq.jl?branch=master)
 
-[![DiffEqDevTools](http://pkg.julialang.org/badges/DiffEqDevTools_0.5.svg)](http://pkg.julialang.org/?pkg=DiffEqDevTools)
-[![DiffEqDevTools](http://pkg.julialang.org/badges/DiffEqDevTools_0.6.svg)](http://pkg.julialang.org/?pkg=DiffEqDevTools)
-
 DiffEqDevTools.jl is a component package in the DifferentialEquations ecosystem. It holds the
 convergence testing, benchmarking, and error approximation functionality which is
 used by the other component packages in order to test for correctness. Users interested in using this
