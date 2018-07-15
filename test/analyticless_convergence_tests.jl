@@ -1,4 +1,4 @@
-using OrdinaryDiffEq, ParameterizedFunctions, Base.Test
+using OrdinaryDiffEq, ParameterizedFunctions, Test, Random
 
 f = @ode_def LotkaVolterra begin
   dx = 1.5x - x*y

@@ -1,4 +1,4 @@
-using StochasticDiffEq, DiffEqDevTools, DiffEqProblemLibrary, Base.Test
+using StochasticDiffEq, DiffEqDevTools, DiffEqProblemLibrary, Test
 
 prob = prob_sde_additivesystem
 prob = SDEProblem(prob.f,prob.g,prob.u0,(0.0,1.0))

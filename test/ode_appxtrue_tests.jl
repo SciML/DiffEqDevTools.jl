@@ -1,8 +1,10 @@
-using OrdinaryDiffEq, DiffEqBase, DiffEqProblemLibrary, DiffEqDevTools, Base.Test
+using OrdinaryDiffEq, DiffEqBase, DiffEqDevTools, Test
+using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
+import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_linear
 
 f = (u,p,t) -> u
-prob = ODEProblem(f,1/2,(0.0,1.0))
-(::typeof(f))(::Type{Val{:analytic}},u0,p,t) = u0*exp(t)
+fun = ODEFunction(f; analytic=(u0,p,t)->u0*exp(t))
+prob = ODEProblem(fun,1/2,(0.0,1.0))
 
 sol =solve(prob,Euler();dt=1//2^(4),dense_errors=true)
 sol2 =solve(prob,Vern9();dt=1//2^(10),abstol=1e-14,reltol=1e-14)

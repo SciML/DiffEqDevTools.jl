@@ -5,6 +5,8 @@ module DiffEqDevTools
 using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase,
       DiffEqMonteCarlo, DiffEqNoiseProcess, Juno
 
+using LinearAlgebra
+
 using Statistics
 
 import Base: length
@@ -12,7 +14,8 @@ import Base: length
 import DiffEqBase: AbstractODEProblem, AbstractDDEProblem,
        AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
        AbstractDAEProblem, @def, ConvergenceSetup, DEAlgorithm,
-       ODERKTableau, AbstractTimeseriesSolution, ExplicitRKTableau
+       ODERKTableau, AbstractTimeseriesSolution, ExplicitRKTableau,
+       ImplicitRKTableau
 
 
 const TIMESERIES_ERRORS = Set([:l2,:l∞,:L2,:L∞])

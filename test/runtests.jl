@@ -1,5 +1,5 @@
 using DiffEqDevTools
-using Base.Test
+using Test
 
 # write your own tests here
 @time @testset "Benchmark Tests" begin include("benchmark_tests.jl") end

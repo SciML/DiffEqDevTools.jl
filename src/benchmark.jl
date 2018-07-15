@@ -1,6 +1,6 @@
 ## Shootouts
 
-type Shootout
+mutable struct Shootout
   setups::Vector{Dict{Symbol,Any}}
   times#::Vector{Float64}
   errors#::Vector{uType}
@@ -13,7 +13,7 @@ type Shootout
   winner::String
 end
 
-type ShootoutSet
+mutable struct ShootoutSet
   shootouts::Vector{Shootout}
   probs#::Vector{DEProblem}
   probaux#::Vector{Dict{Symbol,Any}}
@@ -115,7 +115,7 @@ Base.show(io::IO, set::ShootoutSet) = print(io,"ShootoutSet of $(set.N) shootout
 
 ## WorkPrecisions
 
-type WorkPrecision
+mutable struct WorkPrecision
   prob
   abstols
   reltols
@@ -125,7 +125,7 @@ type WorkPrecision
   N::Int
 end
 
-type WorkPrecisionSet
+mutable struct WorkPrecisionSet
   wps::Vector{WorkPrecision}
   N::Int
   abstols
