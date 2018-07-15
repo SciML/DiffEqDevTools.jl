@@ -22,7 +22,7 @@ mutable struct ShootoutSet
 end
 
 function ode_shootout(args...;kwargs...)
-  warn("ode_shootout is deprecated. Use ShootOut instead")
+  @warn("ode_shootout is deprecated. Use ShootOut instead")
   ShootOut(args...;kwargs...)
 end
 
@@ -63,12 +63,12 @@ function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_est
   for j in 1:N, i in 1:N
     effratios[i,j] = effs[i]/effs[j]
   end
-  bestidx = find((y)->y==maximum(effs),effs)[1]; winner = names[bestidx]
+  bestidx = findall((y)->y==maximum(effs),effs)[1]; winner = names[bestidx]
   return Shootout(setups,times,errors,effs,effratios,solutions,names,N,bestidx,winner)
 end
 
 function ode_shootoutset(args...;kwargs...)
-  warn("ode_shootoutset is deprecated. Use ShootoutSet instead")
+  @warn("ode_shootoutset is deprecated. Use ShootoutSet instead")
   ShootoutSet(args...;kwargs...)
 end
 
