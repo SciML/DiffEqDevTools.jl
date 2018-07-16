@@ -45,7 +45,7 @@ function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,Abs
                       timeseries_steps=timeseries_steps,adaptive=adaptive,
                       timeseries_errors=timeseries_errors,num_monte=numMonte,
                       kwargs...) for i in 1:N]
-  solutions = [calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
+  solutions = [DiffEqBase.calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
   auxdata = Dict("dts" =>  dts)
   # Now Calculate Weak Errors
   additional_errors = Dict()
@@ -79,7 +79,7 @@ function analyticless_test_convergence(dts::AbstractArray,
     end
   end
   _solutions = [MonteCarloSolution(tmp_solutions[:,i],0.0,true) for i in 1:length(dts)]
-  solutions = [calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
+  solutions = [DiffEqBase.calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
   auxdata = Dict("dts" =>  dts)
   # Now Calculate Weak Errors
   additional_errors = Dict()
