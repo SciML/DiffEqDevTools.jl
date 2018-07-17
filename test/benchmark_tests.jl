@@ -2,6 +2,9 @@ using OrdinaryDiffEq, DelayDiffEq, DiffEqDevTools, DiffEqBase, Test
 using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
 import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear
 
+using DiffEqProblemLibrary.DDEProblemLibrary: importddeproblems; importddeproblems()
+import DiffEqProblemLibrary.DDEProblemLibrary: prob_dde_1delay
+
 ## Setup Tests
 
 prob = prob_ode_linear

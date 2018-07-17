@@ -3,3 +3,4 @@ OrdinaryDiffEq 1.0.0
 DelayDiffEq
 StochasticDiffEq 0.0.5
 FiniteElementDiffEq 0.0.5
+ParameterizedFunctions

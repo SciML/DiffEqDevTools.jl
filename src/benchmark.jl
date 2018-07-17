@@ -28,11 +28,11 @@ end
 
 function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_estimate=:final,kwargs...)
   N = length(setups)
-  errors = Vector{Float64}(N)
-  solutions = Vector{Any}(N)
-  effs = Vector{Float64}(N)
-  times = Vector{Float64}(N)
-  effratios = Matrix{Float64}(N,N)
+  errors = Vector{Float64}(undef,N)
+  solutions = Vector{Any}(undef,N)
+  effs = Vector{Float64}(undef,N)
+  times = Vector{Float64}(undef,N)
+  effratios = Matrix{Float64}(undef,N,N)
   timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
   dense_errors = error_estimate ∈ DENSE_ERRORS
   if names == nothing
@@ -43,7 +43,7 @@ function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_est
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
     sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
-    gc()
+    GC.gc()
     t = @elapsed for j in 1:numruns
       sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;
                   kwargs...,setups[i]...,timeseries_errors=false,dense_errors=false)
@@ -75,13 +75,13 @@ end
 function ShootoutSet(probs,setups;probaux=nothing,numruns=20,
                      names=nothing,print_names=false,kwargs...)
   N = length(probs)
-  shootouts = Vector{Shootout}(N)
-  winners = Vector{String}(N)
+  shootouts = Vector{Shootout}(undef,N)
+  winners = Vector{String}(undef,N)
   if names == nothing
     names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
   end
   if probaux == nothing
-    probaux = Vector{Dict{Symbol,Any}}(N)
+    probaux = Vector{Dict{Symbol,Any}}(undef,N)
     for i in 1:N
       probaux[i] = Dict{Symbol,Any}()
     end
@@ -99,6 +99,8 @@ Base.size(shoot::Shootout) = length(shoot)
 Base.endof(shoot::Shootout) = length(shoot)
 Base.getindex(shoot::Shootout,i::Int) = shoot.effs[i]
 Base.getindex(shoot::Shootout,::Colon) = shoot.effs
+Base.firstindex(shoot::Shootout) = 1
+Base.lastindex(shoot::Shootout) = lastindex(shoot.effs)
 
 function Base.show(io::IO, shoot::Shootout)
   println(io,"Winner: $(shoot.winner)")
@@ -111,7 +113,8 @@ Base.endof(set::ShootoutSet) = length(set)
 Base.getindex(set::ShootoutSet,i::Int) = set.shootouts[i]
 Base.getindex(set::ShootoutSet,::Colon) = set.shootouts
 Base.show(io::IO, set::ShootoutSet) = print(io,"ShootoutSet of $(set.N) shootouts ")
-
+Base.firstindex(shoot::ShootoutSet) = 1
+Base.lastindex(shoot::ShootoutSet) = lastindex(shoot.shootouts)
 
 ## WorkPrecisions
 
@@ -142,8 +145,8 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
                        name=nothing,numruns=20,
                        appxsol=nothing,error_estimate=:final,kwargs...)
   N = length(abstols)
-  errors = Vector{Float64}(N)
-  times = Vector{Float64}(N)
+  errors = Vector{Float64}(undef,N)
+  times = Vector{Float64}(undef,N)
   if name == nothing
     name = "WP-Alg"
   end
@@ -158,7 +161,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      gc()
+      GC.gc()
     else
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
@@ -166,7 +169,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      gc()
+      GC.gc()
     end
 
     if appxsol != nothing
@@ -192,7 +195,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
                                   dense_errors = false)
       end
       t += t_tmp
-      gc()
+      GC.gc()
     end
     times[i] = t/numruns
   end
@@ -206,7 +209,7 @@ function WorkPrecisionSet(prob::Union{AbstractODEProblem,AbstractDDEProblem,
                           error_estimate=:final,
                           test_dt=nothing,kwargs...)
   N = length(setups)
-  wps = Vector{WorkPrecision}(N)
+  wps = Vector{WorkPrecision}(undef,N)
   if names == nothing
     names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
   end
@@ -292,7 +295,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   if names == nothing
     names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
   end
-  time_tmp = Vector{Float64}(numruns)
+  time_tmp = Vector{Float64}(undef,numruns)
 
   # First calculate all of the errors
   if parallel_type == :threads
@@ -331,7 +334,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
             dense_errors = dense_errors)
     end
   end
-  gc()
+  GC.gc()
   # Now time it
   for k in 1:N
     for j in 1:M
@@ -352,7 +355,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
         end
       end
       times[j,k] = mean(time_tmp)
-      gc()
+      GC.gc()
     end
   end
 
@@ -381,7 +384,7 @@ function get_sample_errors(prob::AbstractRODEProblem,test_dt=nothing;
                           numruns=20,std_estimation_runs = maximum(numruns),
                           error_estimate=:final,parallel_type = :none,kwargs...)
   _std_estimation_runs = Int(std_estimation_runs)
-  analytical_solution_ends = Vector{typeof(norm(prob.u0))}(_std_estimation_runs)
+  analytical_solution_ends = Vector{typeof(norm(prob.u0))}(undef,_std_estimation_runs)
   if parallel_type == :threads
     Threads.@threads for i in 1:_std_estimation_runs
       @sample_errors
@@ -404,6 +407,8 @@ Base.size(wp::WorkPrecision) = length(wp)
 Base.endof(wp::WorkPrecision) = length(wp)
 Base.getindex(wp::WorkPrecision,i::Int) = wp.times[i]
 Base.getindex(wp::WorkPrecision,::Colon) = wp.times
+Base.firstindex(wp::WorkPrecision) = 1
+Base.lastindex(wp::WorkPrecision) = lastindex(wp.times)
 
 function Base.show(io::IO, wp::WorkPrecision)
   println(io,"Name: $(wp.name)")
@@ -416,5 +421,7 @@ Base.size(wp_set::WorkPrecisionSet) = length(wp_set)
 Base.endof(wp_set::WorkPrecisionSet) = length(wp_set)
 Base.getindex(wp_set::WorkPrecisionSet,i::Int) = wp_set.wps[i]
 Base.getindex(wp_set::WorkPrecisionSet,::Colon) = wp_set.wps
+Base.firstindex(wp_set::WorkPrecisionSet) = 1
+Base.lastindex(wp_set::WorkPrecisionSet)  = lastindex(wp_set.wps)
 
 Base.show(io::IO, wp_set::WorkPrecisionSet) = println(io,"WorkPrecisionSet of $(wp_set.N) wps")
