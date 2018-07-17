@@ -19,6 +19,7 @@ testTol = 0.3
 superduperbool = Vector{Bool}(undef, 2)
 
 for i = 1:2 # 1 = num, 2 = ExplicitRK
+  global dts
   if i>1
     prob = probArr[2]
     bigprob = bigprobArr[2]
