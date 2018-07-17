@@ -5,7 +5,7 @@ module DiffEqDevTools
 using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase,
       DiffEqMonteCarlo, DiffEqNoiseProcess, Juno
 
-using LinearAlgebra
+using LinearAlgebra, Distributed
 
 using Statistics
 
