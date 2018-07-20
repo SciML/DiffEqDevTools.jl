@@ -81,7 +81,7 @@ end
 Euler's method.
 """
 function constructEuler(T::Type = Float64)
-  A = Matrix{T}(1,1)
+  A = Matrix{T}(undef,1,1)
   A[1] = 0
   c = [0]
   α = [1]
@@ -209,7 +209,7 @@ end
 Implicit Euler Method
 """
 function constructImplicitEuler(T::Type = Float64)
-  A = Matrix{T}(1,1)
+  A = Matrix{T}(undef,1,1)
   A[1] = 1
   c = [1]
   α = [1]
@@ -223,7 +223,7 @@ end
 Order 2 Midpoint Method
 """
 function constructMidpointRule(T::Type = Float64)
-  A = Matrix{T}(1,1)
+  A = Matrix{T}(undef,1,1)
   A[1] = 1//2
   c = [1//2]
   α = [1]
