@@ -65,17 +65,7 @@ wp_set[end]
 @test (minimum(diff(wp_set[2].errors).==0)) # The errors for a fixed timestep method should be constant
 
 
-# 2D Linear ODE
-function f_2dlin(du,u,p,t)
-  for i in 1:length(u)
-    du[i] = 1.01*u[i]
-  end
-end
-function (::typeof(f_2dlin))(::Type{Val{:analytic}},u₀,p,t)
-  u₀*exp(1.01*t)
-end
-tspan = (0.0,10.0)
-prob = ODEProblem(f_2dlin,rand(100,100),tspan)
+prob = prob_ode_2Dlinear
 
 abstols = 1 ./10 .^(3:7)
 reltols = 1 ./10 .^(0:4)

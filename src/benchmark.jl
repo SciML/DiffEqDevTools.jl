@@ -231,7 +231,7 @@ function WorkPrecisionSet(prob::Union{AbstractODEProblem,AbstractDDEProblem,
 end
 
 @def error_calculation begin
-  if !has_analytic(prob.f)
+  if !DiffEqBase.has_analytic(prob.f)
     t = prob.tspan[1]:test_dt:prob.tspan[2]
     brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
     brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
@@ -275,7 +275,7 @@ end
             timeseries_errors=timeseries_errors,
             dense_errors = dense_errors)
     end
-    has_analytic(prob.f) ? err_sol = sol : err_sol = appxtrue(sol,true_sol)
+    DiffEqBase.has_analytic(prob.f) ? err_sol = sol : err_sol = appxtrue(sol,true_sol)
     tmp_solutions[i,j,k] = err_sol
   end
 end
@@ -285,13 +285,13 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
                           print_names=false,names=nothing,appxsol_setup=nothing,
                           error_estimate=:final,parallel_type = :none,kwargs...)
 
-  timeseries_errors = has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
+  timeseries_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
   weak_dense_errors = error_estimate ∈ WEAK_DENSE_ERRORS
-  dense_errors = has_analytic(prob.f) && error_estimate ∈ DENSE_ERRORS
+  dense_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ DENSE_ERRORS
   N = length(setups); M = length(abstols)
-  times = Array{Float64}(M,N)
-  tmp_solutions = Array{Any}(numruns_error,M,N)
+  times = Array{Float64}(undef,M,N)
+  tmp_solutions = Array{Any}(undef,numruns_error,M,N)
   if names == nothing
     names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
   end
@@ -310,7 +310,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   analytical_solution_ends = [tmp_solutions[i,1,1].u_analytic[end] for i in 1:numruns_error]
   sample_error = 1.96std(norm.(analytical_solution_ends))/sqrt(numruns_error)
   _solutions_k = [[MonteCarloSolution(tmp_solutions[:,j,k],0.0,true) for j in 1:M] for k in 1:N]
-  solutions = [[calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in sol_k] for sol_k in _solutions_k]
+  solutions = [[DiffEqBase.calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in sol_k] for sol_k in _solutions_k]
   if error_estimate ∈ WEAK_ERRORS
     errors = [[solutions[j][i].weak_errors[error_estimate] for i in 1:M] for j in 1:N]
   else
@@ -364,7 +364,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
 end
 
 @def sample_errors begin
-  if !has_analytic(prob.f)
+  if !DiffEqBase.has_analytic(prob.f)
     true_sol = solve(prob,appxsol_setup[:alg];kwargs...,appxsol_setup...,
                      save_everystep=false)
     analytical_solution_ends[i] = norm(true_sol.u[end])

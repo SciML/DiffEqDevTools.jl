@@ -62,7 +62,7 @@ function analyticless_test_convergence(dts::AbstractArray,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   _solutions = []
-  tmp_solutions = Array{Any}(numMonte,length(dts))
+  tmp_solutions = Array{Any}(undef,numMonte,length(dts))
   @progress for j in 1:numMonte
     t = prob.tspan[1]:test_dt:prob.tspan[2]
     brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
@@ -136,5 +136,6 @@ Base.length(sim::ConvergenceSimulation) = sim.N
 Base.endof( sim::ConvergenceSimulation) = length(sim)
 Base.getindex(sim::ConvergenceSimulation,i::Int) = sim.solutions[i]
 Base.getindex(sim::ConvergenceSimulation,i::Int,I::Int...) = sim.solutions[i][I]
-
+Base.lastindex(sim::ConvergenceSimulation) = lastindex(sim.solutions)
+Base.firstindex(sim::ConvergenceSimulation) = firstindex(sim.solutions)
 Base.length(sim::ConvergenceSetup) = sim.probs
