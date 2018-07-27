@@ -8,10 +8,10 @@ prob = SDEProblem(prob.f,prob.g,prob.u0,(0.0,1.0),prob.p)
 reltols = 1.0./10.0.^(1:5)
 abstols = reltols#[0.0 for i in eachindex(reltols)]
 setups = [Dict(:alg=>SRIW1())
-          Dict(:alg=>EM(),:dts=>1.0./5.0.^((1:length(reltols)) + 1),:adaptive=>false)
-          Dict(:alg=>RKMil(),:dts=>1.0./5.0.^((1:length(reltols)) + 1),:adaptive=>false)
-          Dict(:alg=>SRIW1(),:dts=>1.0./5.0.^((1:length(reltols)) + 1),:adaptive=>false)
-          Dict(:alg=>SRA1(),:dts=>1.0./5.0.^((1:length(reltols)) + 1),:adaptive=>false)
+          Dict(:alg=>EM(),:dts=>1.0./5.0.^((1:length(reltols)) .+ 1),:adaptive=>false)
+          Dict(:alg=>RKMil(),:dts=>1.0./5.0.^((1:length(reltols)) .+ 1),:adaptive=>false)
+          Dict(:alg=>SRIW1(),:dts=>1.0./5.0.^((1:length(reltols)) .+ 1),:adaptive=>false)
+          Dict(:alg=>SRA1(),:dts=>1.0./5.0.^((1:length(reltols)) .+ 1),:adaptive=>false)
           Dict(:alg=>SRA1())
           ]
 names = ["SRIW1","EM","RKMil","SRIW1 Fixed","SRA1 Fixed","SRA1"]
