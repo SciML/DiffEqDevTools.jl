@@ -133,7 +133,6 @@ length(simres::ConvergenceSimulation)
 Returns the number of simultations in the Convergence Simulation
 """
 Base.length(sim::ConvergenceSimulation) = sim.N
-Base.endof( sim::ConvergenceSimulation) = length(sim)
 Base.getindex(sim::ConvergenceSimulation,i::Int) = sim.solutions[i]
 Base.getindex(sim::ConvergenceSimulation,i::Int,I::Int...) = sim.solutions[i][I]
 Base.lastindex(sim::ConvergenceSimulation) = lastindex(sim.solutions)
