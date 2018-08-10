@@ -96,7 +96,6 @@ end
 
 Base.length(shoot::Shootout) = shoot.N
 Base.size(shoot::Shootout) = length(shoot)
-Base.endof(shoot::Shootout) = length(shoot)
 Base.getindex(shoot::Shootout,i::Int) = shoot.effs[i]
 Base.getindex(shoot::Shootout,::Colon) = shoot.effs
 Base.firstindex(shoot::Shootout) = 1
@@ -109,7 +108,6 @@ end
 
 Base.length(set::ShootoutSet) = set.N
 Base.size(set::ShootoutSet) = length(set)
-Base.endof(set::ShootoutSet) = length(set)
 Base.getindex(set::ShootoutSet,i::Int) = set.shootouts[i]
 Base.getindex(set::ShootoutSet,::Colon) = set.shootouts
 Base.show(io::IO, set::ShootoutSet) = print(io,"ShootoutSet of $(set.N) shootouts ")
@@ -404,7 +402,6 @@ end
 
 Base.length(wp::WorkPrecision) = wp.N
 Base.size(wp::WorkPrecision) = length(wp)
-Base.endof(wp::WorkPrecision) = length(wp)
 Base.getindex(wp::WorkPrecision,i::Int) = wp.times[i]
 Base.getindex(wp::WorkPrecision,::Colon) = wp.times
 Base.firstindex(wp::WorkPrecision) = 1
@@ -418,7 +415,6 @@ end
 
 Base.length(wp_set::WorkPrecisionSet) = wp_set.N
 Base.size(wp_set::WorkPrecisionSet) = length(wp_set)
-Base.endof(wp_set::WorkPrecisionSet) = length(wp_set)
 Base.getindex(wp_set::WorkPrecisionSet,i::Int) = wp_set.wps[i]
 Base.getindex(wp_set::WorkPrecisionSet,::Colon) = wp_set.wps
 Base.firstindex(wp_set::WorkPrecisionSet) = 1
