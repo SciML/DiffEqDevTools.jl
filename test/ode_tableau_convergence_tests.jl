@@ -11,7 +11,7 @@ probArr[2] = prob_ode_2Dlinear
 bigprobArr[1] = prob_ode_bigfloatlinear
 bigprobArr[2] = prob_ode_bigfloat2Dlinear
 setprecision(400)
-srand(100)
+Random.seed!(100)
 ## Convergence Testing
 println("Convergence Test on Linear")
 dts = 1 .//2 .^(8:-1:4)
