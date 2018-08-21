@@ -41,8 +41,8 @@ end
   xguide --> "Error"
   xscale --> :log10
   yscale --> :log10
-  errors = Vector{Any}(0)
-  times = Vector{Any}(0)
+  errors = Vector{Any}(undef,0)
+  times = Vector{Any}(undef,0)
   for i in 1:length(wp_set)
     push!(errors,wp_set[i].errors)
     push!(times,wp_set[i].times)
