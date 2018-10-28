@@ -48,6 +48,7 @@ set[1][:]
 
 ## WorkPrecision Tests
 println("WorkPrecision Tests")
+println("Test DP5")
 wp = WorkPrecision(prob,DP5(),abstols,reltols;name="Dormand-Prince 4/5")
 
 wp[1]
@@ -72,6 +73,7 @@ reltols = 1 ./10 .^(0:4)
 
 setups = [Dict(:alg=>DP5())
           Dict(:alg=>Tsit5())]
+println("Test DP5 and Tsit5")
 wp = WorkPrecisionSet(prob,abstols,reltols,setups;save_everystep=false)
 
 function lotka(du,u,p,t)
@@ -90,6 +92,7 @@ setups = [Dict(:alg=>DP5())
           Dict(:alg=>Tsit5())
           Dict(:alg=>Vern6())
           ]
+println("Test DP5, Tsit5, and Vern6")
 wp = WorkPrecisionSet(prob,abstols,reltols,setups;appxsol=test_sol,save_everystep=false,numruns=20,maxiters=10000)
 
 # DDE problem
@@ -102,4 +105,5 @@ test_sol = TestSolution(sol)
 
 setups = [Dict(:alg => MethodOfSteps(BS3()))
           Dict(:alg => MethodOfSteps(Tsit5()))]
+println("Test MethodOfSteps BS3 and Tsit5")
 wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol)
