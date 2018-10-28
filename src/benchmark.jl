@@ -301,7 +301,8 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
       @error_calculation
     end
   elseif parallel_type == :none
-    @progress for i in 1:numruns_error
+    for i in 1:numruns_error
+      @info "Error calculation: $i/$numruns_error"
       @error_calculation
     end
   end
@@ -388,7 +389,8 @@ function get_sample_errors(prob::AbstractRODEProblem,test_dt=nothing;
       @sample_errors
     end
   elseif parallel_type == :none
-    @progress for i in 1:_std_estimation_runs
+    for i in 1:_std_estimation_runs
+      @info "Standard deviation estimation: $i/$_std_estimation_runs"
       @sample_errors
     end
   end

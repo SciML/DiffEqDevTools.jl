@@ -3,7 +3,7 @@ __precompile__()
 module DiffEqDevTools
 
 using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase,
-      DiffEqMonteCarlo, DiffEqNoiseProcess, Juno
+      DiffEqMonteCarlo, DiffEqNoiseProcess
 
 using LinearAlgebra, Distributed
 
