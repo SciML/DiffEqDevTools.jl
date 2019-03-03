@@ -6,3 +6,4 @@ DiffEqPDEBase 0.4.0
 NLsolve 0.14.1
 DiffEqMonteCarlo
 DiffEqNoiseProcess
+BenchmarkTools

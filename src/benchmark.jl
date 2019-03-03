@@ -1,3 +1,4 @@
+using BenchmarkTools
 ## Shootouts
 
 mutable struct Shootout
@@ -26,7 +27,7 @@ function ode_shootout(args...;kwargs...)
   ShootOut(args...;kwargs...)
 end
 
-function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_estimate=:final,kwargs...)
+function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:final,kwargs...)
   N = length(setups)
   errors = Vector{Float64}(undef,N)
   solutions = Vector{Any}(undef,N)
@@ -43,10 +44,19 @@ function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_est
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
     sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
-    GC.gc()
-    t = @elapsed for j in 1:numruns
-      sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;
-                  kwargs...,setups[i]...,timeseries_errors=false,dense_errors=false)
+    fails = 0
+    local t
+    @label START
+    try
+      t = @belapsed(solve($prob,$(setups[i][:alg]),$(sol.u),$(sol.t),$(sol.k);
+                          $kwargs...,$(setups[i])...,timeseries_errors=false,dense_errors=false), seconds=0.1)
+    catch
+      # sometimes BenchmarkTools errors with
+      # `ERROR: syntax: function argument and static parameter names must be distinct`
+      # so, we are catching that error and try a few times.
+      fails += 1
+      fails > 4 && rethrow()
+      @goto START
     end
     if appxsol != nothing
       errsol = appxtrue(sol,appxsol)
@@ -57,7 +67,6 @@ function Shootout(prob,setups;appxsol=nothing,numruns=20,names=nothing,error_est
       solutions[i] = sol
     end
     effs[i] = 1/(errors[i]*t)
-    t = t/numruns
     times[i] = t
   end
   for j in 1:N, i in 1:N
@@ -72,7 +81,7 @@ function ode_shootoutset(args...;kwargs...)
   ShootoutSet(args...;kwargs...)
 end
 
-function ShootoutSet(probs,setups;probaux=nothing,numruns=20,
+function ShootoutSet(probs,setups;probaux=nothing,
                      names=nothing,print_names=false,kwargs...)
   N = length(probs)
   shootouts = Vector{Shootout}(undef,N)
@@ -88,7 +97,7 @@ function ShootoutSet(probs,setups;probaux=nothing,numruns=20,
   end
   for i in eachindex(probs)
     print_names && println(names[i])
-    shootouts[i] = Shootout(probs[i],setups;numruns=numruns,names=names,kwargs...,probaux[i]...)
+    shootouts[i] = Shootout(probs[i],setups;names=names,kwargs...,probaux[i]...)
     winners[i] = shootouts[i].winner
   end
   return ShootoutSet(shootouts,probs,probaux,N,winners)
@@ -136,12 +145,10 @@ mutable struct WorkPrecisionSet
   names
   sample_error
   error_estimate
-  numruns
 end
 
 function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
-                       name=nothing,numruns=20,
-                       appxsol=nothing,error_estimate=:final,kwargs...)
+                       name=nothing,appxsol=nothing,error_estimate=:final,kwargs...)
   N = length(abstols)
   errors = Vector{Float64}(undef,N)
   times = Vector{Float64}(undef,N)
@@ -159,7 +166,6 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      GC.gc()
     else
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
@@ -167,7 +173,6 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      GC.gc()
     end
 
     if appxsol != nothing
@@ -177,32 +182,40 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       errors[i] = mean(sol.errors[error_estimate])
     end
 
-    t = 0.0
-    for j in 1:numruns
-      t_tmp = @elapsed if dts == nothing
-        solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,
-                                  abstol=abstols[i],
-                                  reltol=reltols[i],
-                                  timeseries_errors=false,
-                                  dense_errors = false)
+    fails = 0
+    local t
+    @label START
+    try
+      t = if dts == nothing
+        @belapsed(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
+                        abstol=$(abstols[i]),
+                        reltol=$(reltols[i]),
+                        timeseries_errors = false,
+                        dense_errors = false, $kwargs...), seconds=0.1)
       else
-         solve(prob,alg,sol.u,sol.t,sol.k;
-                                  kwargs...,abstol=abstols[i],
-                                  reltol=reltols[i],dt=dts[i],
-                                  timeseries_errors=false,
-                                  dense_errors = false)
+        @belapsed(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
+                        abstol=$(abstols[i]),
+                        reltol=$(reltols[i]),
+                        dt=$(dts[i]),
+                        timeseries_errors = false,
+                        dense_errors = false, $kwargs...), seconds=0.1)
       end
-      t += t_tmp
-      GC.gc()
+    catch
+      # sometimes BenchmarkTools errors with
+      # `ERROR: syntax: function argument and static parameter names must be distinct`
+      # so, we are catching that error and try a few times.
+      fails += 1
+      fails > 4 && rethrow()
+      @goto START
     end
-    times[i] = t/numruns
+    times[i] = t
   end
   return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
 end
 
 function WorkPrecisionSet(prob::Union{AbstractODEProblem,AbstractDDEProblem,
                                       AbstractDAEProblem},
-                          abstols,reltols,setups;numruns=20,
+                          abstols,reltols,setups;
                           print_names=false,names=nothing,appxsol=nothing,
                           error_estimate=:final,
                           test_dt=nothing,kwargs...)
@@ -215,17 +228,17 @@ function WorkPrecisionSet(prob::Union{AbstractODEProblem,AbstractDDEProblem,
     print_names && println(names[i])
     if haskey(setups[i],:dts)
       wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols,setups[i][:dts];
-                                 numruns=numruns,appxsol=appxsol,
+                                 appxsol=appxsol,
                                  error_estimate=error_estimate,
                                  name=names[i],kwargs...,setups[i]...)
     else
       wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols;
-                                 numruns=numruns,appxsol=appxsol,
+                                 appxsol=appxsol,
                                  error_estimate=error_estimate,
                                  name=names[i],kwargs...,setups[i]...)
     end
   end
-  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,nothing,error_estimate,numruns)
+  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,nothing,error_estimate)
 end
 
 @def error_calculation begin
@@ -279,7 +292,7 @@ end
 end
 
 function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_dt=nothing;
-                          numruns=20,numruns_error = 20,
+                          numruns_error = 20,
                           print_names=false,names=nothing,appxsol_setup=nothing,
                           error_estimate=:final,parallel_type = :none,kwargs...)
 
@@ -293,7 +306,6 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   if names == nothing
     names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
   end
-  time_tmp = Vector{Float64}(undef,numruns)
 
   # First calculate all of the errors
   if parallel_type == :threads
@@ -333,28 +345,36 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
             dense_errors = dense_errors)
     end
   end
-  GC.gc()
   # Now time it
   for k in 1:N
     for j in 1:M
-      for i in 1:numruns
-        time_tmp[i] = @elapsed if !haskey(setups[k],:dts)
-          sol = solve(prob,setups[k][:alg];
-                kwargs...,
-                abstol=abstols[j],
-                reltol=reltols[j],
+      fails = 0
+      local t
+      @label START
+      try
+        t = if !haskey(setups[k],:dts)
+          @belapsed(solve($prob,$(setups[k][:alg]);
+                $kwargs...,
+                abstol=$(abstols[j]),
+                reltol=$(reltols[j]),
                 timeseries_errors=false,
-                dense_errors = false)
+                dense_errors = false), seconds = 0.1)
         else
-          sol = solve(prob,setups[k][:alg];
-                kwargs...,abstol=abstols[j],
-                reltol=reltols[j],dt=setups[k][:dts][j],
-                timeseries_errors=false,
-                dense_errors = false)
+          @belapsed(solve($prob,$(setups[k][:alg]);
+                          $kwargs...,abstol=$(abstols[j]),
+                          reltol=$(reltols[j]),dt=$(setups[k][:dts][j]),
+                          timeseries_errors=false,
+                          dense_errors = false), seconds = 0.1)
         end
+      catch
+        # sometimes BenchmarkTools errors with
+        # `ERROR: syntax: function argument and static parameter names must be distinct`
+        # so, we are catching that error and try a few times.
+        fails += 1
+        fails > 4 && rethrow()
+        @goto START
       end
-      times[j,k] = mean(time_tmp)
-      GC.gc()
+      times[j,k] = t
     end
   end
 
