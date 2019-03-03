@@ -188,31 +188,19 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       errors[i] = mean(sol.errors[error_estimate])
     end
 
-    fails = 0
-    local benchable
-    @label START
-    try
-      benchable = if dts == nothing
-        @benchmarkable(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
-                        abstol=$(abstols[i]),
-                        reltol=$(reltols[i]),
-                        timeseries_errors = false,
-                        dense_errors = false, $kwargs...))
-      else
-        @benchmarkable(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
-                        abstol=$(abstols[i]),
-                        reltol=$(reltols[i]),
-                        dt=$(dts[i]),
-                        timeseries_errors = false,
-                        dense_errors = false, $kwargs...))
-      end
-    catch e
-      # sometimes BenchmarkTools errors with
-      # `ERROR: syntax: function argument and static parameter names must be distinct`
-      # so, we are catching that error and try a few times.
-      fails += 1
-      fails > 4 && rethrow()
-      @goto START
+    benchable = if dts == nothing
+      @benchmarkable(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
+                      abstol=$(abstols[i]),
+                      reltol=$(reltols[i]),
+                      timeseries_errors = false,
+                      dense_errors = false, $kwargs...))
+    else
+      @benchmarkable(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
+                      abstol=$(abstols[i]),
+                      reltol=$(reltols[i]),
+                      dt=$(dts[i]),
+                      timeseries_errors = false,
+                      dense_errors = false, $kwargs...))
     end
     bench = run(benchable, samples=numruns, seconds=seconds)
     times[i] = benchtime(bench)
@@ -301,7 +289,7 @@ end
 function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_dt=nothing;
                           numruns_error = 20,
                           print_names=false,names=nothing,appxsol_setup=nothing,
-                          error_estimate=:final,parallel_type = :none,numruns=20,seconds=Inf,kwargs...)
+                          error_estimate=:final,parallel_type = :none,numruns=20,seconds=2,kwargs...)
 
   timeseries_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
