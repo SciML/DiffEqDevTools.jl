@@ -301,7 +301,7 @@ end
 function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_dt=nothing;
                           numruns_error = 20,
                           print_names=false,names=nothing,appxsol_setup=nothing,
-                          error_estimate=:final,parallel_type = :none,numruns=20,seconds=2,kwargs...)
+                          error_estimate=:final,parallel_type = :none,numruns=20,seconds=Inf,kwargs...)
 
   timeseries_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
