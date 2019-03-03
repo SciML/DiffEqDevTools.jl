@@ -145,6 +145,7 @@ mutable struct WorkPrecisionSet
   names
   sample_error
   error_estimate
+  numruns
 end
 
 function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
@@ -238,7 +239,7 @@ function WorkPrecisionSet(prob::Union{AbstractODEProblem,AbstractDDEProblem,
                                  name=names[i],kwargs...,setups[i]...)
     end
   end
-  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,nothing,error_estimate)
+  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,nothing,error_estimate,nothing)
 end
 
 @def error_calculation begin
