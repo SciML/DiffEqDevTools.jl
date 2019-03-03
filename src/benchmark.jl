@@ -1,4 +1,5 @@
 using BenchmarkTools
+using Statistics
 ## Shootouts
 
 mutable struct Shootout
@@ -27,7 +28,9 @@ function ode_shootout(args...;kwargs...)
   ShootOut(args...;kwargs...)
 end
 
-function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:final,kwargs...)
+benchtime(bench) = BenchmarkTools.time(mean(bench))/1e9
+
+function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:final,numruns=20,seconds=2,kwargs...)
   N = length(setups)
   errors = Vector{Float64}(undef,N)
   solutions = Vector{Any}(undef,N)
@@ -45,11 +48,11 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
     sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
     fails = 0
-    local t
+    local benchable
     @label START
     try
-      t = @belapsed(solve($prob,$(setups[i][:alg]),$(sol.u),$(sol.t),$(sol.k);
-                          $kwargs...,$(setups[i])...,timeseries_errors=false,dense_errors=false), seconds=0.1)
+      benchable = @benchmarkable(solve($prob,$(setups[i][:alg]),$(sol.u),$(sol.t),$(sol.k);
+                                       $kwargs...,$(setups[i])...,timeseries_errors=false,dense_errors=false))
     catch
       # sometimes BenchmarkTools errors with
       # `ERROR: syntax: function argument and static parameter names must be distinct`
@@ -66,6 +69,8 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
       errors[i] = sol.errors[error_estimate]
       solutions[i] = sol
     end
+    bench = run(benchable, samples=numruns, seconds=seconds)
+    t = benchtime(bench)
     effs[i] = 1/(errors[i]*t)
     times[i] = t
   end
@@ -149,7 +154,7 @@ mutable struct WorkPrecisionSet
 end
 
 function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
-                       name=nothing,appxsol=nothing,error_estimate=:final,kwargs...)
+                       name=nothing,appxsol=nothing,error_estimate=:final,numruns=20,seconds=2,kwargs...)
   N = length(abstols)
   errors = Vector{Float64}(undef,N)
   times = Vector{Float64}(undef,N)
@@ -184,24 +189,24 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
     end
 
     fails = 0
-    local t
+    local benchable
     @label START
     try
-      t = if dts == nothing
-        @belapsed(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
+      benchable = if dts == nothing
+        @benchmarkable(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
                         abstol=$(abstols[i]),
                         reltol=$(reltols[i]),
                         timeseries_errors = false,
-                        dense_errors = false, $kwargs...), seconds=0.1)
+                        dense_errors = false, $kwargs...))
       else
-        @belapsed(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
+        @benchmarkable(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
                         abstol=$(abstols[i]),
                         reltol=$(reltols[i]),
                         dt=$(dts[i]),
                         timeseries_errors = false,
-                        dense_errors = false, $kwargs...), seconds=0.1)
+                        dense_errors = false, $kwargs...))
       end
-    catch
+    catch e
       # sometimes BenchmarkTools errors with
       # `ERROR: syntax: function argument and static parameter names must be distinct`
       # so, we are catching that error and try a few times.
@@ -209,7 +214,8 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       fails > 4 && rethrow()
       @goto START
     end
-    times[i] = t
+    bench = run(benchable, samples=numruns, seconds=seconds)
+    times[i] = benchtime(bench)
   end
   return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
 end
@@ -295,7 +301,7 @@ end
 function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_dt=nothing;
                           numruns_error = 20,
                           print_names=false,names=nothing,appxsol_setup=nothing,
-                          error_estimate=:final,parallel_type = :none,kwargs...)
+                          error_estimate=:final,parallel_type = :none,numruns=20,seconds=2,kwargs...)
 
   timeseries_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
@@ -350,22 +356,22 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   for k in 1:N
     for j in 1:M
       fails = 0
-      local t
+      local benchable
       @label START
       try
-        t = if !haskey(setups[k],:dts)
-          @belapsed(solve($prob,$(setups[k][:alg]);
+        benchable = if !haskey(setups[k],:dts)
+          @benchmarkable(solve($prob,$(setups[k][:alg]);
                 $kwargs...,
                 abstol=$(abstols[j]),
                 reltol=$(reltols[j]),
                 timeseries_errors=false,
-                dense_errors = false), seconds = 0.1)
+                dense_errors = false))
         else
-          @belapsed(solve($prob,$(setups[k][:alg]);
+          @benchmarkable(solve($prob,$(setups[k][:alg]);
                           $kwargs...,abstol=$(abstols[j]),
                           reltol=$(reltols[j]),dt=$(setups[k][:dts][j]),
                           timeseries_errors=false,
-                          dense_errors = false), seconds = 0.1)
+                          dense_errors = false))
         end
       catch
         # sometimes BenchmarkTools errors with
@@ -375,7 +381,8 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
         fails > 4 && rethrow()
         @goto START
       end
-      times[j,k] = t
+      bench = run(benchable, samples=numruns, seconds=seconds)
+      times[j,k] = benchtime(bench)
     end
   end
 
