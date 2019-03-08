@@ -28,7 +28,7 @@ function ode_shootout(args...;kwargs...)
   ShootOut(args...;kwargs...)
 end
 
-benchtime(bench) = BenchmarkTools.time(mean(bench))/1e9
+benchtime(bench) = BenchmarkTools.time(minimum(bench))/1e9
 
 function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:final,numruns=20,seconds=2,kwargs...)
   N = length(setups)
@@ -299,9 +299,9 @@ end
 end
 
 function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_dt=nothing;
-                          numruns_error = 20,
+                          numruns=20,numruns_error = 20,
                           print_names=false,names=nothing,appxsol_setup=nothing,
-                          error_estimate=:final,parallel_type = :none,numruns=20,seconds=Inf,kwargs...)
+                          error_estimate=:final,parallel_type = :none,kwargs...)
 
   timeseries_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
@@ -313,6 +313,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   if names == nothing
     names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
   end
+  time_tmp = Vector{Float64}(undef,numruns)
 
   # First calculate all of the errors
   if parallel_type == :threads
@@ -352,37 +353,28 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
             dense_errors = dense_errors)
     end
   end
+  GC.gc()
   # Now time it
   for k in 1:N
     for j in 1:M
-      fails = 0
-      local benchable
-      @label START
-      try
-        benchable = if !haskey(setups[k],:dts)
-          @benchmarkable(solve($prob,$(setups[k][:alg]);
-                $kwargs...,
-                abstol=$(abstols[j]),
-                reltol=$(reltols[j]),
+      for i in 1:numruns
+        time_tmp[i] = @elapsed if !haskey(setups[k],:dts)
+          sol = solve(prob,setups[k][:alg];
+                kwargs...,
+                abstol=abstols[j],
+                reltol=reltols[j],
                 timeseries_errors=false,
-                dense_errors = false))
+                dense_errors = false)
         else
-          @benchmarkable(solve($prob,$(setups[k][:alg]);
-                          $kwargs...,abstol=$(abstols[j]),
-                          reltol=$(reltols[j]),dt=$(setups[k][:dts][j]),
-                          timeseries_errors=false,
-                          dense_errors = false))
+          sol = solve(prob,setups[k][:alg];
+                kwargs...,abstol=abstols[j],
+                reltol=reltols[j],dt=setups[k][:dts][j],
+                timeseries_errors=false,
+                dense_errors = false)
         end
-      catch
-        # sometimes BenchmarkTools errors with
-        # `ERROR: syntax: function argument and static parameter names must be distinct`
-        # so, we are catching that error and try a few times.
-        fails += 1
-        fails > 4 && rethrow()
-        @goto START
       end
-      bench = run(benchable, samples=numruns, seconds=seconds)
-      times[j,k] = benchtime(bench)
+      times[j,k] = mean(time_tmp)
+      GC.gc()
     end
   end
 
