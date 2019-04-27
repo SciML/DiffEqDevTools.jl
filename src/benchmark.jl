@@ -339,6 +339,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   end
 
   # precompile
+  local _sol
   for k in 1:N
     if !haskey(setups[k],:dts)
       _sol = solve(prob,setups[k][:alg];
