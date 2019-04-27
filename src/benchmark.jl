@@ -45,8 +45,10 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
   for i in eachindex(setups)
     sol = solve(prob,setups[i][:alg];timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
-    sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;timeseries_errors=timeseries_errors,
-    dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
+    _sol = solve(prob,setups[i][:alg],sol.u,sol.t,sol.k;
+                kwargs...,setups[i]...,
+                timeseries_errors=false,dense_errors = false) # Compile and get result
+    x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
     fails = 0
     local benchable
     @label START
@@ -71,7 +73,7 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
     end
     bench = run(benchable, samples=numruns, seconds=seconds)
     t = benchtime(bench)
-    effs[i] = 1/(errors[i]*t)
+    effs[i] = 1/(errors[i]*t) + x # x == 0, but to confuse the compiler
     times[i] = t
   end
   for j in 1:N, i in 1:N
@@ -169,16 +171,18 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
-      reltol=reltols[i],timeseries_errors=timeseries_errors,
-      dense_errors = dense_errors) # Compile and get result
+      _sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],timeseries_errors=false,
+      dense_errors = false) # Compile and get result
+      x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
     else
       sol = solve(prob,alg;kwargs...,abstol=abstols[i],
       reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
       dense_errors = dense_errors) # Compile and get result
-      sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
-      reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
-      dense_errors = dense_errors) # Compile and get result
+      _sol = solve(prob,alg,sol.u,sol.t,sol.k;kwargs...,abstol=abstols[i],
+      reltol=reltols[i],dt=dts[i],timeseries_errors=false,
+      dense_errors = false) # Compile and get result
+      x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
     end
 
     if appxsol != nothing
@@ -188,7 +192,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       errors[i] = mean(sol.errors[error_estimate])
     end
 
-    fails = 0
+    fails = 0 + x # x == 0, to confuse the compiler to not remove
     local benchable
     @label START
     try
@@ -335,23 +339,25 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   end
 
   # precompile
+  local _sol
   for k in 1:N
     if !haskey(setups[k],:dts)
-      sol = solve(prob,setups[k][:alg];
+      _sol = solve(prob,setups[k][:alg];
             kwargs...,
             abstol=abstols[1],
             reltol=reltols[1],
-            timeseries_errors=timeseries_errors,
+            timeseries_errors=false,
             dense_errors = dense_errors)
     else
-      sol = solve(prob,setups[k][:alg];
+      _sol = solve(prob,setups[k][:alg];
             kwargs...,abstol=abstols[1],
             reltol=reltols[1],dt=setups[k][:dts][1],
             timeseries_errors=timeseries_errors,
-            dense_errors = dense_errors)
+            dense_errors = false)
     end
   end
   GC.gc()
+  x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
   # Now time it
   for k in 1:N
     for j in 1:M
@@ -371,7 +377,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
                 dense_errors = false)
         end
       end
-      times[j,k] = mean(time_tmp)
+      times[j,k] = mean(time_tmp) + x # x == 0, to confuse the compiler to not remove
       GC.gc()
     end
   end
