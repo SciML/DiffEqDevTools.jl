@@ -259,14 +259,14 @@ end
   # Get a cache
   if !haskey(setups[1],:dts)
     sol = solve(_prob,setups[1][:alg];
-          kwargs...,
+          kwargs...,setups[1]...,
           abstol=abstols[1],
           reltol=reltols[1],
           timeseries_errors=false,
           dense_errors = false)
   else
     sol = solve(_prob,setups[1][:alg];
-          kwargs...,abstol=abstols[1],
+          kwargs...,setups[1]...,abstol=abstols[1],
           reltol=reltols[1],dt=setups[1][:dts][1],
           timeseries_errors=false,
           dense_errors = false)
@@ -275,14 +275,14 @@ end
   for j in 1:M, k in 1:N
     if !haskey(setups[k],:dts)
       sol = solve(_prob,setups[k][:alg];
-            kwargs...,
+            kwargs...,setups[k]...,
             abstol=abstols[j],
             reltol=reltols[j],
             timeseries_errors=timeseries_errors,
             dense_errors = dense_errors)
     else
       sol = solve(_prob,setups[k][:alg];
-            kwargs...,abstol=abstols[j],
+            kwargs...,setups[k]...,abstol=abstols[j],
             reltol=reltols[j],dt=setups[k][:dts][j],
             timeseries_errors=timeseries_errors,
             dense_errors = dense_errors)
@@ -330,40 +330,40 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
     errors = [[solutions[j][i].error_means[error_estimate] for i in 1:M] for j in 1:N]
   end
 
-  # precompile
   local _sol
+
+  # Now time it
   for k in 1:N
+    # precompile
+    GC.gc()
     if !haskey(setups[k],:dts)
       _sol = solve(prob,setups[k][:alg];
-            kwargs...,
+            kwargs...,setups[k]...,
             abstol=abstols[1],
             reltol=reltols[1],
             timeseries_errors=false,
             dense_errors = false)
     else
       _sol = solve(prob,setups[k][:alg];
-            kwargs...,abstol=abstols[1],
+            kwargs...,setups[k]...,abstol=abstols[1],
             reltol=reltols[1],dt=setups[k][:dts][1],
             timeseries_errors=false,
             dense_errors = false)
     end
-  end
-  GC.gc()
-  x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
-  # Now time it
-  for k in 1:N
+    x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
+    GC.gc()
     for j in 1:M
       for i in 1:numruns
         time_tmp[i] = @elapsed if !haskey(setups[k],:dts)
           sol = solve(prob,setups[k][:alg];
-                kwargs...,
+                kwargs...,setups[k]...,
                 abstol=abstols[j],
                 reltol=reltols[j],
                 timeseries_errors=false,
                 dense_errors = false)
         else
           sol = solve(prob,setups[k][:alg];
-                kwargs...,abstol=abstols[j],
+                kwargs...,setups[k]...,abstol=abstols[j],
                 reltol=reltols[j],dt=setups[k][:dts][j],
                 timeseries_errors=false,
                 dense_errors = false)
