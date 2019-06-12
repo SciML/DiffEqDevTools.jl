@@ -1,4 +1,3 @@
-using BenchmarkTools
 using Statistics
 ## Shootouts
 
@@ -28,8 +27,6 @@ function ode_shootout(args...;kwargs...)
   ShootOut(args...;kwargs...)
 end
 
-benchtime(bench) = BenchmarkTools.time(minimum(bench))/1e9
-
 function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:final,numruns=20,seconds=2,kwargs...)
   N = length(setups)
   errors = Vector{Float64}(undef,N)
@@ -45,20 +42,7 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
   for i in eachindex(setups)
     sol = solve(prob,setups[i][:alg];timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
-    fails = 0
-    local benchable
-    @label START
-    try
-      benchable = @benchmarkable(solve($prob,$(setups[i][:alg]),$(sol.u),$(sol.t),$(sol.k);
-                                       $kwargs...,$(setups[i])...,timeseries_errors=false,dense_errors=false))
-    catch
-      # sometimes BenchmarkTools errors with
-      # `ERROR: syntax: function argument and static parameter names must be distinct`
-      # so, we are catching that error and try a few times.
-      fails += 1
-      fails > 4 && rethrow()
-      @goto START
-    end
+
     if appxsol != nothing
       errsol = appxtrue(sol,appxsol)
       errors[i] = errsol.errors[error_estimate]
@@ -67,12 +51,23 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
       errors[i] = sol.errors[error_estimate]
       solutions[i] = sol
     end
-    BenchmarkTools.warmup(benchable)
-    BenchmarkTools.tune!(benchable)
-    bench = run(benchable, samples=numruns, seconds=seconds)
-    t = benchtime(bench)
-    effs[i] = 1/(errors[i]*t)
-    times[i] = t
+
+    benchmark_f = let prob=prob,alg=setups[i][:alg],sol=sol,kwargs=kwargs
+      function benchmark_f()
+        @elapsed solve(prob,alg,(sol.u),(sol.t),(sol.k);
+              timeseries_errors = false,
+              dense_errors = false, kwargs...)
+      end
+    end
+
+    b_t =  benchmark_f()
+    if b_t > seconds
+      times[i] = b_t
+    else
+      times[i] = minimum([b_t;map(i->benchmark_f(),2:numruns)])
+    end
+
+    effs[i] = 1/(errors[i]*times[i])
   end
   for j in 1:N, i in 1:N
     effratios[i,j] = effs[i]/effs[j]
@@ -182,36 +177,31 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       errors[i] = mean(sol.errors[error_estimate])
     end
 
-    fails = 0
-    local benchable
-    @label START
-    try
-      benchable = if dts == nothing
-        @benchmarkable(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
-                        abstol=$(abstols[i]),
-                        reltol=$(reltols[i]),
-                        timeseries_errors = false,
-                        dense_errors = false, $kwargs...))
-      else
-        @benchmarkable(solve($prob,$alg,$(sol.u),$(sol.t),$(sol.k);
-                        abstol=$(abstols[i]),
-                        reltol=$(reltols[i]),
-                        dt=$(dts[i]),
-                        timeseries_errors = false,
-                        dense_errors = false, $kwargs...))
+    benchmark_f = let dts=dts,prob=prob,alg=alg,sol=sol,abstols=abstols,reltols=reltols,kwargs=kwargs
+      function benchmark_f()
+        if dts == nothing
+          @elapsed solve(prob,alg,(sol.u),(sol.t),(sol.k);
+                abstol=(abstols[i]),
+                reltol=(reltols[i]),
+                timeseries_errors = false,
+                dense_errors = false, kwargs...)
+        else
+          @elapsed solve(prob,alg,(sol.u),(sol.t),(sol.k);
+                abstol=(abstols[i]),
+                reltol=(reltols[i]),
+                dt=(dts[i]),
+                timeseries_errors = false,
+                dense_errors = false, kwargs...)
+        end
       end
-    catch e
-      # sometimes BenchmarkTools errors with
-      # `ERROR: syntax: function argument and static parameter names must be distinct`
-      # so, we are catching that error and try a few times.
-      fails += 1
-      fails > 4 && rethrow()
-      @goto START
     end
-    BenchmarkTools.warmup(benchable)
-    BenchmarkTools.tune!(benchable)
-    bench = run(benchable, samples=numruns, seconds=seconds)
-    times[i] = benchtime(bench)
+
+    b_t =  benchmark_f()
+    if b_t > seconds
+      times[i] = b_t
+    else
+      times[i] = minimum([b_t;map(i->benchmark_f(),2:numruns)])
+    end
   end
   return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
 end
