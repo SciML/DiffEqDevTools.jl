@@ -1,5 +1,3 @@
-__precompile__()
-
 module DiffEqDevTools
 
 using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase, DiffEqNoiseProcess
