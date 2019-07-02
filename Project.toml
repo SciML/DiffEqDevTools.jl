@@ -1,31 +1,31 @@
 name = "DiffEqDevTools"
 uuid = "f3b72e0c-5b89-59e1-b016-84e28bfd966d"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "v2.9.0"
+version = "2.9.0"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
-RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
-Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
-RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-DiffEqPDEBase = "34035eb4-37db-58ae-b003-a3202c898701"
-NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
-DiffEqMonteCarlo = "78ddff82-25fc-5f2b-89aa-309469cbf16f"
 DiffEqNoiseProcess = "77a26b50-5914-5dd7-bc55-306e6241c503"
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+DiffEqPDEBase = "34035eb4-37db-58ae-b003-a3202c898701"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
+RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
+DiffEqBase = ">= 5.11.0"
 julia = "1"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 DelayDiffEq = "bcd4f6db-9728-5f36-b5f7-82caef46ccdb"
-StochasticDiffEq = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"
-ParameterizedFunctions = "65888b18-ceab-5e60-b2b9-181511a3b968"
 DiffEqProblemLibrary = "a077e3f3-b75c-5d7f-a0c6-6bc4c8ec64a9"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+ParameterizedFunctions = "65888b18-ceab-5e60-b2b9-181511a3b968"
+StochasticDiffEq = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "OrdinaryDiffEq", "DelayDiffEq", "StochasticDiffEq", "ParameterizedFunctions", "DiffEqProblemLibrary"]
+test = ["DelayDiffEq", "DiffEqProblemLibrary", "OrdinaryDiffEq", "ParameterizedFunctions", "StochasticDiffEq", "Test"]

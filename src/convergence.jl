@@ -36,16 +36,16 @@ function ConvergenceSimulation(solutions,convergence_axis;
 end
 
 function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},
-                          alg;numMonte=10000,save_everystep=true,timeseries_steps=1,
+                          alg;trajectories=10000,save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   N = length(dts)
-  monte_prob = MonteCarloProblem(prob)
-  _solutions = [solve(monte_prob,alg;dt=dts[i],save_everystep=save_everystep,
+  ensemble_prob = EnsembleProblem(prob)
+  _solutions = [solve(ensemble_prob,alg;dt=dts[i],save_everystep=save_everystep,
                       timeseries_steps=timeseries_steps,adaptive=adaptive,
-                      timeseries_errors=timeseries_errors,num_monte=numMonte,
+                      timeseries_errors=timeseries_errors,trajectories=trajectories,
                       kwargs...) for i in 1:N]
-  solutions = [DiffEqBase.calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
+  solutions = [DiffEqBase.calculate_ensemble_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
   auxdata = Dict("dts" =>  dts)
   # Now Calculate Weak Errors
   additional_errors = Dict()
@@ -57,14 +57,14 @@ end
 
 function analyticless_test_convergence(dts::AbstractArray,
                           prob::Union{AbstractRODEProblem,AbstractSDEProblem},
-                          alg,test_dt;numMonte=100,
+                          alg,test_dt;trajectories=100,
                           save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   _solutions = []
-  tmp_solutions = Array{Any}(undef,numMonte,length(dts))
-  for j in 1:numMonte
-    @info "Monte Carlo iteration: $j/$numMonte"
+  tmp_solutions = Array{Any}(undef,trajectories,length(dts))
+  for j in 1:trajectories
+    @info "Monte Carlo iteration: $j/$trajectories"
     t = prob.tspan[1]:test_dt:prob.tspan[2]
     brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
     brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
@@ -79,8 +79,8 @@ function analyticless_test_convergence(dts::AbstractArray,
       tmp_solutions[j,i] = err_sol
     end
   end
-  _solutions = [MonteCarloSolution(tmp_solutions[:,i],0.0,true) for i in 1:length(dts)]
-  solutions = [DiffEqBase.calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
+  _solutions = [EnsembleSolution(tmp_solutions[:,i],0.0,true) for i in 1:length(dts)]
+  solutions = [DiffEqBase.calculate_ensemble_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
   auxdata = Dict("dts" =>  dts)
   # Now Calculate Weak Errors
   additional_errors = Dict()
