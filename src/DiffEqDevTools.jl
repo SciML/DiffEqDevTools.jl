@@ -23,9 +23,6 @@ const WEAK_DENSE_ERRORS = Set([:weak_L2,:weak_L∞])
 const WEAK_ERRORS = union(Set([:weak_final]),
                           WEAK_TIMESERIES_ERRORS,WEAK_DENSE_ERRORS)
 
-parameterless_type(T::Type) = Base.typename(T).wrapper
-parameterless_type(x) = parameterless_type(typeof(x))
-
 include("benchmark.jl")
 include("convergence.jl")
 include("plotrecipes.jl")
