@@ -30,5 +30,5 @@ using StochasticDiffEq
 dts = (1/2).^(6:-1:3)
 test_dt = 1/2^8
 Random.seed!(100)
-sim1 = analyticless_test_convergence(dts,prob,SRIW1(),test_dt,numMonte=400)
+sim1 = analyticless_test_convergence(dts,prob,SRIW1(),test_dt,trajectories=400)
 @test sim1.𝒪est[:final]-1.5 < 0.3

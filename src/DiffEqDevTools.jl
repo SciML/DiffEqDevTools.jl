@@ -1,9 +1,6 @@
-__precompile__()
-
 module DiffEqDevTools
 
-using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase,
-      DiffEqMonteCarlo, DiffEqNoiseProcess
+using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqPDEBase, DiffEqNoiseProcess
 
 using LinearAlgebra, Distributed
 

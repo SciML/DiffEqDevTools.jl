@@ -88,7 +88,7 @@ function appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution;timeseries_
   DiffEqBase.build_solution(sol,timeseries_analytic,errors)
 end
 
-function appxtrue(sim::MonteCarloSolution,appx_setup;kwargs...)
+function appxtrue(sim::EnsembleSolution,appx_setup;kwargs...)
   _new_sols = Vector{DESolution}(length(sim.u))
   for i in eachindex(sim)
     @show i
@@ -98,5 +98,5 @@ function appxtrue(sim::MonteCarloSolution,appx_setup;kwargs...)
     _new_sols[i] = appxtrue(sim[i],true_sol)
   end
   new_sols = convert(Vector{typeof(_new_sols[1])},_new_sols)
-  calculate_monte_errors(new_sols;converged=sim.converged,elapsedTime=sim.elapsedTime,kwargs...)
+  calculate_ensemble_errors(new_sols;converged=sim.converged,elapsedTime=sim.elapsedTime,kwargs...)
 end

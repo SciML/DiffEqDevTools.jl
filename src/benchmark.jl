@@ -312,8 +312,8 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   end
   analytical_solution_ends = [tmp_solutions[i,1,1].u_analytic[end] for i in 1:numruns_error]
   sample_error = 1.96std(norm.(analytical_solution_ends))/sqrt(numruns_error)
-  _solutions_k = [[MonteCarloSolution(tmp_solutions[:,j,k],0.0,true) for j in 1:M] for k in 1:N]
-  solutions = [[DiffEqBase.calculate_monte_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in sol_k] for sol_k in _solutions_k]
+  _solutions_k = [[EnsembleSolution(tmp_solutions[:,j,k],0.0,true) for j in 1:M] for k in 1:N]
+  solutions = [[DiffEqBase.calculate_ensemble_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in sol_k] for sol_k in _solutions_k]
   if error_estimate ∈ WEAK_ERRORS
     errors = [[solutions[j][i].weak_errors[error_estimate] for i in 1:M] for j in 1:N]
   else
