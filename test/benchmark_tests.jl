@@ -1,9 +1,9 @@
 using OrdinaryDiffEq, DelayDiffEq, DiffEqDevTools, DiffEqBase, Test
 using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
-import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear
+using DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear
 
 using DiffEqProblemLibrary.DDEProblemLibrary: importddeproblems; importddeproblems()
-import DiffEqProblemLibrary.DDEProblemLibrary: prob_dde_1delay
+using DiffEqProblemLibrary.DDEProblemLibrary: prob_dde_constant_1delay_ip
 
 ## Setup Tests
 
@@ -96,7 +96,7 @@ println("Test DP5, Tsit5, and Vern6")
 wp = WorkPrecisionSet(prob,abstols,reltols,setups;appxsol=test_sol,save_everystep=false,numruns=20,maxiters=10000)
 
 # DDE problem
-prob = prob_dde_1delay
+prob = prob_dde_constant_1delay_ip
 
 abstols = 1 ./10 .^(7:10)
 reltols = 1 ./10 .^(4:7)
