@@ -37,7 +37,7 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
   timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
   dense_errors = error_estimate ∈ DENSE_ERRORS
   if names == nothing
-    names = [string(parameterless_type(setups[i][:alg])) for i=1:N]
+    names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
   end
   for i in eachindex(setups)
     sol = solve(prob,setups[i][:alg];timeseries_errors=timeseries_errors,
@@ -87,7 +87,7 @@ function ShootoutSet(probs,setups;probaux=nothing,
   shootouts = Vector{Shootout}(undef,N)
   winners = Vector{String}(undef,N)
   if names == nothing
-    names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
+    names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
   end
   if probaux == nothing
     probaux = Vector{Dict{Symbol,Any}}(undef,N)
@@ -215,7 +215,7 @@ function WorkPrecisionSet(prob::Union{AbstractODEProblem,AbstractDDEProblem,
   N = length(setups)
   wps = Vector{WorkPrecision}(undef,N)
   if names == nothing
-    names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
+    names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
   end
   for i in 1:N
     print_names && println(names[i])
@@ -295,7 +295,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   times = Array{Float64}(undef,M,N)
   tmp_solutions = Array{Any}(undef,numruns_error,M,N)
   if names == nothing
-    names = [string(parameterless_type(setups[i][:alg])) for i=1:length(setups)]
+    names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
   end
   time_tmp = Vector{Float64}(undef,numruns)
 
