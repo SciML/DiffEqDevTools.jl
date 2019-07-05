@@ -1,6 +1,6 @@
 using OrdinaryDiffEq, DiffEqBase, DiffEqDevTools, Test
 using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
-import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_linear
+using DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_linear
 
 f = (u,p,t) -> u
 fun = ODEFunction(f; analytic=(u0,p,t)->u0*exp(t))

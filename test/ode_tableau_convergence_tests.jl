@@ -1,6 +1,6 @@
 using OrdinaryDiffEq, DiffEqDevTools, Test, Random
 using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
-import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear,
+using DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear,
        prob_ode_bigfloatlinear, prob_ode_bigfloat2Dlinear
 
 probArr = Vector{ODEProblem}(undef, 2)
