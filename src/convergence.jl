@@ -36,7 +36,7 @@ function ConvergenceSimulation(solutions,convergence_axis;
 end
 
 function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},
-                          alg;trajectories=10000,save_everystep=true,timeseries_steps=1,
+                          alg;trajectories,save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   N = length(dts)
