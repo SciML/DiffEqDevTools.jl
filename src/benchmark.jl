@@ -43,8 +43,14 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
     sol = solve(prob,setups[i][:alg];timeseries_errors=timeseries_errors,
     dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
 
-    if appxsol != nothing
-      errsol = appxtrue(sol,appxsol)
+    if :prob_choice ∈ keys(setups[i])
+      cur_appxsol = appxsol[setups[i][:prob_choice]]
+    else
+      cur_appxsol = appxsol
+    end
+
+    if cur_appxsol != cur_appxsol
+      errsol = appxtrue(sol,cur_appxsol)
       errors[i] = errsol.errors[error_estimate]
       solutions[i] = errsol
     else
@@ -52,9 +58,15 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
       solutions[i] = sol
     end
 
-    benchmark_f = let prob=prob,alg=setups[i][:alg],sol=sol,kwargs=kwargs
+    if haskey(setups[i], :prob_choice)
+      _prob = prob[setups[i][:prob_choice]]
+    else
+      _prob = prob
+    end
+
+    benchmark_f = let _prob=_prob,alg=setups[i][:alg],sol=sol,kwargs=kwargs
       function benchmark_f()
-        @elapsed solve(prob,alg,(sol.u),(sol.t),(sol.k);
+        @elapsed solve(_prob,alg,(sol.u),(sol.t),(sol.k);
               timeseries_errors = false,
               dense_errors = false, kwargs...)
       end
@@ -156,58 +168,72 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
   if name == nothing
     name = "WP-Alg"
   end
-  timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
-  dense_errors = error_estimate ∈ DENSE_ERRORS
-  for i in 1:N
-    # Calculate errors and precompile
-    if dts == nothing
-      sol = solve(prob,alg;kwargs...,abstol=abstols[i],
-      reltol=reltols[i],timeseries_errors=timeseries_errors,
-      dense_errors = dense_errors) # Compile and get result
-    else
-      sol = solve(prob,alg;kwargs...,abstol=abstols[i],
-      reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
-      dense_errors = dense_errors) # Compile and get result
-    end
 
-    if appxsol != nothing
-      errsol = appxtrue(sol,appxsol)
-      errors[i] = mean(errsol.errors[error_estimate])
-    else
-      errors[i] = mean(sol.errors[error_estimate])
-    end
+  if haskey(kwargs, :prob_choice)
+    _prob = prob[kwargs[:prob_choice]]
+  else
+    _prob = prob
+  end
 
-    benchmark_f = let dts=dts,prob=prob,alg=alg,sol=sol,abstols=abstols,reltols=reltols,kwargs=kwargs
-      function benchmark_f()
-        if dts == nothing
-          @elapsed solve(prob,alg,(sol.u),(sol.t),(sol.k);
-                abstol=(abstols[i]),
-                reltol=(reltols[i]),
-                timeseries_errors = false,
-                dense_errors = false, kwargs...)
-        else
-          @elapsed solve(prob,alg,(sol.u),(sol.t),(sol.k);
-                abstol=(abstols[i]),
-                reltol=(reltols[i]),
-                dt=(dts[i]),
-                timeseries_errors = false,
-                dense_errors = false, kwargs...)
+  let _prob = _prob
+    timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
+    dense_errors = error_estimate ∈ DENSE_ERRORS
+    for i in 1:N
+      # Calculate errors and precompile
+      if dts == nothing
+        sol = solve(_prob,alg;kwargs...,abstol=abstols[i],
+        reltol=reltols[i],timeseries_errors=timeseries_errors,
+        dense_errors = dense_errors) # Compile and get result
+      else
+        sol = solve(_prob,alg;kwargs...,abstol=abstols[i],
+        reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
+        dense_errors = dense_errors) # Compile and get result
+      end
+
+      if haskey(kwargs, :prob_choice)
+        cur_appxsol = appxsol[kwargs[:prob_choice]]
+      else
+        cur_appxsol = appxsol
+      end
+
+      if cur_appxsol != nothing
+        errsol = appxtrue(sol,cur_appxsol)
+        errors[i] = mean(errsol.errors[error_estimate])
+      else
+        errors[i] = mean(sol.errors[error_estimate])
+      end
+
+      benchmark_f = let dts=dts,_prob=_prob,alg=alg,sol=sol,abstols=abstols,reltols=reltols,kwargs=kwargs
+        function benchmark_f()
+          if dts == nothing
+            @elapsed solve(_prob,alg,(sol.u),(sol.t),(sol.k);
+                  abstol=(abstols[i]),
+                  reltol=(reltols[i]),
+                  timeseries_errors = false,
+                  dense_errors = false, kwargs...)
+          else
+            @elapsed solve(_prob,alg,(sol.u),(sol.t),(sol.k);
+                  abstol=(abstols[i]),
+                  reltol=(reltols[i]),
+                  dt=(dts[i]),
+                  timeseries_errors = false,
+                  dense_errors = false, kwargs...)
+          end
         end
       end
-    end
 
-    b_t =  benchmark_f()
-    if b_t > seconds
-      times[i] = b_t
-    else
-      times[i] = minimum([b_t;map(i->benchmark_f(),2:numruns)])
+      b_t =  benchmark_f()
+      if b_t > seconds
+        times[i] = b_t
+      else
+        times[i] = minimum([b_t;map(i->benchmark_f(),2:numruns)])
+      end
     end
   end
   return WorkPrecision(prob,abstols,reltols,errors,times,name,N)
 end
 
-function WorkPrecisionSet(prob::Union{AbstractODEProblem,AbstractDDEProblem,
-                                      AbstractDAEProblem},
+function WorkPrecisionSet(prob,
                           abstols,reltols,setups;
                           print_names=false,names=nothing,appxsol=nothing,
                           error_estimate=:final,
