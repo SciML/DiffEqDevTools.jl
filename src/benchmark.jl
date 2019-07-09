@@ -169,7 +169,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
     name = "WP-Alg"
   end
 
-  if :prob_choice ∈ keys(kwargs)
+  if haskey(kwargs, :prob_choice)
     _prob = prob[kwargs[:prob_choice]]
   else
     _prob = prob
