@@ -121,3 +121,4 @@ setups = [Dict(:alg => MethodOfSteps(BS3()))
           Dict(:alg => MethodOfSteps(Tsit5()))]
 println("Test MethodOfSteps BS3 and Tsit5")
 wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol)
+println("DDE Done")
