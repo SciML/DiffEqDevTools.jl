@@ -58,7 +58,7 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
       solutions[i] = sol
     end
 
-    if :prob_choice ∈ keys(setups[i])
+    if haskey(setups[i], :prob_choice)
       _prob = prob[setups[i][:prob_choice]]
     else
       _prob = prob
