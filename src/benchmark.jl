@@ -190,7 +190,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
         dense_errors = dense_errors) # Compile and get result
       end
 
-      if :prob_choice ∈ keys(kwargs)
+      if haskey(kwargs, :prob_choice)
         cur_appxsol = appxsol[kwargs[:prob_choice]]
       else
         cur_appxsol = appxsol
