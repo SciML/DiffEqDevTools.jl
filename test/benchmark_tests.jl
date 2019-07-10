@@ -112,7 +112,7 @@ wp = WorkPrecisionSet(probs,abstols,reltols,setups;appxsol=[test_sol,test_sol1],
 # DDE problem
 prob = prob_dde_constant_1delay_ip
 
-abstols = 1 ./10 .^(7:10)
+abstols = 1 ./10 .^(5:8)
 reltols = 1 ./10 .^(4:7)
 sol = solve(prob, MethodOfSteps(Vern9(), max_fixedpoint_iters=1000); reltol=1e-8, abstol=1e-8)
 test_sol = TestSolution(sol)
