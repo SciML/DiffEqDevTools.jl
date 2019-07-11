@@ -19,10 +19,10 @@ test_dt = 0.1
 wp = WorkPrecisionSet(prob,abstols,reltols,setups,test_dt;
                                      numruns=5,names=names,error_estimate=:l2)
 
-se = get_sample_errors(prob,numruns=1000)
-se = get_sample_errors(prob,numruns=[5;10;25;50])
+se = get_sample_errors(prob,setups[1],numruns=1000)
+se = get_sample_errors(prob,setups[1],numruns=[5;10;25;50])
 
-println("Now weak error")
+println("Now weak error without analytical solution")
 
 prob2 = SDEProblem((du,u,p,t)->prob.f(du,u,p,t),prob.g,prob.u0,(0.0,0.1),prob.p)
 test_dt = 1/10^5
@@ -33,9 +33,7 @@ wp = WorkPrecisionSet(prob2,abstols,reltols,setups,test_dt;
 
 println("Get sample errors")
 
-se2 = get_sample_errors(prob2,test_dt,appxsol_setup = appxsol_setup,
-                       numruns=5)
-se2 = get_sample_errors(prob2,test_dt,appxsol_setup = appxsol_setup,
-                       numruns=[5;10;25;50])
+se2 = get_sample_errors(prob2,setups[1],test_dt,appxsol_setup = appxsol_setup,
+                       numruns=[5,10,25,50,100],sample_error_runs=20)
 
 @test all(se-se2 .< 1e-1)

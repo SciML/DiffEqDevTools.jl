@@ -155,7 +155,6 @@ mutable struct WorkPrecisionSet
   prob
   setups
   names
-  sample_error
   error_estimate
   numruns
 end
@@ -257,7 +256,7 @@ function WorkPrecisionSet(prob,
                                  name=names[i],kwargs...,setups[i]...)
     end
   end
-  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,nothing,error_estimate,nothing)
+  return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,error_estimate,nothing)
 end
 
 @def error_calculation begin
@@ -311,7 +310,8 @@ end
 function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_dt=nothing;
                           numruns=20,numruns_error = 20,
                           print_names=false,names=nothing,appxsol_setup=nothing,
-                          error_estimate=:final,parallel_type = :none,kwargs...)
+                          error_estimate=:final,parallel_type = :none,
+                          kwargs...)
 
   timeseries_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
@@ -336,8 +336,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
       @error_calculation
     end
   end
-  analytical_solution_ends = [tmp_solutions[i,1,1].u_analytic[end] for i in 1:numruns_error]
-  sample_error = 1.96std(norm.(analytical_solution_ends))/sqrt(numruns_error)
+
   _solutions_k = [[EnsembleSolution(tmp_solutions[:,j,k],0.0,true) for j in 1:M] for k in 1:N]
   solutions = [[DiffEqBase.calculate_ensemble_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in sol_k] for sol_k in _solutions_k]
   if error_estimate ∈ WEAK_ERRORS
@@ -391,46 +390,61 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   end
 
   wps = [WorkPrecision(prob,abstols,reltols,errors[i],times[:,i],names[i],N) for i in 1:N]
-  WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,sample_error,error_estimate,numruns_error)
+  WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,error_estimate,numruns_error)
 end
 
-@def sample_errors begin
-  if !DiffEqBase.has_analytic(prob.f)
-    true_sol = solve(prob,appxsol_setup[:alg];kwargs...,appxsol_setup...,
-                     save_everystep=false)
-    analytical_solution_ends[i] = norm(true_sol.u[end])
-  else
-    _dt = prob.tspan[2] - prob.tspan[1]
-    if typeof(prob.u0) <: Number
-      W = sqrt(_dt)*randn()
-    else
-      W = sqrt(_dt)*randn(size(prob.u0))
-    end
-    analytical_solution_ends[i] = norm(prob.f.analytic(prob.u0,prob.p,prob.tspan[2],W))
-  end
-end
-
-function get_sample_errors(prob::AbstractRODEProblem,test_dt=nothing;
+function get_sample_errors(prob::AbstractRODEProblem,setup,test_dt=nothing;
                           appxsol_setup=nothing,
-                          numruns=20,std_estimation_runs = maximum(numruns),
-                          error_estimate=:final,parallel_type = :none,kwargs...)
-  _std_estimation_runs = Int(std_estimation_runs)
-  analytical_solution_ends = Vector{typeof(norm(prob.u0))}(undef,_std_estimation_runs)
-  if parallel_type == :threads
-    Threads.@threads for i in 1:_std_estimation_runs
-      @sample_errors
+                          numruns,error_estimate=:final,
+                          sample_error_runs = Int(1e8),
+                          solution_runs,
+                          parallel_type = :none,kwargs...)
+
+  maxnumruns = findmax(numruns)[1]
+
+  tmp_solutions_full = map(1:solution_runs) do i
+    # Use the WorkPrecision stuff to calculate the errors
+    tmp_solutions = Array{Any}(undef,maxnumruns,1,1)
+    setups = [setup]
+    abstols = [1e-2] # Standard default
+    reltols = [1e-2] # Standard default
+    M = 1; N = 1
+    timeseries_errors = false; dense_errors = false
+    if parallel_type == :threads
+      Threads.@threads for i in 1:maxnumruns
+        @error_calculation
+      end
+    elseif parallel_type == :none
+      for i in 1:maxnumruns
+        @info "Standard deviation estimation: $i/$numruns"
+        @error_calculation
+      end
     end
-  elseif parallel_type == :none
-    for i in 1:_std_estimation_runs
-      @info "Standard deviation estimation: $i/$_std_estimation_runs"
-      @sample_errors
-    end
+    tmp_solutions = vec(tmp_solutions)
   end
-  est_std = std(analytical_solution_ends)
-  if typeof(numruns) <: Number
-    return 1.96est_std/sqrt(numruns)
+
+  if DiffEqBase.has_analytic(prob.f)
+    analytical_mean_end = mean(1:sample_error_runs) do i
+      _dt = prob.tspan[2] - prob.tspan[1]
+      if typeof(prob.u0) <: Number
+        W = sqrt(_dt)*randn()
+      else
+        W = sqrt(_dt)*randn(size(prob.u0))
+      end
+      prob.f.analytic(prob.u0,prob.p,prob.tspan[2],W)
+    end
   else
-    return [1.96est_std/sqrt(_numruns) for _numruns in numruns]
+    @assert !(numruns isa Number)
+    # Use the mean of the means as the analytical mean
+    analytical_mean_end = mean(mean(tmp_solutions[i].u[end] for i in 1:length(tmp_solutions)) for tmp_solutions in tmp_solutions_full)
+  end
+
+  mean_solution_ends = [mean([tmp_solutions[i].u[end] for i in 1:maxnumruns]) for tmp_solutions in tmp_solutions_full]
+
+  if numruns isa Number
+    return sample_error = 1.96std(norm(mean_sol_end - analytical_mean_end) for mean_sol_end in mean_solution_ends)/sqrt(numruns)
+  else
+    return sample_error = [1.96std(norm(mean_sol_end - analytical_mean_end) for mean_sol_end in mean_solution_ends)/sqrt(numruns[i]) for i in 1:length(numruns)]
   end
 end
 
