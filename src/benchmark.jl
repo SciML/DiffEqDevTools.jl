@@ -403,6 +403,7 @@ function get_sample_errors(prob::AbstractRODEProblem,setup,test_dt=nothing;
   maxnumruns = findmax(numruns)[1]
 
   tmp_solutions_full = map(1:solution_runs) do i
+    @info "Solution Run: $i"
     # Use the WorkPrecision stuff to calculate the errors
     tmp_solutions = Array{Any}(undef,maxnumruns,1,1)
     setups = [setup]
@@ -416,7 +417,6 @@ function get_sample_errors(prob::AbstractRODEProblem,setup,test_dt=nothing;
       end
     elseif parallel_type == :none
       for i in 1:maxnumruns
-        @info "Standard deviation estimation: $i/$numruns"
         @error_calculation
       end
     end
@@ -434,7 +434,6 @@ function get_sample_errors(prob::AbstractRODEProblem,setup,test_dt=nothing;
       prob.f.analytic(prob.u0,prob.p,prob.tspan[2],W)
     end
   else
-    @assert !(numruns isa Number)
     # Use the mean of the means as the analytical mean
     analytical_mean_end = mean(mean(tmp_solutions[i].u[end] for i in 1:length(tmp_solutions)) for tmp_solutions in tmp_solutions_full)
   end
