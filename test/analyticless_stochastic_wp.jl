@@ -3,7 +3,7 @@ using DiffEqProblemLibrary.SDEProblemLibrary: importsdeproblems; importsdeproble
 using DiffEqProblemLibrary.SDEProblemLibrary: prob_sde_additivesystem
 
 prob = prob_sde_additivesystem
-prob = SDEProblem(prob.f,prob.g,prob.u0,(0.0,1.0),prob.p)
+prob = SDEProblem(prob.f,prob.g,prob.u0,(0.0,0.1),prob.p)
 
 reltols = 1.0./10.0.^(1:5)
 abstols = reltols#[0.0 for i in eachindex(reltols)]
@@ -19,8 +19,8 @@ test_dt = 0.1
 wp = WorkPrecisionSet(prob,abstols,reltols,setups,test_dt;
                                      numruns=5,names=names,error_estimate=:l2)
 
-se = get_sample_errors(prob,setups[1],numruns=100,solution_runs=20)
-se = get_sample_errors(prob,setups[1],numruns=[5,10,25,50,100,1000],solution_runs=20)
+se = get_sample_errors(prob,setups[1],numruns=100,solution_runs=200)
+se = get_sample_errors(prob,setups[1],numruns=[5,10,25,50,100,1000],solution_runs=200)
 
 println("Now weak error without analytical solution")
 
@@ -36,4 +36,4 @@ println("Get sample errors")
 se2 = get_sample_errors(prob2,setups[1],test_dt,appxsol_setup = appxsol_setup,
                         numruns=[5,10,25,50,100],solution_runs=20)
 
-@test all(se-se2 .< 1e-1)
+@test all(se[1:5]-se2 .< 1e-1)

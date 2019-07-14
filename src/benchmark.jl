@@ -396,7 +396,7 @@ end
 function get_sample_errors(prob::AbstractRODEProblem,setup,test_dt=nothing;
                           appxsol_setup=nothing,
                           numruns,error_estimate=:final,
-                          sample_error_runs = Int(1e8),
+                          sample_error_runs = Int(1e7),
                           solution_runs,
                           parallel_type = :none,kwargs...)
 
@@ -438,12 +438,14 @@ function get_sample_errors(prob::AbstractRODEProblem,setup,test_dt=nothing;
     analytical_mean_end = mean(mean(tmp_solutions[i].u[end] for i in 1:length(tmp_solutions)) for tmp_solutions in tmp_solutions_full)
   end
 
-  mean_solution_ends = [mean([tmp_solutions[i].u[end] for i in 1:maxnumruns]) for tmp_solutions in tmp_solutions_full]
-
   if numruns isa Number
+    mean_solution_ends = [mean([tmp_solutions[i].u[end] for i in 1:maxnumruns]) for tmp_solutions in tmp_solutions_full]
     return sample_error = 1.96std(norm(mean_sol_end - analytical_mean_end) for mean_sol_end in mean_solution_ends)/sqrt(numruns)
   else
-    return sample_error = [1.96std(norm(mean_sol_end - analytical_mean_end) for mean_sol_end in mean_solution_ends)/sqrt(numruns[i]) for i in 1:length(numruns)]
+    map(1:length(numruns)) do i
+      mean_solution_ends = [mean([tmp_solutions[i].u[end] for i in 1:numruns[i]]) for tmp_solutions in tmp_solutions_full]
+      sample_error = 1.96std(norm(mean_sol_end - analytical_mean_end) for mean_sol_end in mean_solution_ends)/sqrt(numruns[i])
+    end
   end
 end
 
