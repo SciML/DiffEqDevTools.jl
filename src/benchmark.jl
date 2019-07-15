@@ -41,7 +41,7 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
   end
   for i in eachindex(setups)
     sol = solve(prob,setups[i][:alg];timeseries_errors=timeseries_errors,
-    dense_errors = dense_errors,kwargs...,setups[i]...) # Compile and get result
+    dense_errors = dense_errors,kwargs...,setups[i]...)
 
     if :prob_choice ∈ keys(setups[i])
       cur_appxsol = appxsol[setups[i][:prob_choice]]
@@ -65,18 +65,17 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
     end
 
     benchmark_f = let _prob=_prob,alg=setups[i][:alg],sol=sol,kwargs=kwargs
-      function benchmark_f()
-        @elapsed solve(_prob,alg,(sol.u),(sol.t),(sol.k);
-              timeseries_errors = false,
-              dense_errors = false, kwargs...)
-      end
+      () -> @elapsed solve(_prob, alg, sol.u, sol.t, sol.k;
+                           timeseries_errors = false,
+                           dense_errors = false, kwargs...)
     end
+    benchmark_f() # pre-compile
 
-    b_t =  benchmark_f()
+    b_t = benchmark_f()
     if b_t > seconds
       times[i] = b_t
     else
-      times[i] = minimum([b_t;map(i->benchmark_f(),2:numruns)])
+      times[i] = mapreduce(i -> benchmark_f(), min, 2:numruns; init = b_t)
     end
 
     effs[i] = 1/(errors[i]*times[i])
@@ -178,15 +177,14 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
     timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
     dense_errors = error_estimate ∈ DENSE_ERRORS
     for i in 1:N
-      # Calculate errors and precompile
       if dts == nothing
         sol = solve(_prob,alg;kwargs...,abstol=abstols[i],
         reltol=reltols[i],timeseries_errors=timeseries_errors,
-        dense_errors = dense_errors) # Compile and get result
+        dense_errors = dense_errors)
       else
         sol = solve(_prob,alg;kwargs...,abstol=abstols[i],
         reltol=reltols[i],dt=dts[i],timeseries_errors=timeseries_errors,
-        dense_errors = dense_errors) # Compile and get result
+        dense_errors = dense_errors)
       end
 
       if haskey(kwargs, :prob_choice)
@@ -203,29 +201,28 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       end
 
       benchmark_f = let dts=dts,_prob=_prob,alg=alg,sol=sol,abstols=abstols,reltols=reltols,kwargs=kwargs
-        function benchmark_f()
-          if dts == nothing
-            @elapsed solve(_prob,alg,(sol.u),(sol.t),(sol.k);
-                  abstol=(abstols[i]),
-                  reltol=(reltols[i]),
-                  timeseries_errors = false,
-                  dense_errors = false, kwargs...)
-          else
-            @elapsed solve(_prob,alg,(sol.u),(sol.t),(sol.k);
-                  abstol=(abstols[i]),
-                  reltol=(reltols[i]),
-                  dt=(dts[i]),
-                  timeseries_errors = false,
-                  dense_errors = false, kwargs...)
-          end
+        if dts == nothing
+          () -> @elapsed solve(_prob, alg, sol.u, sol.t, sol.k;
+                               abstol = abstols[i],
+                               reltol = reltols[i],
+                               timeseries_errors = false,
+                               dense_errors = false, kwargs...)
+        else
+          () -> @elapsed solve(_prob, alg, sol.u, sol.t, sol.k;
+                               abstol = abstols[i],
+                               reltol = reltols[i],
+                               dt = dts[i],
+                               timeseries_errors = false,
+                               dense_errors = false, kwargs...)
         end
       end
+      benchmark_f() # pre-compile
 
-      b_t =  benchmark_f()
+      b_t = benchmark_f()
       if b_t > seconds
         times[i] = b_t
       else
-        times[i] = minimum([b_t;map(i->benchmark_f(),2:numruns)])
+        times[i] = mapreduce(i -> benchmark_f(), min, 2:numruns; init = b_t)
       end
     end
   end
