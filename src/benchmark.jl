@@ -36,7 +36,7 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
   effratios = Matrix{Float64}(undef,N,N)
   timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
   dense_errors = error_estimate ∈ DENSE_ERRORS
-  if names == nothing
+  if names === nothing
     names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
   end
   for i in eachindex(setups)
@@ -97,10 +97,10 @@ function ShootoutSet(probs,setups;probaux=nothing,
   N = length(probs)
   shootouts = Vector{Shootout}(undef,N)
   winners = Vector{String}(undef,N)
-  if names == nothing
+  if names === nothing
     names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
   end
-  if probaux == nothing
+  if probaux === nothing
     probaux = Vector{Dict{Symbol,Any}}(undef,N)
     for i in 1:N
       probaux[i] = Dict{Symbol,Any}()
@@ -163,7 +163,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
   N = length(abstols)
   errors = Vector{Float64}(undef,N)
   times = Vector{Float64}(undef,N)
-  if name == nothing
+  if name === nothing
     name = "WP-Alg"
   end
 
@@ -177,7 +177,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
     timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
     dense_errors = error_estimate ∈ DENSE_ERRORS
     for i in 1:N
-      if dts == nothing
+      if dts === nothing
         sol = solve(_prob,alg;kwargs...,abstol=abstols[i],
         reltol=reltols[i],timeseries_errors=timeseries_errors,
         dense_errors = dense_errors)
@@ -193,7 +193,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
         cur_appxsol = appxsol
       end
 
-      if cur_appxsol != nothing
+      if cur_appxsol !== nothing
         errsol = appxtrue(sol,cur_appxsol)
         errors[i] = mean(errsol.errors[error_estimate])
       else
@@ -201,7 +201,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       end
 
       benchmark_f = let dts=dts,_prob=_prob,alg=alg,sol=sol,abstols=abstols,reltols=reltols,kwargs=kwargs
-        if dts == nothing
+        if dts === nothing
           () -> @elapsed solve(_prob, alg, sol.u, sol.t, sol.k;
                                abstol = abstols[i],
                                reltol = reltols[i],
@@ -236,7 +236,7 @@ function WorkPrecisionSet(prob,
                           test_dt=nothing,kwargs...)
   N = length(setups)
   wps = Vector{WorkPrecision}(undef,N)
-  if names == nothing
+  if names === nothing
     names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
   end
   for i in 1:N
@@ -317,7 +317,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   N = length(setups); M = length(abstols)
   times = Array{Float64}(undef,M,N)
   tmp_solutions = Array{Any}(undef,numruns_error,M,N)
-  if names == nothing
+  if names === nothing
     names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
   end
   time_tmp = Vector{Float64}(undef,numruns)
