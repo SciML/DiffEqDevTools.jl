@@ -75,7 +75,7 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
     if b_t > seconds
       times[i] = b_t
     else
-      times[i] = minimum([b_t;map(i->benchmark_f(),2:numruns)])
+      times[i] = mapreduce(i -> benchmark_f(), min, 2:numruns; init = b_t)
     end
 
     effs[i] = 1/(errors[i]*times[i])
@@ -222,7 +222,7 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
       if b_t > seconds
         times[i] = b_t
       else
-        times[i] = minimum([b_t;map(i->benchmark_f(),2:numruns)])
+        times[i] = mapreduce(i -> benchmark_f(), min, 2:numruns; init = b_t)
       end
     end
   end
