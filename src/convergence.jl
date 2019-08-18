@@ -66,7 +66,7 @@ function analyticless_test_convergence(dts::AbstractArray,
   for j in 1:trajectories
     @info "Monte Carlo iteration: $j/$trajectories"
     t = prob.tspan[1]:test_dt:prob.tspan[2]
-    if prob.noise_rate_prototype == nothing
+    if prob.noise_rate_prototype === nothing
       brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
       brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
     else
