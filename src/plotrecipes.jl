@@ -35,8 +35,7 @@ end
   wp.errors,wp.times
 end
 
-@recipe function f(wp_set::WorkPrecisionSet;
-                   plot_sample_error = wp_set.error_estimate ∈ WEAK_ERRORS)
+@recipe function f(wp_set::WorkPrecisionSet)
   seriestype --> :path
   linewidth --> 3
   yguide --> "Time (s)"
@@ -50,20 +49,7 @@ end
     push!(errors,wp_set[i].errors)
     push!(times,wp_set[i].times)
   end
-  if plot_sample_error
-    @series begin
-      linestyle := :dash
-      label := "Sample Error: $(wp_set.numruns)"
-      color := :red
-      xs = [wp_set.sample_error,wp_set.sample_error]
-      ys = [minimum(minimum(t) for t in times),maximum(maximum(t) for t in times)]
-      xs,ys
-    end
-    label -->  reshape(["Sample Error: $(wp_set.numruns)";wp_set.names],1,1+length(wp_set))
-  else
-    label -->  reshape(wp_set.names,1,length(wp_set))
-  end
-
+  label -->  reshape(wp_set.names,1,length(wp_set))
   errors,times
 end
 

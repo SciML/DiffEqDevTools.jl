@@ -36,7 +36,7 @@ function ConvergenceSimulation(solutions,convergence_axis;
 end
 
 function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},
-                          alg;trajectories=10000,save_everystep=true,timeseries_steps=1,
+                          alg;trajectories,save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   N = length(dts)
@@ -66,8 +66,13 @@ function analyticless_test_convergence(dts::AbstractArray,
   for j in 1:trajectories
     @info "Monte Carlo iteration: $j/$trajectories"
     t = prob.tspan[1]:test_dt:prob.tspan[2]
-    brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
-    brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    if prob.noise_rate_prototype === nothing
+      brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+      brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    else
+      brownian_values = cumsum([[zeros(size(prob.noise_rate_prototype,2))];[sqrt(test_dt)*randn(size(prob.noise_rate_prototype,2)) for i in 1:length(t)-1]])
+      brownian_values2 = cumsum([[zeros(size(prob.noise_rate_prototype,2))];[sqrt(test_dt)*randn(size(prob.noise_rate_prototype,2)) for i in 1:length(t)-1]])
+    end
     np = NoiseGrid(t,brownian_values,brownian_values2)
     _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
                        noise=np,
