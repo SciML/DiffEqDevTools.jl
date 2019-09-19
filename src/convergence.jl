@@ -95,6 +95,48 @@ function analyticless_test_convergence(dts::AbstractArray,
   ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors)
 end
 
+function analyticless_test_convergence(dts::AbstractArray,
+  prob::AbstractSDDEProblem,
+  alg, test_dt;trajectories = 100,
+  save_everystep = true,timeseries_steps = 1,
+  timeseries_errors = save_everystep,adaptive = false,
+  weak_timeseries_errors = false,weak_dense_errors = false,kwargs...)
+  _solutions = []
+  tmp_solutions = Array{Any}(undef, trajectories, length(dts))
+  for j in 1:trajectories
+    @info "Monte Carlo iteration: $j/$trajectories"
+    t = prob.tspan[1]:test_dt:prob.tspan[2]
+    if prob.noise_rate_prototype === nothing
+      brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt) * randn(size(prob.u0)) for i in 1:length(t) - 1]])
+      brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt) * randn(size(prob.u0)) for i in 1:length(t) - 1]])
+    else
+      brownian_values = cumsum([[zeros(size(prob.noise_rate_prototype, 2))];[sqrt(test_dt) * randn(size(prob.noise_rate_prototype, 2)) for i in 1:length(t) - 1]])
+      brownian_values2 = cumsum([[zeros(size(prob.noise_rate_prototype, 2))];[sqrt(test_dt) * randn(size(prob.noise_rate_prototype, 2)) for i in 1:length(t) - 1]])
+    end
+    np = NoiseGrid(t, brownian_values, brownian_values2)
+
+    _prob = SDDEProblem(prob.f, prob.g, prob.h, prob.tspan, prob.p, 
+                    noise = np, noise_rate_prototype = prob.noise_rate_prototype,
+                    constant_lags = prob.constant_lags, dependent_lags = prob.dependent_lags,
+                    neutral = prob.neutral, order_discontinuity_t0 = prob.order_discontinuity_t0, prob.kwargs...);
+    true_sol = solve(_prob, alg;adaptive = adaptive,dt = test_dt);
+    for i in 1:length(dts)
+      sol = solve(_prob, alg;dt = dts[i],adaptive = adaptive);
+      err_sol = appxtrue(sol, true_sol)
+      tmp_solutions[j,i] = err_sol
+    end
+  end
+  _solutions = [EnsembleSolution(tmp_solutions[:,i], 0.0, true) for i in 1:length(dts)]
+  solutions = [DiffEqBase.calculate_ensemble_errors(sim;weak_timeseries_errors = weak_timeseries_errors,weak_dense_errors = weak_dense_errors) for sim in _solutions]
+  auxdata = Dict("dts" =>  dts)
+# Now Calculate Weak Errors
+  additional_errors = Dict()
+  for k in keys(solutions[1].weak_errors)
+    additional_errors[k] = [sol.weak_errors[k] for sol in solutions]
+  end
+  ConvergenceSimulation(solutions, dts, auxdata = auxdata, additional_errors = additional_errors)
+end
+
 function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;
                           save_everystep=true,adaptive=false,kwargs...)
   N = length(dts)

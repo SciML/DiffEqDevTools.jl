@@ -10,8 +10,9 @@ import Base: length
 
 import DiffEqBase: AbstractODEProblem, AbstractDDEProblem,
        AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
-       AbstractDAEProblem, @def, ConvergenceSetup, DEAlgorithm,
-       ODERKTableau, AbstractTimeseriesSolution, ExplicitRKTableau,
+       AbstractDAEProblem, AbstractSDDEProblem,
+       @def, ConvergenceSetup, DEAlgorithm, ODERKTableau,
+       AbstractTimeseriesSolution, ExplicitRKTableau,
        ImplicitRKTableau
 
 import LinearAlgebra: norm, I
