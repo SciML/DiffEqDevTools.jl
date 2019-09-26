@@ -29,6 +29,7 @@ end
 
 function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:final,numruns=20,seconds=2,kwargs...)
   N = length(setups)
+  @assert names === nothing || length(setups) == length(names)
   errors = Vector{Float64}(undef,N)
   solutions = Vector{Any}(undef,N)
   effs = Vector{Float64}(undef,N)
@@ -95,6 +96,7 @@ end
 function ShootoutSet(probs,setups;probaux=nothing,
                      names=nothing,print_names=false,kwargs...)
   N = length(probs)
+  @assert names === nothing || length(setups) == length(names)
   shootouts = Vector{Shootout}(undef,N)
   winners = Vector{String}(undef,N)
   if names === nothing
@@ -235,6 +237,7 @@ function WorkPrecisionSet(prob,
                           error_estimate=:final,
                           test_dt=nothing,kwargs...)
   N = length(setups)
+  @assert names === nothing || length(setups) == length(names)
   wps = Vector{WorkPrecision}(undef,N)
   if names === nothing
     names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
@@ -309,7 +312,8 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
                           print_names=false,names=nothing,appxsol_setup=nothing,
                           error_estimate=:final,parallel_type = :none,
                           kwargs...)
-
+  
+  @assert names === nothing || length(setups) == length(names)
   timeseries_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
   weak_dense_errors = error_estimate ∈ WEAK_DENSE_ERRORS
