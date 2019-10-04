@@ -42,7 +42,8 @@ export get_sample_errors
 #Plot Functions
 export stability_region
 
-#Tableus
+#Tableaus
+export deduce_Butcher_tableau
 export constructEuler, constructKutta3, constructRK4, constructRK438Rule,
        constructImplicitEuler, constructMidpointRule, constructTrapezoidalRule,
        constructLobattoIIIA4, constructLobattoIIIB2, constructLobattoIIIB4,
