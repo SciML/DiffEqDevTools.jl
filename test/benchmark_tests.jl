@@ -123,3 +123,12 @@ println("Test MethodOfSteps BS3 and Tsit5")
 #Travis compile time issue
 #wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol)
 println("DDE Done")
+
+__f(u,p,t) = 1.01*u
+u0=1/2
+tspan = (0.0,1.0)
+prob = ODEProblem(__f,u0,tspan)
+sol = solve(prob,Rodas4(),reltol=1e-8,abstol=1e-8)
+setups =  [Dict(:alg=>RadauIIA5()),
+				  Dict(:alg=>RosShamp4())]
+shoot = Shootout(prob,setups;appxsol = TestSolution(sol))

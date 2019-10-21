@@ -50,7 +50,7 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
       cur_appxsol = appxsol
     end
 
-    if cur_appxsol != cur_appxsol
+    if cur_appxsol !== nothing
       errsol = appxtrue(sol,cur_appxsol)
       errors[i] = errsol.errors[error_estimate]
       solutions[i] = errsol
@@ -312,7 +312,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
                           print_names=false,names=nothing,appxsol_setup=nothing,
                           error_estimate=:final,parallel_type = :none,
                           kwargs...)
-  
+
   @assert names === nothing || length(setups) == length(names)
   timeseries_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ TIMESERIES_ERRORS
   weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
