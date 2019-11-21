@@ -19,6 +19,7 @@ DelayDiffEq = ">= 5.5.0"
 DiffEqBase = "6"
 DiffEqNoiseProcess = "3.3"
 DiffEqProblemLibrary = ">= 4.3.0"
+RecursiveArrayTools = "1.0"
 julia = "1"
 
 [extras]
