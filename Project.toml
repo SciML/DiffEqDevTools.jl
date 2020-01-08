@@ -1,7 +1,7 @@
 name = "DiffEqDevTools"
 uuid = "f3b72e0c-5b89-59e1-b016-84e28bfd966d"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "2.16.0"
+version = "2.16.1"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
@@ -20,8 +20,8 @@ DiffEqBase = "6"
 DiffEqNoiseProcess = "3.3"
 DiffEqProblemLibrary = "4.5"
 NLsolve = "4.2"
-RecursiveArrayTools = "2"
 RecipesBase = "0.7"
+RecursiveArrayTools = "2"
 julia = "1"
 
 [extras]
@@ -29,8 +29,9 @@ DelayDiffEq = "bcd4f6db-9728-5f36-b5f7-82caef46ccdb"
 DiffEqProblemLibrary = "a077e3f3-b75c-5d7f-a0c6-6bc4c8ec64a9"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 ParameterizedFunctions = "65888b18-ceab-5e60-b2b9-181511a3b968"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 StochasticDiffEq = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["DelayDiffEq", "DiffEqProblemLibrary", "OrdinaryDiffEq", "ParameterizedFunctions", "StochasticDiffEq", "Test"]
+test = ["DelayDiffEq", "DiffEqProblemLibrary", "OrdinaryDiffEq", "ParameterizedFunctions", "Random", "StochasticDiffEq", "Test"]
