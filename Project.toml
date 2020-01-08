@@ -20,7 +20,7 @@ DiffEqBase = "6"
 DiffEqNoiseProcess = "3.3"
 DiffEqProblemLibrary = "4.5"
 NLsolve = "4.2"
-RecursiveArrayTools = "1.0"
+RecursiveArrayTools = "2"
 RecipesBase = "0.7"
 julia = "1"
 

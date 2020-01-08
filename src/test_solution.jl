@@ -2,7 +2,7 @@
 TestSolution
 
 """
-mutable struct TestSolution{T,N,hasinterp,tType,uType,iType} <: AbstractTimeseriesSolution{T,N}
+mutable struct TestSolution{T,N,hasinterp,tType,uType,iType} <: AbstractTimeseriesSolution{T,N,uType}
   t::tType
   u::uType
   interp::iType
@@ -91,7 +91,6 @@ end
 function appxtrue(sim::EnsembleSolution,appx_setup;kwargs...)
   _new_sols = Vector{DESolution}(length(sim.u))
   for i in eachindex(sim)
-    @show i
     prob = sim[i].prob
     prob2 = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,noise=NoiseWrapper(sim[i].W))
     true_sol = solve(prob2,appx_setup[:alg];appx_setup...)
