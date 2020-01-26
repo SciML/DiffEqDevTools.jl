@@ -95,7 +95,7 @@ function analyticless_test_convergence(dts::AbstractArray,
   ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors)
 end
 
-function test_convergence(dts::AbstractArray,prob::AbstractODEProblem,alg;
+function test_convergence(dts::AbstractArray,prob::Union{AbstractODEProblem,AbstractDAEProblem},alg;
                           save_everystep=true,adaptive=false,kwargs...)
   N = length(dts)
   solutions = [solve(prob,alg;dt=dts[i],save_everystep=save_everystep,adaptive=adaptive,kwargs...) for i=1:N]
