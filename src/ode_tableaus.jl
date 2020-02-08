@@ -7959,3 +7959,53 @@ function constructDormandPrince8(T::Type = Float64)
    αEEst = map(T,αEEst)
    return(ExplicitRKTableau(A,c,α,8,αEEst=αEEst,adaptiveorder=7))
 end
+
+
+"""
+  Runge Kutta Oliver method, 6 stages, 5th order
+  https://www.sciencedirect.com/science/article/pii/S0096300319301511
+"""
+
+function constructRKO65(T::Type = Float64)
+  A = zeros(T,6,6)
+  c = zeros(T,6)
+  α = zeros(T,6)
+
+  c[1] = 2//3
+  c[2] = 1//6
+  c[3] = 3//4
+  c[4] = 1//1
+  c[5] = 4//5
+  c[6] = 1//1
+
+  α[2] = 54//133
+  α[3] = 32//21
+  α[4] = 1//18
+  α[5] = -125//114
+  α[6] = 1//9
+
+  A[2,1] = 1//6
+  A[3,1] = -15//8
+  A[4,1] = -9//1
+  A[5,1] = -3//1
+
+  A[3,2] = 21//8
+  A[4,2] = 75//7
+  A[5,2] = 34257//8750
+  A[6,2] = 123//380 # changed w.r.t. the paper
+
+  A[4,3] = -5//7
+  A[5,3] = -114//875
+  A[6,3] = 5//2
+
+  A[5,4] = 19//1250
+  A[6,4] = 3//20
+
+  A[6,5] = -75//38
+
+
+  A = map(T,A)
+  α = map(T,α)
+  c = map(T,c)
+  return(ExplicitRKTableau(A,c,α,5))
+end

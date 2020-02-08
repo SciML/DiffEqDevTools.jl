@@ -131,6 +131,9 @@ for i = 1:2 # 1 = num, 2 = ExplicitRK
   sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-5) < testTol
 
+  tabalg = ExplicitRK(tableau=constructRKO65())
+  sim = test_convergence(dts,prob,tabalg)
+  @test abs(sim.𝒪est[:l∞]-5) < testTol
 
   # Order 6
 
