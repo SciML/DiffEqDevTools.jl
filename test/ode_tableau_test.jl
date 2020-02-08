@@ -128,6 +128,18 @@ function ode_tableau_tests(T)
     @test bb ≈ tab.α
     @test cc ≈ tab.c
   end
+
+  let erk = RKO65()
+    A, b, c = deduce_Butcher_tableau(erk)
+    tab = constructRKO65()
+    AA = A[2:end, 2:end]
+    bb = b[2:end]
+    cc = c[2:end]
+    @test AA ≈ tab.A
+    @test bb ≈ tab.α
+    @test cc ≈ tab.c
+  end
+
 end
 
 
