@@ -36,12 +36,13 @@ function ConvergenceSimulation(solutions,convergence_axis;
 end
 
 function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},
-                          alg;trajectories,save_everystep=true,timeseries_steps=1,
+                          alg,ensemblealg=EnsembleThreads();
+                          trajectories,save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
   N = length(dts)
   ensemble_prob = EnsembleProblem(prob)
-  _solutions = [solve(ensemble_prob,alg;dt=dts[i],save_everystep=save_everystep,
+  _solutions = [solve(ensemble_prob,alg,ensemblealg;dt=dts[i],save_everystep=save_everystep,
                       timeseries_steps=timeseries_steps,adaptive=adaptive,
                       timeseries_errors=timeseries_errors,trajectories=trajectories,
                       kwargs...) for i in 1:N]
