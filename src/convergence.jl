@@ -61,28 +61,46 @@ function analyticless_test_convergence(dts::AbstractArray,
                           alg,test_dt;trajectories=100,
                           save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
-                          weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
+                          weak_timeseries_errors=false,weak_dense_errors=false,use_noise_grid=true,kwargs...)
   _solutions = []
   tmp_solutions = Array{Any}(undef,trajectories,length(dts))
   for j in 1:trajectories
     @info "Monte Carlo iteration: $j/$trajectories"
     t = prob.tspan[1]:test_dt:prob.tspan[2]
-    if prob.noise_rate_prototype === nothing
-      brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
-      brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+    if use_noise_grid
+      if prob.noise_rate_prototype === nothing
+        brownian_values = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+        brownian_values2 = cumsum([[zeros(size(prob.u0))];[sqrt(test_dt)*randn(size(prob.u0)) for i in 1:length(t)-1]])
+      else
+        brownian_values = cumsum([[zeros(size(prob.noise_rate_prototype,2))];[sqrt(test_dt)*randn(size(prob.noise_rate_prototype,2)) for i in 1:length(t)-1]])
+        brownian_values2 = cumsum([[zeros(size(prob.noise_rate_prototype,2))];[sqrt(test_dt)*randn(size(prob.noise_rate_prototype,2)) for i in 1:length(t)-1]])
+      end
+      np = NoiseGrid(t,brownian_values,brownian_values2)
+      _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
+                         noise=np,
+                         noise_rate_prototype=prob.noise_rate_prototype);
+      true_sol = solve(_prob,alg;adaptive=adaptive,dt=test_dt);
+
+      for i in 1:length(dts)
+        sol = solve(_prob,alg;dt=dts[i],adaptive=adaptive);
+        err_sol = appxtrue(sol,true_sol)
+        tmp_solutions[j,i] = err_sol
+      end
     else
-      brownian_values = cumsum([[zeros(size(prob.noise_rate_prototype,2))];[sqrt(test_dt)*randn(size(prob.noise_rate_prototype,2)) for i in 1:length(t)-1]])
-      brownian_values2 = cumsum([[zeros(size(prob.noise_rate_prototype,2))];[sqrt(test_dt)*randn(size(prob.noise_rate_prototype,2)) for i in 1:length(t)-1]])
-    end
-    np = NoiseGrid(t,brownian_values,brownian_values2)
-    _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
-                       noise=np,
-                       noise_rate_prototype=prob.noise_rate_prototype);
-    true_sol = solve(_prob,alg;adaptive=adaptive,dt=test_dt);
-    for i in 1:length(dts)
-      sol = solve(_prob,alg;dt=dts[i],adaptive=adaptive);
-      err_sol = appxtrue(sol,true_sol)
-      tmp_solutions[j,i] = err_sol
+      # using NoiseWrapper doesn't lead to constant true_sol
+      true_sol = solve(prob,alg;adaptive=adaptive,dt=test_dt, save_noise=true)
+      _sol = deepcopy(true_sol)
+      W1 = NoiseWrapper(_sol.W)
+
+      _prob = remake(prob,u0=prob.u0,p=prob.p,tspan=prob.tspan,noise=W1,noise_rate_prototype = prob.noise_rate_prototype)
+
+      for i in 1:length(dts)
+        W1 = NoiseWrapper(_sol.W)
+        _prob = remake(prob,u0=prob.u0,p=prob.p,tspan=prob.tspan,noise=W1,noise_rate_prototype = prob.noise_rate_prototype)
+        sol = solve(_prob,alg;dt=dts[i],adaptive=adaptive);
+        err_sol = appxtrue(sol,true_sol)
+        tmp_solutions[j,i] = err_sol
+      end
     end
   end
   _solutions = [EnsembleSolution(tmp_solutions[:,i],0.0,true) for i in 1:length(dts)]
