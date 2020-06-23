@@ -17,7 +17,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 [compat]
 DelayDiffEq = "5"
 DiffEqBase = "6.11"
-DiffEqNoiseProcess = "3.3, 4.0"
+DiffEqNoiseProcess = "3.3, 4.0, 5.0"
 DiffEqProblemLibrary = "4.5"
 NLsolve = "4.2"
 RecipesBase = "0.7, 0.8, 1.0"
