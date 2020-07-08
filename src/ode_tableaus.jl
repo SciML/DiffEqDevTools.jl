@@ -2235,7 +2235,7 @@ Tsitouras-Papakostas's Order 6
 Cheap Error Estimation for Runge-Kutta methods, by Ch. Tsitouras and S.N. Papakostas,
 Siam Journal on Scientific Computing, Vol. 20, Issue 6, Nov 1999.
 """
-function constructTsitourasPapakostas6(T::Type = Float64)
+function constructTsitourasPapakostas7(T::Type = Float64)
   A = zeros(T,8,8)
   c = zeros(T,8)
   α = zeros(T,8)
@@ -2297,7 +2297,7 @@ function constructTsitourasPapakostas6(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ExplicitRKTableau(A,c,α,6))
+  return(ExplicitRKTableau(A,c,α,7,adaptiveorder=5,αEEst=αEEst,fsal=true))
 end
 
 """
