@@ -232,6 +232,35 @@ function constructRK438Rule(T::Type = Float64)
 end
 
 """
+Ralston's Order 4 method with minimum truncation error.
+"""
+function constructRalston4(T::Type = Float64)
+  sqrt5 = sqrt(convert(T, 5))
+  a21 = 4//10
+  a31 = (-2889 + 1428 * sqrt5) / 1024
+  a32 = (3785 - 1620 * sqrt5) / 1024
+  a41 = (-3365 + 2094 * sqrt5) / 6040
+  a42 = (-975 - 3046 * sqrt5) / 2552
+  a43 = (467040 + 203968 * sqrt5) / 240845
+  A = [0     0     0      0
+       a21   0     0      0
+       a31   a32   0      0
+       a41   a42   a43    0]
+  b2 = 4//10
+  b3 = (14 - 3 * sqrt5) / 16
+  c = [0, b2, b3, 1]
+  b1 = (263 + 24 * sqrt5) / 1812
+  b2 = (125 - 1000 * sqrt5) / 3828
+  b3 = 1024 * (3346 + 1623 * sqrt5) / 5924787
+  b4 = (30 - 4 * sqrt5) / 123
+  α = [b1, b2, b3, b4]
+  A = map(T,A)
+  α = map(T,α)
+  c = map(T,c)
+  return ExplicitRKTableau(A,c,α,4)
+end
+
+"""
 Explicit SSP method of order 2 using 2 stages.
 """
 function constructSSPRK22(T::Type = Float64)

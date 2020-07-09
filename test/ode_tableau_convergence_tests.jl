@@ -18,6 +18,8 @@ dts = 1 .//2 .^(8:-1:4)
 testTol = 0.3
 superduperbool = Vector{Bool}(undef, 2)
 
+@test all(i -> residual_order_condition(constructRalston4(), i, +, abs) < 10eps(1.0), 1:4)
+
 for i = 1:2 # 1 = num, 2 = ExplicitRK
   global dts
   if i>1
@@ -60,6 +62,10 @@ for i = 1:2 # 1 = num, 2 = ExplicitRK
   # Order 4
 
   tabalg = ExplicitRK(tableau=constructRKF4())
+  sim = test_convergence(dts,prob,tabalg)
+  @test abs(sim.𝒪est[:l∞]-4) < testTol
+
+  tabalg = ExplicitRK(tableau=constructRalston4())
   sim = test_convergence(dts,prob,tabalg)
   @test abs(sim.𝒪est[:l∞]-4) < testTol
 

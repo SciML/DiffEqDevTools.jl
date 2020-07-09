@@ -1,5 +1,5 @@
 using OrdinaryDiffEq, ParameterizedFunctions, Test, Random
-
+using ParameterizedFunctions.ModelingToolkit # macro hygiene
 f = @ode_def LotkaVolterra begin
   dx = 1.5x - x*y
   dy = -3y + x*y
