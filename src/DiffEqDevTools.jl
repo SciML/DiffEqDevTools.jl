@@ -40,7 +40,7 @@ export test_convergence, analyticless_test_convergence, appxtrue!, appxtrue
 export get_sample_errors
 
 #Plot Functions
-export stability_region
+export stability_region, residual_order_condition
 
 #Tableaus
 export deduce_Butcher_tableau

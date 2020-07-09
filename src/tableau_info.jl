@@ -1,4 +1,4 @@
-using NLsolve, LinearAlgebra
+using NLsolve, LinearAlgebra, RootedTrees
 """
 `Base.length(tab::ODERKTableau)`
 
@@ -28,4 +28,17 @@ function stability_region(tab::ODERKTableau; initial_guess=-3.0)
   end
   sol = nlsolve(residual!, [initial_guess])
   sol.zero[1]
+end
+
+function RootedTrees.residual_order_condition(tab::ODERKTableau, order::Int, reducer=nothing, mapper=x->x^2)
+  if reducer === nothing
+    resid = map(RootedTreeIterator(order)) do t
+      residual_order_condition(t, tab.A, tab.α, tab.c)
+    end
+  else
+    resid = mapreduce(reducer, RootedTreeIterator(order)) do t
+      mapper(residual_order_condition(t, tab.A, tab.α, tab.c))
+    end
+  end
+  return resid
 end
