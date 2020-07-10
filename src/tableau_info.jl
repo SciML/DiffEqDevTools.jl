@@ -30,14 +30,16 @@ function stability_region(tab::ODERKTableau; initial_guess=-3.0)
   sol.zero[1]
 end
 
-function RootedTrees.residual_order_condition(tab::ODERKTableau, order::Int, reducer=nothing, mapper=x->x^2)
+function RootedTrees.residual_order_condition(tab::ODERKTableau, order::Int, reducer=nothing, mapper=x->x^2; embedded=false)
+  A, c = tab.A, tab.c
+  b = embedded ? tab.αEEst : tab.α
   if reducer === nothing
     resid = map(RootedTreeIterator(order)) do t
-      residual_order_condition(t, tab.A, tab.α, tab.c)
+      residual_order_condition(t, A, b, c)
     end
   else
     resid = mapreduce(reducer, RootedTreeIterator(order)) do t
-      mapper(residual_order_condition(t, tab.A, tab.α, tab.c))
+      mapper(residual_order_condition(t, A, b, c))
     end
   end
   return resid
