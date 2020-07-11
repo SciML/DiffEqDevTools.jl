@@ -18,10 +18,10 @@ dts = 1 .//2 .^(8:-1:4)
 testTol = 0.3
 superduperbool = Vector{Bool}(undef, 2)
 
-for tab in [constructRalston4(), constructTsitourasPapakostas6()]
-  @test all(i -> residual_order_condition(tab, i, +, abs) < 10eps(1.0), 1:tab.order)
+for tab in [constructRalston4(), constructTsitourasPapakostas6(), constructDormandLockyerMcCorriganPrince6()]
+  @test all(i -> residual_order_condition(tab, i, +, abs) < 100eps(1.0), 1:tab.order)
   if tab.adaptiveorder != 0
-    @test all(i -> residual_order_condition(tab, i, +, abs; embedded=true) < 10eps(1.0), tab.adaptiveorder)
+    @test all(i -> residual_order_condition(tab, i, +, abs; embedded=true) < 100eps(1.0), tab.adaptiveorder)
   end
 end
 
