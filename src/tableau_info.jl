@@ -12,7 +12,7 @@ Base.length(tab::ODERKTableau) = tab.stages
 Calculates the stability function from the tableau at `z`. Stable if <1.
 
 ```math
-r(z) = 1 + z bᵀ(I - z)⁻¹ 𝟙
+r(z) = 1 + z bᵀ(I - zA)⁻¹ 𝟙
 ```
 where 𝟙 denotes a vector of ones.
 """
