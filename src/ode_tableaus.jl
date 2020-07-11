@@ -2297,7 +2297,7 @@ function constructTsitourasPapakostas6(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ExplicitRKTableau(A,c,α,6))
+  return(ExplicitRKTableau(A,c,α,6,adaptiveorder=5,αEEst=αEEst))
 end
 
 """
