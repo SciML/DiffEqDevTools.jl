@@ -5799,7 +5799,7 @@ end
 """
 Feagin10 in Tableau form
 """
-function constructFeagin10Tableau(T::Type = BigFloat)
+function constructFeagin10(T::Type = BigFloat)
   A = zeros(T,17,17)
   c = zeros(T,17)
   α = zeros(T,17)
@@ -6734,7 +6734,7 @@ end
 """
 Tableau form of Feagin12
 """
-function constructFeagin12Tableau(T::Type = BigFloat)
+function constructFeagin12(T::Type = BigFloat)
   A = zeros(T,25,25)
   c = zeros(T,25)
   α = zeros(T,25)
@@ -7099,7 +7099,7 @@ end
 """
 Tableau form of Feagin14
 """
-function constructFeagin14Tableau(T::Type = BigFloat)
+function constructFeagin14(T::Type = BigFloat)
   A = zeros(T,35,35)
   c = zeros(T,35)
   α = zeros(T,35)
