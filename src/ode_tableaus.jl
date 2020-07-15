@@ -385,7 +385,7 @@ function constructLobattoIIIA4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -419,7 +419,7 @@ function constructLobattoIIIB4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -454,7 +454,7 @@ function constructLobattoIIIC4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -469,7 +469,7 @@ function constructLobattoIIICStar2(T::Type = Float64)
   A = map(T,A)
   α = map(T,α)
   c = map(T,c)
-  return(ImplicitRKTableau(A,c,α,2))
+  return(ExplicitRKTableau(A,c,α,2))
 end
 
 
@@ -488,7 +488,7 @@ function constructLobattoIIICStar4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -521,7 +521,7 @@ function constructLobattoIIID4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -5799,7 +5799,7 @@ end
 """
 Feagin10 in Tableau form
 """
-function constructFeagin10Tableau(T::Type = BigFloat)
+function constructFeagin10(T::Type = BigFloat)
   A = zeros(T,17,17)
   c = zeros(T,17)
   α = zeros(T,17)
@@ -6734,7 +6734,7 @@ end
 """
 Tableau form of Feagin12
 """
-function constructFeagin12Tableau(T::Type = BigFloat)
+function constructFeagin12(T::Type = BigFloat)
   A = zeros(T,25,25)
   c = zeros(T,25)
   α = zeros(T,25)
@@ -7099,7 +7099,7 @@ end
 """
 Tableau form of Feagin14
 """
-function constructFeagin14Tableau(T::Type = BigFloat)
+function constructFeagin14(T::Type = BigFloat)
   A = zeros(T,35,35)
   c = zeros(T,35)
   α = zeros(T,35)
@@ -7838,7 +7838,7 @@ function constructClassicVerner6(T::Type = Float64)
       -8716//891 656//297 39520//891 -416//11 52//27 0 0 0
       3015//256 -9//4 -4219//78 5985//128 -539//384 0 693//3328 0]
   c = [0;1//18;1//6;2//9;2//3;1;8//9;1]
-  αEEst = [3//80;0;4//25;243//1120;77//160;73//700]
+  αEEst = [3//80;0;4//25;243//1120;77//160;73//700;0;0]
   α = [57//640;0;-16//65;1377//2240;121//320;0;891//8320;2//35]
   A = map(T,A)
   α = map(T,α)
@@ -7863,7 +7863,7 @@ function constructClassicVerner7(T::Type = Float64)
         -12253//99144 0 16//27 16//459 29072//161109 -2023//75816 112//12393 0 0 0
         30517//2512 0 -7296//157 268728//7379 2472//2041 -3522621//10743824 132//157 0 -12393//4396 0]
   c = [0;1//12;1//6;1//4;3//4;16//17;1//2;1;2//3;1]
-  αEEst = [7//90;0;0;16//45;16//45;0;2//15;7//90]
+  αEEst = [7//90;0;0;16//45;16//45;0;2//15;7//90;0;0]
   α = [2881//40320;0;0;1216//2961;-2624//4095;24137569//57482880;-4//21;0;4131//3920;-157//1260]
   A = map(T,A)
   α = map(T,α)
