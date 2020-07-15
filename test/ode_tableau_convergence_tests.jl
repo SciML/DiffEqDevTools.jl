@@ -15,7 +15,7 @@ Random.seed!(100)
 ## Convergence Testing
 println("Convergence Test on Linear")
 dts = 1 .//2 .^(8:-1:4)
-testTol = 0.7
+testTol = 0.3
 superduperbool = Vector{Bool}(undef, 2)
 
 for constructfun in filter(x->startswith(string(x), "construct"), names(DiffEqDevTools))
@@ -50,6 +50,6 @@ for i = 1:2 # 1 = num, 2 = ExplicitRK
     @info "Testing..."
     tabalg = ExplicitRK(tableau=tab)
     sim = test_convergence(dts,bigprob,tabalg)
-    @test abs(sim.𝒪est[:l∞]-tab.order) < testTol
+    @test sim.𝒪est[:l∞] >= tab.order || abs(sim.𝒪est[:l∞] - tab.order) < testTol
   end
 end
