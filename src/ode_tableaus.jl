@@ -385,7 +385,7 @@ function constructLobattoIIIA4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -419,7 +419,7 @@ function constructLobattoIIIB4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -454,7 +454,7 @@ function constructLobattoIIIC4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -488,7 +488,7 @@ function constructLobattoIIICStar4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
@@ -521,7 +521,7 @@ function constructLobattoIIID4(T::Type = Float64)
   α = map(T,α)
   c = map(T,c)
   αEEst = map(T,αEEst)
-  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=3))
+  return(ImplicitRKTableau(A,c,α,4,αEEst=αEEst,adaptiveorder=2))
 end
 
 """
