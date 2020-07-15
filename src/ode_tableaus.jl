@@ -469,7 +469,7 @@ function constructLobattoIIICStar2(T::Type = Float64)
   A = map(T,A)
   α = map(T,α)
   c = map(T,c)
-  return(ImplicitRKTableau(A,c,α,2))
+  return(ExplicitRKTableau(A,c,α,2))
 end
 
 
