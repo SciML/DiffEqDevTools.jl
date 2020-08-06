@@ -12,15 +12,15 @@ Base.length(tab::ODERKTableau) = tab.stages
 Calculates the stability function from the tableau at `z`. Stable if <1.
 
 ```math
-r(z) = 1 + z bᵀ(I - zA)⁻¹ 𝟙
+r(z) = 1 + z bᵀ(I - zA)⁻¹ e
 ```
-where 𝟙 denotes a vector of ones.
+where e denotes a vector of ones.
 """
 function stability_region(z,tab::ODERKTableau; embedded=false)
   A, c = tab.A, tab.c
   b = embedded ? tab.αEEst : tab.α
-  𝟙 = ones(eltype(A), length(b))
-  stages = (I - z*A) \ 𝟙
+  e = ones(eltype(A), length(b))
+  stages = (I - z*A) \ e
   1 + z * (transpose(b) * stages)
 end
 
