@@ -57,7 +57,7 @@ function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,Abs
 end
 
 function analyticless_test_convergence(dts::AbstractArray,
-                          prob::Union{AbstractRODEProblem,AbstractSDEProblem},
+                          prob::Union{AbstractRODEProblem,AbstractSDEProblem,AbstractSDDEProblem},
                           alg,test_dt;trajectories=100,
                           save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
@@ -76,9 +76,18 @@ function analyticless_test_convergence(dts::AbstractArray,
         brownian_values2 = cumsum([[zeros(size(prob.noise_rate_prototype,2))];[sqrt(test_dt)*randn(size(prob.noise_rate_prototype,2)) for i in 1:length(t)-1]])
       end
       np = NoiseGrid(t,brownian_values,brownian_values2)
-      _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,
+
+      if prob isa AbstractSDDEProblem
+        _prob = SDDEProblem(prob.f,prob.g,prob.u0,prob.h,prob.tspan,prob.p,
+                            noise = np, noise_rate_prototype = prob.noise_rate_prototype,
+                            constant_lags = prob.constant_lags, dependent_lags = prob.dependent_lags,
+                            neutral = prob.neutral, order_discontinuity_t0 = prob.order_discontinuity_t0, prob.kwargs...);
+      else
+        _prob = SDEProblem(prob.f,prob.g,prob.u0,prob.tspan,prob.p,
                          noise=np,
                          noise_rate_prototype=prob.noise_rate_prototype);
+      end
+
       true_sol = solve(_prob,alg;adaptive=adaptive,dt=test_dt);
 
       for i in 1:length(dts)
