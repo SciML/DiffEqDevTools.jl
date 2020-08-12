@@ -1,4 +1,4 @@
-using OrdinaryDiffEq, ParameterizedFunctions, Test, Random
+using OrdinaryDiffEq, StochasticDelayDiffEq, ParameterizedFunctions, Test, Random
 using ParameterizedFunctions.ModelingToolkit # macro hygiene
 f = @ode_def LotkaVolterra begin
   dx = 1.5x - x*y
@@ -39,3 +39,25 @@ test_dt = 1/2^8
 sim2 = analyticless_test_convergence(dts,prob,SRIW1(),test_dt,trajectories=100, use_noise_grid=false)
 @test abs(sim2.𝒪est[:final]-1.5) < 0.3
 @show sim2.𝒪est[:final]
+
+### SDDE
+
+function hayes_modelf(du,u,h,p,t)
+    τ,a,b,c,α,β,γ = p
+    du .= a.*u .+ b .* h(p,t-τ) .+ c
+end
+function hayes_modelg(du,u,h,p,t)
+    τ,a,b,c,α,β,γ = p
+    du .= α.*u .+ β.*h(p,t-τ) .+ γ
+end
+h(p,t) = (ones(1) .+ t);
+tspan = (0.,10.)
+
+pmul = [1.0,-4.,-2.,10.,-1.3,-1.2, 1.1]
+padd = [1.0,-4.,-2.,10.,-0.0,-0.0, 0.1]
+
+prob = SDDEProblem(hayes_modelf, hayes_modelg, [1.], h, tspan, pmul; constant_lags = (pmul[1],));
+dts = (1/2).^(7:-1:3)
+test_dt = 1/2^8
+sim2 = analyticless_test_convergence(dts,prob,RKMil(),test_dt,trajectories=100, use_noise_grid=false)
+@test abs(sim2.𝒪est[:final]-1.0) < 0.3
