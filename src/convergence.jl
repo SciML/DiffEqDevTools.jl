@@ -8,21 +8,24 @@ mutable struct ConvergenceSimulation{SolType}
 end
 
 function ConvergenceSimulation(solutions,convergence_axis;
-                               auxdata=nothing,additional_errors=nothing)
+                               auxdata=nothing,additional_errors=nothing, expected_value=nothing)
   N = size(solutions,1)
   uEltype = eltype(solutions[1].u[1])
   errors = Dict() #Should add type information
-  if isempty(solutions[1].errors)
-    error("Errors dictionary is empty. No analytical solution set.")
-  end
-  for k in keys(solutions[1].errors)
-    errors[k] = [mean(sol.errors[k]) for sol in solutions]
+  if expected_value == nothing
+    if isempty(solutions[1].errors)
+      error("Errors dictionary is empty. No analytical solution set.")
+    end
+    for k in keys(solutions[1].errors)
+      errors[k] = [mean(sol.errors[k]) for sol in solutions]
+    end
   end
   if additional_errors != nothing
     for k in keys(additional_errors)
       errors[k] = additional_errors[k]
     end
   end
+
   𝒪est = Dict((calc𝒪estimates(p) for p = pairs(errors)))
   #𝒪est = Dict(map(calc𝒪estimates,errors))
   𝒪esttmp = Dict() #Makes Dict of Any to be more compatible
@@ -35,25 +38,53 @@ function ConvergenceSimulation(solutions,convergence_axis;
   return(ConvergenceSimulation(solutions,errors,N,auxdata,𝒪est,convergence_axis))
 end
 
-function test_convergence(dts::AbstractArray,prob::Union{AbstractRODEProblem,AbstractSDEProblem},
+function test_convergence(dts::AbstractArray,
+                          prob::Union{AbstractRODEProblem,AbstractSDEProblem,AbstractEnsembleProblem},
                           alg,ensemblealg=EnsembleThreads();
-                          trajectories,save_everystep=true,timeseries_steps=1,
+                          trajectories,save_start=true,save_everystep=true,timeseries_steps=1,
                           timeseries_errors=save_everystep,adaptive=false,
-                          weak_timeseries_errors=false,weak_dense_errors=false,kwargs...)
+                          weak_timeseries_errors=false,weak_dense_errors=false,
+                          expected_value=nothing,kwargs...)
   N = length(dts)
-  ensemble_prob = EnsembleProblem(prob)
-  _solutions = [solve(ensemble_prob,alg,ensemblealg;dt=dts[i],save_everystep=save_everystep,
-                      timeseries_steps=timeseries_steps,adaptive=adaptive,
-                      timeseries_errors=timeseries_errors,trajectories=trajectories,
-                      kwargs...) for i in 1:N]
-  solutions = [DiffEqBase.calculate_ensemble_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
-  auxdata = Dict("dts" =>  dts)
-  # Now Calculate Weak Errors
-  additional_errors = Dict()
-  for k in keys(solutions[1].weak_errors)
-    additional_errors[k] = [sol.weak_errors[k] for sol in solutions]
+
+  if typeof(prob) <: AbstractEnsembleProblem
+    ensemble_prob = prob
+  else
+    ensemble_prob = EnsembleProblem(prob)
   end
-  ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors)
+
+  _solutions = Array{Any}(undef,length(dts))
+  for i in 1:length(dts)
+    sol = solve(ensemble_prob,alg,ensemblealg;dt=dts[i],adaptive=adaptive,
+      save_start=save_start,save_everystep=save_everystep,timeseries_steps=timeseries_steps,
+      timeseries_errors=timeseries_errors,weak_timeseries_errors=weak_timeseries_errors,
+      weak_dense_errors=weak_dense_errors,trajectories=Int(trajectories),kwargs...)
+    @info "dt: $(dts[i]) ($i/$N)"
+    _solutions[i] = sol
+  end
+
+  auxdata = Dict("dts" =>  dts)
+
+  if expected_value == nothing
+    solutions = [DiffEqBase.calculate_ensemble_errors(sim;weak_timeseries_errors=weak_timeseries_errors,weak_dense_errors=weak_dense_errors) for sim in _solutions]
+    # Now Calculate Weak Errors
+    additional_errors = Dict()
+    for k in keys(solutions[1].weak_errors)
+      additional_errors[k] = [sol.weak_errors[k] for sol in solutions]
+    end
+
+  else
+    additional_errors = Dict()
+    additional_errors[:weak_final] = []
+    for sol in _solutions
+      weak_final = LinearAlgebra.norm(Statistics.mean(sol.u .- expected_value))
+      push!(additional_errors[:weak_final],weak_final)
+    end
+    solutions = _solutions
+  end
+
+  return ConvergenceSimulation(_solutions,dts,auxdata=auxdata,additional_errors=additional_errors,
+                               expected_value=expected_value)
 end
 
 function analyticless_test_convergence(dts::AbstractArray,
@@ -153,6 +184,7 @@ end
 function calc𝒪estimates(error::Pair)
   key = error.first
   error =error.second
+
   if ndims(error)>1 error=mean(error,1) end
   S = Vector{eltype(error)}(undef, length(error)-1)
   for i=1:length(error)-1
