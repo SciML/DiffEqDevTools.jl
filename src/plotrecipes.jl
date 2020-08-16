@@ -53,12 +53,21 @@ end
   errors,times
 end
 
-@recipe function f(tab::ODERKTableau;dx=1/100,dy=1/100,xlim=[-6,1],ylim=[-5,5])
-  x = xlim[1]:dx:xlim[2]
-  y = ylim[1]:dy:ylim[2]
-  f = (u,v)-> abs(stability_region(u+v*im,tab))<1
+@recipe function f(tab::ODERKTableau;dx=1/100,dy=1/100,order_star=false,embedded=false)
+  xlims = get(plotattributes, :xlims, (-6,1))
+  ylims = get(plotattributes, :ylims, (-5,5))
+  x = xlims[1]:dx:xlims[2]
+  y = ylims[1]:dy:ylims[2]
+
+  if order_star
+    f = (u,v)-> abs(stability_region(u+v*im,tab; embedded=embedded)/exp(u+v*im)) < 1
+  else
+    f = (u,v)-> abs(stability_region(u+v*im,tab; embedded=embedded)) < 1
+  end
   seriestype --> :contour
   fill --> true
-  cbar --> false
+  colorbar --> false
+  seriescolor --> :grays
+  aspect_ratio --> 1
   x,y,f
 end

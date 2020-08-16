@@ -10,6 +10,7 @@ import Base: length
 
 import DiffEqBase: AbstractODEProblem, AbstractDDEProblem,
        AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
+       AbstractSDDEProblem,
        AbstractDAEProblem, @def, ConvergenceSetup, DEAlgorithm,
        ODERKTableau, AbstractTimeseriesSolution, ExplicitRKTableau,
        ImplicitRKTableau
@@ -39,8 +40,8 @@ export test_convergence, analyticless_test_convergence, appxtrue!, appxtrue
 
 export get_sample_errors
 
-#Plot Functions
-export stability_region
+#Tab Functions
+export stability_region, residual_order_condition, check_tableau
 
 #Tableaus
 export deduce_Butcher_tableau
@@ -51,9 +52,9 @@ export constructEuler, constructKutta3, constructRK4, constructRK438Rule,
        constructLobattoIIICStar4, constructLobattoIIID2, constructLobattoIIID4,
        constructRadauIA3, constructRadauIA5,
        constructRadauIIA3, constructRadauIIA5,
-       constructRalston, constructHeun, constructRKF5, constructBogakiShampine3,
+       constructRalston, constructRalston4, constructHeun, constructRKF5, constructBogakiShampine3,
        constructCashKarp, constructRKF8, constructDormandPrince8,
-       constructMSRI1,constructFeagin10, constructFeagin12, constructFeagin14,
+       constructFeagin10, constructFeagin12, constructFeagin14,
        constructDormandPrince8_64bit, constructRKF5, constructRungeFirst5,
        constructCassity5, constructLawson5,
        constructLutherKonen5, constructLutherKonen52,
@@ -63,7 +64,6 @@ export constructEuler, constructKutta3, constructRK4, constructRK438Rule,
        constructButcher6, constructButcher7,
        constructDverk, constructClassicVerner6,
        constructClassicVerner7, constructClassicVerner8,
-       constructClassicVerner92,
        constructVernerRobust7, constructEnrightVerner7,
        constructTanakaYamashitaStable7,
        constructTanakaYamashitaEfficient7, constructSharpSmart7,
@@ -73,9 +73,9 @@ export constructEuler, constructKutta3, constructRK4, constructRK438Rule,
        constructTsitourasPapakostas8, constructdverk78, constructEnrightVerner8,
        constructCurtis8, constructVernerRobust9, constructVernerEfficient9,
        constructSharp9, constructTsitouras9,
-       constructTsitouras92,constructFeagin14Tableau,
-       constructFeagin12Tableau, constructOno12, constructCurtis10,
-       constructOno10, constructFeagin10Tableau,
+       constructTsitouras92,
+       constructOno12, constructCurtis10,
+       constructOno10,
        constructCurtis10, constructBaker10,
        constructHairer10, constructButcher63,
        constructButcher6, constructButcher62,
@@ -91,7 +91,7 @@ export constructEuler, constructKutta3, constructRK4, constructRK438Rule,
        constructMikkawyEisa, constructChummund6, constructChummund62,
        constructHuta62, constructHuta6, constructRKF4,
        constructVerner7, constructVerner8,
-       constructVerner9, constructVerner6, constructSSPRK22, constructSSPRK33,
+       constructVerner6, constructSSPRK22, constructSSPRK33,
        constructSSPRK43, constructSSPRK104,
        constructRKO65
 
