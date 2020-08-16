@@ -83,7 +83,7 @@ function test_convergence(dts::AbstractArray,
     solutions = _solutions
   end
 
-  return ConvergenceSimulation(_solutions,dts,auxdata=auxdata,additional_errors=additional_errors,
+  return ConvergenceSimulation(solutions,dts,auxdata=auxdata,additional_errors=additional_errors,
                                expected_value=expected_value)
 end
 
