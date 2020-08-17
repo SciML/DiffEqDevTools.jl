@@ -394,6 +394,122 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,error_estimate,numruns_error)
 end
 
+
+function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,test_dt=nothing;
+                          numruns=5, trajectories=1000,
+                          print_names=false,names=nothing,appxsol_setup=nothing,expected_value=nothing,
+                          error_estimate=:weak_final,ensemblealg=EnsembleThreads(),
+                          kwargs...)
+
+  @assert names === nothing || length(setups) == length(names)
+
+  weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
+  weak_dense_errors = error_estimate ∈ WEAK_DENSE_ERRORS
+
+  N = length(setups); M = length(abstols)
+  times = Array{Float64}(undef,M,N)
+  solutions = Array{Any}(undef,M,N)
+  if names === nothing
+    names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
+  end
+  time_tmp = Vector{Float64}(undef,numruns)
+
+  # First calculate all of the errors
+  for k in 1:N
+    for j in 1:M
+      if !haskey(setups[1],:dts)
+        sol = solve(prob,setups[k][:alg],ensemblealg;
+          setups[k]...,
+          abstol=abstols[j],
+          reltol=reltols[j],
+          timeseries_errors=false,
+          dense_errors = false,
+          trajectories=Int(trajectories),kwargs...)
+      else
+        sol = solve(prob,setups[k][:alg],ensemblealg;
+          setups[k]...,
+          abstol=abstols[j],
+          reltol=reltols[j],
+          dt=setups[k][:dts][j],
+          timeseries_errors=false,
+          dense_errors = false,
+          trajectories=Int(trajectories),kwargs...)
+      end
+      solutions[j,k] = sol
+    end
+    @info "$(setups[k][:alg]) ($k/$N)"
+  end
+
+  if error_estimate ∈ WEAK_ERRORS
+    if expected_value != nothing
+      errors = [[LinearAlgebra.norm(Statistics.mean(solutions[i,j].u .- expected_value))
+        for i in 1:M] for j in 1:N]
+    else
+      sol = solve(prob,appxsol_setup[:alg],ensemblealg;kwargs...,appxsol_setup...,
+          timeseries_errors=false,dense_errors = false,trajectories=Int(trajectories))
+      errors = [[LinearAlgebra.norm(Statistics.mean(solutions[i,j].u .- sol.u))
+        for i in 1:M] for j in 1:N]
+    end
+  else
+    error("use RODEProblem instead of EnsembleProblem for strong errors.")
+  end
+
+  local _sol
+
+  # Now time it
+  for k in 1:N
+    # precompile
+    GC.gc()
+    if !haskey(setups[1],:dts)
+      _sol = solve(prob,setups[k][:alg],ensemblealg;
+        setups[k]...,
+        abstol=abstols[1],
+        reltol=reltols[1],
+        timeseries_errors=false,
+        dense_errors = false,
+        trajectories=Int(trajectories),kwargs...)
+    else
+      _sol = solve(prob,setups[k][:alg],ensemblealg;
+        setups[k]...,
+        abstol=abstols[1],
+        reltol=reltols[1],
+        dt=setups[k][:dts][1],
+        timeseries_errors=false,
+        dense_errors = false,
+        trajectories=Int(trajectories),kwargs...)
+    end
+    #x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
+    GC.gc()
+    for j in 1:M
+      for i in 1:numruns
+        time_tmp[i] = @elapsed if !haskey(setups[k],:dts)
+          sol = solve(prob,setups[k][:alg],ensemblealg;
+              setups[k]...,
+              abstol=abstols[j],
+              reltol=reltols[j],
+              timeseries_errors=false,
+              dense_errors = false,
+              trajectories=Int(trajectories),kwargs...)
+        else
+          sol = solve(prob,setups[k][:alg],ensemblealg;
+              setups[k]...,
+              abstol=abstols[j],
+              reltol=reltols[j],
+              dt=setups[k][:dts][j],
+              timeseries_errors=false,
+              dense_errors = false,
+              trajectories=Int(trajectories),kwargs...)
+        end
+      end
+      times[j,k] = mean(time_tmp) #+ x
+      GC.gc()
+    end
+  end
+
+  wps = [WorkPrecision(prob,abstols,reltols,errors[i],times[:,i],names[i],N) for i in 1:N]
+  WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,error_estimate,Int(trajectories))
+end
+
 function get_sample_errors(prob::AbstractRODEProblem,setup,test_dt=nothing;
                           appxsol_setup=nothing,
                           numruns,error_estimate=:final,
