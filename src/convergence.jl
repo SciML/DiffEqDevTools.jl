@@ -75,10 +75,20 @@ function test_convergence(dts::AbstractArray,
 
   else
     additional_errors = Dict()
-    additional_errors[:weak_final] = []
+    if length(expected_value) == 1 || typeof(expected_value) <: Number
+      additional_errors[:weak_final] = []
+    else
+      additional_errors[:weak_l2] = []
+    end
     for sol in _solutions
-      weak_final = LinearAlgebra.norm(Statistics.mean(sol.u .- expected_value))
-      push!(additional_errors[:weak_final],weak_final)
+      if length(expected_value) == 1 || typeof(expected_value) <: Number
+        weak_final = LinearAlgebra.norm(Statistics.mean(sol.u .- expected_value))
+        push!(additional_errors[:weak_final],weak_final)
+      else
+        weak_l2 = LinearAlgebra.norm(Statistics.mean(sol .- expected_value))
+        push!(additional_errors[:weak_l2],weak_l2)
+      end
+
     end
     solutions = _solutions
   end

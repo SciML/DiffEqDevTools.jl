@@ -442,8 +442,15 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
 
   if error_estimate ∈ WEAK_ERRORS
     if expected_value != nothing
-      errors = [[LinearAlgebra.norm(Statistics.mean(solutions[i,j].u .- expected_value))
-        for i in 1:M] for j in 1:N]
+      if error_estimate == :weak_final
+        errors = [[LinearAlgebra.norm(Statistics.mean(solutions[i,j].u .- expected_value))
+          for i in 1:M] for j in 1:N]
+      elseif error_estimate == :weak_l2
+        errors = [[LinearAlgebra.norm(Statistics.mean(solutions[i,j] .- expected_value))
+          for i in 1:M] for j in 1:N]
+      else
+        error("Error estimate $error_estimate is not implemented yet.")      
+      end
     else
       sol = solve(prob,appxsol_setup[:alg],ensemblealg;kwargs...,appxsol_setup...,
           timeseries_errors=false,dense_errors = false,trajectories=Int(trajectories))
