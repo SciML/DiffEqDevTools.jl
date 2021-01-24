@@ -73,8 +73,8 @@ reltols = 1 ./10 .^(0:4)
 
 setups = [Dict(:alg=>DP5())
           Dict(:alg=>Tsit5(),
-		  :abstols => 1 ./10 .^(4:7),
-		  :reltols => 1 ./10 .^(1:4))]
+		  	   :abstols => 1 ./10 .^(4:7),
+			   :reltols => 1 ./10 .^(1:4))]
 
 sol = solve(prob,Vern7(),abstol=1/10^14,reltol=1/10^14)
 test_sol1 = TestSolution(sol)
