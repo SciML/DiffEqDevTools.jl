@@ -440,7 +440,7 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
       setups[k]...,
       abstol=_abstols[1],
       reltol=_reltols[1],
-      dt=dts[1],
+      dt=_dts[1],
       timeseries_errors=false,
       dense_errors = false,
       trajectories=Int(trajectories),kwargs...)
