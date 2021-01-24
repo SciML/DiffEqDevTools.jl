@@ -72,12 +72,17 @@ abstols = 1 ./10 .^(3:7)
 reltols = 1 ./10 .^(0:4)
 
 setups = [Dict(:alg=>DP5())
-          Dict(:alg=>Tsit5())]
+          Dict(:alg=>Tsit5(),
+		  :abstols => 1 ./10 .^(4:7),
+		  :reltols => 1 ./10 .^(1:4))]
 
 sol = solve(prob,Vern7(),abstol=1/10^14,reltol=1/10^14)
 test_sol1 = TestSolution(sol)
 println("Test DP5 and Tsit5")
 wp = WorkPrecisionSet(prob,abstols,reltols,setups;save_everystep=false)
+
+@test length(wp[1]) == 5
+@test length(wp[2]) == 4
 
 function lotka(du,u,p,t)
   du[1] = 1.5 * u[1] - u[1]*u[2]

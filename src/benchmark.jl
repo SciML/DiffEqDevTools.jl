@@ -244,17 +244,13 @@ function WorkPrecisionSet(prob,
   end
   for i in 1:N
     print_names && println(names[i])
-    if haskey(setups[i],:dts)
-      wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols,setups[i][:dts];
-                                 appxsol=appxsol,
-                                 error_estimate=error_estimate,
-                                 name=names[i],kwargs...,setups[i]...)
-    else
-      wps[i] = WorkPrecision(prob,setups[i][:alg],abstols,reltols;
-                                 appxsol=appxsol,
-                                 error_estimate=error_estimate,
-                                 name=names[i],kwargs...,setups[i]...)
-    end
+    _abstols = get(setups[i],:abstols,abstols)
+    _reltols = get(setups[i],:reltols,reltols)
+        _dts = get(setups[i],:dts,nothing)
+    wps[i] = WorkPrecision(prob,setups[i][:alg],_abstols,_reltols,_dts;
+                               appxsol=appxsol,
+                               error_estimate=error_estimate,
+                               name=names[i],kwargs...,setups[i]...)
   end
   return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,error_estimate,nothing)
 end
@@ -272,36 +268,26 @@ end
   end
 
   # Get a cache
-  if !haskey(setups[1],:dts)
-    sol = solve(_prob,setups[1][:alg];
-          kwargs...,setups[1]...,
-          abstol=abstols[1],
-          reltol=reltols[1],
-          timeseries_errors=false,
-          dense_errors = false)
-  else
-    sol = solve(_prob,setups[1][:alg];
-          kwargs...,setups[1]...,abstol=abstols[1],
-          reltol=reltols[1],dt=setups[1][:dts][1],
-          timeseries_errors=false,
-          dense_errors = false)
-  end
+  _abstols = get(setups[1],:abstols,abstols)
+  _reltols = get(setups[1],:reltols,reltols)
+  _dts = get(setups[1],:dts,zeros(length(_abstols)))
+
+  sol = solve(_prob,setups[1][:alg];
+        kwargs...,setups[1]...,abstol=_abstols[1],
+        reltol=_reltols[1],dt=_dts[1],
+        timeseries_errors=false,
+        dense_errors = false)
 
   for j in 1:M, k in 1:N
-    if !haskey(setups[k],:dts)
-      sol = solve(_prob,setups[k][:alg];
-            kwargs...,setups[k]...,
-            abstol=abstols[j],
-            reltol=reltols[j],
-            timeseries_errors=timeseries_errors,
-            dense_errors = dense_errors)
-    else
-      sol = solve(_prob,setups[k][:alg];
-            kwargs...,setups[k]...,abstol=abstols[j],
-            reltol=reltols[j],dt=setups[k][:dts][j],
-            timeseries_errors=timeseries_errors,
-            dense_errors = dense_errors)
-    end
+    _abstols = get(setups[k],:abstols,abstols)
+    _reltols = get(setups[k],:reltols,reltols)
+    _dts = get(setups[k],:dts,zeros(length(_abstols)))
+
+    sol = solve(_prob,setups[k][:alg];
+          kwargs...,setups[k]...,abstol=_abstols[j],
+          reltol=_reltols[j],dt=_dts[j],
+          timeseries_errors=timeseries_errors,
+          dense_errors = dense_errors)
     DiffEqBase.has_analytic(prob.f) ? err_sol = sol : err_sol = appxtrue(sol,true_sol)
     tmp_solutions[i,j,k] = err_sol
   end
@@ -352,38 +338,24 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   for k in 1:N
     # precompile
     GC.gc()
-    if !haskey(setups[k],:dts)
-      _sol = solve(prob,setups[k][:alg];
-            kwargs...,setups[k]...,
-            abstol=abstols[1],
-            reltol=reltols[1],
-            timeseries_errors=false,
-            dense_errors = false)
-    else
-      _sol = solve(prob,setups[k][:alg];
-            kwargs...,setups[k]...,abstol=abstols[1],
-            reltol=reltols[1],dt=setups[k][:dts][1],
-            timeseries_errors=false,
-            dense_errors = false)
-    end
+    _abstols = get(setup[k],:abstols,abstols)
+    _reltols = get(setup[k],:reltols,reltols)
+    _dts = get(setups[k],:dts,zeros(length(_abstols)))
+
+    _sol = solve(prob,setups[k][:alg];
+          kwargs...,setups[k]...,abstol=_abstols[1],
+          reltol=_reltols[1],dt=_dts[1],
+          timeseries_errors=false,
+          dense_errors = false)
     x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
     GC.gc()
     for j in 1:M
       for i in 1:numruns
-        time_tmp[i] = @elapsed if !haskey(setups[k],:dts)
-          sol = solve(prob,setups[k][:alg];
-                kwargs...,setups[k]...,
-                abstol=abstols[j],
-                reltol=reltols[j],
-                timeseries_errors=false,
-                dense_errors = false)
-        else
-          sol = solve(prob,setups[k][:alg];
-                kwargs...,setups[k]...,abstol=abstols[j],
-                reltol=reltols[j],dt=setups[k][:dts][j],
-                timeseries_errors=false,
-                dense_errors = false)
-        end
+        time_tmp[i] = @elapsed sol = solve(prob,setups[k][:alg];
+                        kwargs...,setups[k]...,abstol=_abstols[j],
+                        reltol=_reltols[j],dt=_dts[j],
+                        timeseries_errors=false,
+                        dense_errors = false)
       end
       times[j,k] = mean(time_tmp) + x
       GC.gc()
@@ -416,25 +388,18 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
 
   # First calculate all of the errors
   for k in 1:N
+    _abstols = get(setup[k],:abstols,abstols)
+    _reltols = get(setup[k],:reltols,reltols)
+    _dts = get(setups[k],:dts,zeros(length(_abstols)))
     for j in 1:M
-      if !haskey(setups[1],:dts)
-        sol = solve(prob,setups[k][:alg],ensemblealg;
-          setups[k]...,
-          abstol=abstols[j],
-          reltol=reltols[j],
-          timeseries_errors=false,
-          dense_errors = false,
-          trajectories=Int(trajectories),kwargs...)
-      else
-        sol = solve(prob,setups[k][:alg],ensemblealg;
-          setups[k]...,
-          abstol=abstols[j],
-          reltol=reltols[j],
-          dt=setups[k][:dts][j],
-          timeseries_errors=false,
-          dense_errors = false,
-          trajectories=Int(trajectories),kwargs...)
-      end
+      sol = solve(prob,setups[k][:alg],ensemblealg;
+        setups[k]...,
+        abstol=_abstols[j],
+        reltol=_reltols[j],
+        dt=_dts[j],
+        timeseries_errors=false,
+        dense_errors = false,
+        trajectories=Int(trajectories),kwargs...)
       solutions[j,k] = sol
     end
     @info "$(setups[k][:alg]) ($k/$N)"
@@ -449,7 +414,7 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
         errors = [[LinearAlgebra.norm(Statistics.mean(solutions[i,j] .- expected_value))
           for i in 1:M] for j in 1:N]
       else
-        error("Error estimate $error_estimate is not implemented yet.")      
+        error("Error estimate $error_estimate is not implemented yet.")
       end
     else
       sol = solve(prob,appxsol_setup[:alg],ensemblealg;kwargs...,appxsol_setup...,
@@ -467,46 +432,30 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
   for k in 1:N
     # precompile
     GC.gc()
-    if !haskey(setups[1],:dts)
-      _sol = solve(prob,setups[k][:alg],ensemblealg;
-        setups[k]...,
-        abstol=abstols[1],
-        reltol=reltols[1],
-        timeseries_errors=false,
-        dense_errors = false,
-        trajectories=Int(trajectories),kwargs...)
-    else
-      _sol = solve(prob,setups[k][:alg],ensemblealg;
-        setups[k]...,
-        abstol=abstols[1],
-        reltol=reltols[1],
-        dt=setups[k][:dts][1],
-        timeseries_errors=false,
-        dense_errors = false,
-        trajectories=Int(trajectories),kwargs...)
-    end
+    _abstols = get(setup[k],:abstols,abstols)
+    _reltols = get(setup[k],:reltols,reltols)
+    _dts = get(setups[k],:dts,zeros(length(_abstols)))
+
+    _sol = solve(prob,setups[k][:alg],ensemblealg;
+      setups[k]...,
+      abstol=_abstols[1],
+      reltol=_reltols[1],
+      dt=dts[1],
+      timeseries_errors=false,
+      dense_errors = false,
+      trajectories=Int(trajectories),kwargs...)
     #x = isempty(_sol.t) ? 0 : round(Int,mean(_sol.t) - sum(_sol.t)/length(_sol.t))
     GC.gc()
     for j in 1:M
       for i in 1:numruns
-        time_tmp[i] = @elapsed if !haskey(setups[k],:dts)
-          sol = solve(prob,setups[k][:alg],ensemblealg;
-              setups[k]...,
-              abstol=abstols[j],
-              reltol=reltols[j],
-              timeseries_errors=false,
-              dense_errors = false,
-              trajectories=Int(trajectories),kwargs...)
-        else
-          sol = solve(prob,setups[k][:alg],ensemblealg;
-              setups[k]...,
-              abstol=abstols[j],
-              reltol=reltols[j],
-              dt=setups[k][:dts][j],
-              timeseries_errors=false,
-              dense_errors = false,
-              trajectories=Int(trajectories),kwargs...)
-        end
+        time_tmp[i] = @elapsed sol = solve(prob,setups[k][:alg],ensemblealg;
+                      setups[k]...,
+                      abstol=_abstols[j],
+                      reltol=_reltols[j],
+                      dt=_dts[j],
+                      timeseries_errors=false,
+                      dense_errors = false,
+                      trajectories=Int(trajectories),kwargs...)
       end
       times[j,k] = mean(time_tmp) #+ x
       GC.gc()
