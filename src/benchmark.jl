@@ -338,8 +338,8 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
   for k in 1:N
     # precompile
     GC.gc()
-    _abstols = get(setup[k],:abstols,abstols)
-    _reltols = get(setup[k],:reltols,reltols)
+    _abstols = get(setups[k],:abstols,abstols)
+    _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
 
     _sol = solve(prob,setups[k][:alg];
@@ -388,8 +388,8 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
 
   # First calculate all of the errors
   for k in 1:N
-    _abstols = get(setup[k],:abstols,abstols)
-    _reltols = get(setup[k],:reltols,reltols)
+    _abstols = get(setups[k],:abstols,abstols)
+    _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
     for j in 1:M
       sol = solve(prob,setups[k][:alg],ensemblealg;
@@ -432,8 +432,8 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
   for k in 1:N
     # precompile
     GC.gc()
-    _abstols = get(setup[k],:abstols,abstols)
-    _reltols = get(setup[k],:reltols,reltols)
+    _abstols = get(setups[k],:abstols,abstols)
+    _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
 
     _sol = solve(prob,setups[k][:alg],ensemblealg;
