@@ -16,8 +16,8 @@ probs[2] = prob_ode_2Dlinear
 tspan = [0,1]
 tspans = Vector{Vector{Int64}}(undef, 2)
 tspans[1] = tspan; tspans[2] = tspan
-abstols = 1. /10 .^(3:10)
-reltols = 1 ./10 .^(3:10)
+abstols = 1 ./ 10 .^(3:10)
+reltols = 1 ./ 10 .^(3:10)
 
 
 setups = [Dict(:alg=>RK4());Dict(:alg=>Euler());Dict(:alg=>BS3());
