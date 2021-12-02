@@ -24,7 +24,7 @@ NLsolve = "4.2"
 RecipesBase = "0.7, 0.8, 1.0"
 RecursiveArrayTools = "2"
 RootedTrees = "1"
-julia = "1"
+julia = "1.6"
 
 [extras]
 DelayDiffEq = "bcd4f6db-9728-5f36-b5f7-82caef46ccdb"
