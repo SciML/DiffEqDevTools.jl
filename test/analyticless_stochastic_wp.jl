@@ -101,4 +101,4 @@ wp2 = @time WorkPrecisionSet(ensemble_prob,abstols,reltols,setups,test_dt;
 err1 = [wp1.wps[i].errors for i=1:length(setups)]
 err2 = [wp2.wps[i].errors for i=1:length(setups)]
 
-@test isapprox(err1, err2, atol=1e-4)
+@test isapprox(err1, err2, atol=1e-3)
