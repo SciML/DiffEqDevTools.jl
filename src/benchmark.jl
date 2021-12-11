@@ -204,18 +204,35 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
 
       benchmark_f = let dts=dts,_prob=_prob,alg=alg,sol=sol,abstols=abstols,reltols=reltols,kwargs=kwargs
         if dts === nothing
-          () -> @elapsed solve(_prob, alg, sol.u, sol.t, sol.k;
-                               abstol = abstols[i],
-                               reltol = reltols[i],
-                               timeseries_errors = false,
-                               dense_errors = false, kwargs...)
+          if typeof(_prob) <: DAEProblem
+            () -> @elapsed solve(_prob, alg, sol.u, sol.t;
+                                abstol = abstols[i],
+                                reltol = reltols[i],
+                                timeseries_errors = false,
+                                dense_errors = false, kwargs...)
+          else
+            () -> @elapsed solve(_prob, alg, sol.u, sol.t, sol.k;
+                                abstol = abstols[i],
+                                reltol = reltols[i],
+                                timeseries_errors = false,
+                                dense_errors = false, kwargs...)
+          end
         else
-          () -> @elapsed solve(_prob, alg, sol.u, sol.t, sol.k;
-                               abstol = abstols[i],
-                               reltol = reltols[i],
-                               dt = dts[i],
-                               timeseries_errors = false,
-                               dense_errors = false, kwargs...)
+          if typeof(_prob) <: DAEProblem
+            () -> @elapsed solve(_prob, alg, sol.u, sol.t;
+                                abstol = abstols[i],
+                                reltol = reltols[i],
+                                dt = dts[i],
+                                timeseries_errors = false,
+                                dense_errors = false, kwargs...)
+          else
+            () -> @elapsed solve(_prob, alg, sol.u, sol.t, sol.k;
+                                abstol = abstols[i],
+                                reltol = reltols[i],
+                                dt = dts[i],
+                                timeseries_errors = false,
+                                dense_errors = false, kwargs...)
+          end
         end
       end
       benchmark_f() # pre-compile
