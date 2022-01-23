@@ -106,7 +106,7 @@ wp = WorkPrecisionSet(prob,abstols,reltols,setups;appxsol=test_sol,save_everyste
 # Dual Problem
 
 probs = [prob,prob_ode_2Dlinear]
-setups = [Dict(:alg=>DP5(),:prob_choice => 1)
+setups = [Dict(:alg=>DP5())
           Dict(:alg=>Tsit5(), :prob_choice => 2)
           Dict(:alg=>Vern6(), :prob_choice => 2)
           ]

@@ -46,6 +46,8 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
 
     if :prob_choice ∈ keys(setups[i])
       cur_appxsol = appxsol[setups[i][:prob_choice]]
+    elseif prob isa AbstractArray
+      cur_appxsol = appxsol[1]
     else
       cur_appxsol = appxsol
     end
@@ -61,6 +63,8 @@ function Shootout(prob,setups;appxsol=nothing,names=nothing,error_estimate=:fina
 
     if haskey(setups[i], :prob_choice)
       _prob = prob[setups[i][:prob_choice]]
+    elseif prob isa AbstractArray
+      _prob = prob[1]
     else
       _prob = prob
     end
@@ -171,6 +175,8 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
 
   if haskey(kwargs, :prob_choice)
     _prob = prob[kwargs[:prob_choice]]
+  elseif prob isa AbstractArray
+    _prob = prob[1]
   else
     _prob = prob
   end
@@ -191,6 +197,8 @@ function WorkPrecision(prob,alg,abstols,reltols,dts=nothing;
 
       if haskey(kwargs, :prob_choice)
         cur_appxsol = appxsol[kwargs[:prob_choice]]
+      elseif prob isa AbstractArray
+        cur_appxsol = appxsol[1]
       else
         cur_appxsol = appxsol
       end
