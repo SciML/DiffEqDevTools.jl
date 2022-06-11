@@ -41,7 +41,7 @@ end
 function test_convergence(dts::AbstractArray,
                           prob::Union{AbstractRODEProblem,AbstractSDEProblem,AbstractEnsembleProblem},
                           alg,ensemblealg=EnsembleThreads();
-                          trajectories,save_start=true,save_everystep=true,timeseries_steps=1,
+                          trajectories,save_start=true,save_everystep=true,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,
                           expected_value=nothing,kwargs...)
@@ -56,7 +56,7 @@ function test_convergence(dts::AbstractArray,
   _solutions = Array{Any}(undef,length(dts))
   for i in 1:length(dts)
     sol = solve(ensemble_prob,alg,ensemblealg;dt=dts[i],adaptive=adaptive,
-      save_start=save_start,save_everystep=save_everystep,timeseries_steps=timeseries_steps,
+      save_start=save_start,save_everystep=save_everystep,
       timeseries_errors=timeseries_errors,weak_timeseries_errors=weak_timeseries_errors,
       weak_dense_errors=weak_dense_errors,trajectories=Int(trajectories),kwargs...)
     @info "dt: $(dts[i]) ($i/$N)"
@@ -100,7 +100,7 @@ end
 function analyticless_test_convergence(dts::AbstractArray,
                           prob::Union{AbstractRODEProblem,AbstractSDEProblem,AbstractSDDEProblem},
                           alg,test_dt;trajectories=100,
-                          save_everystep=true,timeseries_steps=1,
+                          save_everystep=true,
                           timeseries_errors=save_everystep,adaptive=false,
                           weak_timeseries_errors=false,weak_dense_errors=false,use_noise_grid=true,kwargs...)
   _solutions = []
