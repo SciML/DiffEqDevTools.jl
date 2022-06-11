@@ -272,10 +272,12 @@ function WorkPrecisionSet(prob,
     _abstols = get(setups[i],:abstols,abstols)
     _reltols = get(setups[i],:reltols,reltols)
         _dts = get(setups[i],:dts,nothing)
+    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[i])
+        
     wps[i] = WorkPrecision(prob,setups[i][:alg],_abstols,_reltols,_dts;
                                appxsol=appxsol,
                                error_estimate=error_estimate,
-                               name=names[i],kwargs...,setups[i]...)
+                               name=names[i],kwargs...,filtered_setup...)
   end
   return WorkPrecisionSet(wps,N,abstols,reltols,prob,setups,names,error_estimate,nothing)
 end
@@ -296,9 +298,10 @@ end
   _abstols = get(setups[1],:abstols,abstols)
   _reltols = get(setups[1],:reltols,reltols)
   _dts = get(setups[1],:dts,zeros(length(_abstols)))
+  filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[1])
 
   sol = solve(_prob,setups[1][:alg];
-        kwargs...,setups[1]...,abstol=_abstols[1],
+        kwargs...,filtered_setup...,abstol=_abstols[1],
         reltol=_reltols[1],dt=_dts[1],
         timeseries_errors=false,
         dense_errors = false)
@@ -307,9 +310,10 @@ end
     _abstols = get(setups[k],:abstols,abstols)
     _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
+    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
 
     sol = solve(_prob,setups[k][:alg];
-          kwargs...,setups[k]...,abstol=_abstols[j],
+          kwargs...,filtered_setup...,abstol=_abstols[j],
           reltol=_reltols[j],dt=_dts[j],
           timeseries_errors=timeseries_errors,
           dense_errors = dense_errors)
@@ -366,9 +370,10 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
     _abstols = get(setups[k],:abstols,abstols)
     _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
+    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
 
     _sol = solve(prob,setups[k][:alg];
-          kwargs...,setups[k]...,abstol=_abstols[1],
+          kwargs...,filtered_setup...,abstol=_abstols[1],
           reltol=_reltols[1],dt=_dts[1],
           timeseries_errors=false,
           dense_errors = false)
@@ -377,7 +382,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
     for j in 1:M
       for i in 1:numruns
         time_tmp[i] = @elapsed sol = solve(prob,setups[k][:alg];
-                        kwargs...,setups[k]...,abstol=_abstols[j],
+                        kwargs...,filtered_setup...,abstol=_abstols[j],
                         reltol=_reltols[j],dt=_dts[j],
                         timeseries_errors=false,
                         dense_errors = false)
@@ -416,9 +421,11 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
     _abstols = get(setups[k],:abstols,abstols)
     _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
+    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
+
     for j in 1:M
       sol = solve(prob,setups[k][:alg],ensemblealg;
-        setups[k]...,
+        filtered_setup...,
         abstol=_abstols[j],
         reltol=_reltols[j],
         dt=_dts[j],
@@ -460,9 +467,10 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
     _abstols = get(setups[k],:abstols,abstols)
     _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
+    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
 
     _sol = solve(prob,setups[k][:alg],ensemblealg;
-      setups[k]...,
+      filtered_setup...,
       abstol=_abstols[1],
       reltol=_reltols[1],
       dt=_dts[1],
@@ -474,7 +482,7 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
     for j in 1:M
       for i in 1:numruns
         time_tmp[i] = @elapsed sol = solve(prob,setups[k][:alg],ensemblealg;
-                      setups[k]...,
+                      filtered_setup...,
                       abstol=_abstols[j],
                       reltol=_reltols[j],
                       dt=_dts[j],
