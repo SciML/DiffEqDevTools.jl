@@ -272,7 +272,7 @@ function WorkPrecisionSet(prob,
     _abstols = get(setups[i],:abstols,abstols)
     _reltols = get(setups[i],:reltols,reltols)
         _dts = get(setups[i],:dts,nothing)
-    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[i])
+    filtered_setup = filter(p -> p.first in DiffEqBase.allowedkeywords, setups[i])
         
     wps[i] = WorkPrecision(prob,setups[i][:alg],_abstols,_reltols,_dts;
                                appxsol=appxsol,
@@ -298,7 +298,7 @@ end
   _abstols = get(setups[1],:abstols,abstols)
   _reltols = get(setups[1],:reltols,reltols)
   _dts = get(setups[1],:dts,zeros(length(_abstols)))
-  filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[1])
+  filtered_setup = filter(p -> p.first in DiffEqBase.allowedkeywords, setups[1])
 
   sol = solve(_prob,setups[1][:alg];
         kwargs...,filtered_setup...,abstol=_abstols[1],
@@ -310,8 +310,8 @@ end
     _abstols = get(setups[k],:abstols,abstols)
     _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
-    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
-
+    filtered_setup = filter(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
+    
     sol = solve(_prob,setups[k][:alg];
           kwargs...,filtered_setup...,abstol=_abstols[j],
           reltol=_reltols[j],dt=_dts[j],
@@ -370,7 +370,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem,abstols,reltols,setups,test_
     _abstols = get(setups[k],:abstols,abstols)
     _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
-    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
+    filtered_setup = filter(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
 
     _sol = solve(prob,setups[k][:alg];
           kwargs...,filtered_setup...,abstol=_abstols[1],
@@ -421,7 +421,7 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
     _abstols = get(setups[k],:abstols,abstols)
     _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
-    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
+    filtered_setup = filter(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
 
     for j in 1:M
       sol = solve(prob,setups[k][:alg],ensemblealg;
@@ -467,7 +467,7 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem,abstols,reltols,setups,t
     _abstols = get(setups[k],:abstols,abstols)
     _reltols = get(setups[k],:reltols,reltols)
     _dts = get(setups[k],:dts,zeros(length(_abstols)))
-    filtered_setup = filter!(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
+    filtered_setup = filter(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
 
     _sol = solve(prob,setups[k][:alg],ensemblealg;
       filtered_setup...,
