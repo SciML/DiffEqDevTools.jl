@@ -9,20 +9,20 @@ using Statistics
 import Base: length
 
 import DiffEqBase: AbstractODEProblem, AbstractDDEProblem,
-       AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
-       AbstractSDDEProblem, AbstractEnsembleProblem,
-       AbstractDAEProblem, @def, ConvergenceSetup, DEAlgorithm,
-       ODERKTableau, AbstractTimeseriesSolution, ExplicitRKTableau,
-       ImplicitRKTableau
+                   AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
+                   AbstractSDDEProblem, AbstractEnsembleProblem,
+                   AbstractDAEProblem, @def, ConvergenceSetup, DEAlgorithm,
+                   ODERKTableau, AbstractTimeseriesSolution, ExplicitRKTableau,
+                   ImplicitRKTableau
 
 import LinearAlgebra: norm, I
 
-const TIMESERIES_ERRORS = Set([:l2,:l∞,:L2,:L∞])
-const DENSE_ERRORS = Set([:L2,:L∞])
-const WEAK_TIMESERIES_ERRORS = Set([:weak_l2,:weak_l∞])
-const WEAK_DENSE_ERRORS = Set([:weak_L2,:weak_L∞])
+const TIMESERIES_ERRORS = Set([:l2, :l∞, :L2, :L∞])
+const DENSE_ERRORS = Set([:L2, :L∞])
+const WEAK_TIMESERIES_ERRORS = Set([:weak_l2, :weak_l∞])
+const WEAK_DENSE_ERRORS = Set([:weak_L2, :weak_L∞])
 const WEAK_ERRORS = union(Set([:weak_final]),
-                          WEAK_TIMESERIES_ERRORS,WEAK_DENSE_ERRORS)
+                          WEAK_TIMESERIES_ERRORS, WEAK_DENSE_ERRORS)
 
 include("benchmark.jl")
 include("convergence.jl")
@@ -52,7 +52,8 @@ export constructEuler, constructKutta3, constructRK4, constructRK438Rule,
        constructLobattoIIICStar4, constructLobattoIIID2, constructLobattoIIID4,
        constructRadauIA3, constructRadauIA5,
        constructRadauIIA3, constructRadauIIA5,
-       constructRalston, constructRalston4, constructHeun, constructRKF5, constructBogakiShampine3,
+       constructRalston, constructRalston4, constructHeun, constructRKF5,
+       constructBogakiShampine3,
        constructCashKarp, constructRKF8, constructDormandPrince8,
        constructFeagin10, constructFeagin12, constructFeagin14,
        constructDormandPrince8_64bit, constructRKF5, constructRungeFirst5,

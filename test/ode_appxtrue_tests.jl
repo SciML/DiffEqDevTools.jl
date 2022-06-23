@@ -1,26 +1,27 @@
 using OrdinaryDiffEq, DiffEqBase, DiffEqDevTools, Test
-using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
+using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems;
+importodeproblems();
 using DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_linear
 
-f = (u,p,t) -> u
-fun = ODEFunction(f; analytic=(u0,p,t)->u0*exp(t))
-prob = ODEProblem(fun,1/2,(0.0,1.0))
+f = (u, p, t) -> u
+fun = ODEFunction(f; analytic = (u0, p, t) -> u0 * exp(t))
+prob = ODEProblem(fun, 1 / 2, (0.0, 1.0))
 
-sol =solve(prob,Euler();dt=1//2^(4),dense_errors=true)
-sol2 =solve(prob,Vern9();dt=1//2^(10),abstol=1e-14,reltol=1e-14)
+sol = solve(prob, Euler(); dt = 1 // 2^(4), dense_errors = true)
+sol2 = solve(prob, Vern9(); dt = 1 // 2^(10), abstol = 1e-14, reltol = 1e-14)
 
-prob2 = ODEProblem(f,1/2,(0.0,1.0))
-sol3 =solve(prob_ode_linear,Euler();dt=1//2^(4))
+prob2 = ODEProblem(f, 1 / 2, (0.0, 1.0))
+sol3 = solve(prob_ode_linear, Euler(); dt = 1 // 2^(4))
 
-errsol1 = appxtrue(sol,sol2)
+errsol1 = appxtrue(sol, sol2)
 
-sol4 =solve(prob,Euler();dt=1//2^(4))
+sol4 = solve(prob, Euler(); dt = 1 // 2^(4))
 test_sol = TestSolution(sol2)
-errsol2 = appxtrue(sol4,test_sol)
+errsol2 = appxtrue(sol4, test_sol)
 
-sol5 =solve(prob,Euler();dt=1//2^(4))
-test_sol = TestSolution(sol2.t,sol2[end])
-errsol3 = appxtrue(sol5,test_sol)
+sol5 = solve(prob, Euler(); dt = 1 // 2^(4))
+test_sol = TestSolution(sol2.t, sol2[end])
+errsol3 = appxtrue(sol5, test_sol)
 
 @test errsol1.errors[:L2] ≈ 0.018865798306718855
 @test errsol1.errors[:L2] ≈ errsol2.errors[:L2]
