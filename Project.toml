@@ -1,7 +1,7 @@
 name = "DiffEqDevTools"
 uuid = "f3b72e0c-5b89-59e1-b016-84e28bfd966d"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "2.27.2"
+version = "2.30.0"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
@@ -24,7 +24,7 @@ NLsolve = "4.2"
 RecipesBase = "0.7, 0.8, 1.0"
 RecursiveArrayTools = "2"
 RootedTrees = "1, 2"
-julia = "1"
+julia = "1.6"
 
 [extras]
 DelayDiffEq = "bcd4f6db-9728-5f36-b5f7-82caef46ccdb"
