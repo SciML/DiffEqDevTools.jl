@@ -126,7 +126,7 @@ function rober(du, u, p, t)
 end
 prob1 = ODEProblem(rober, [1.0, 0.0, 0.0], (0.0, 1e5), [0.04, 3e7, 1e4])
 
-ode_ref_sol = solve(odaeprob, Rodas5(), abstol = 1 / 10^14, reltol = 1 / 10^14);
+ode_ref_sol = solve(prob1, Rodas5(), abstol = 1 / 10^14, reltol = 1 / 10^14);
 
 function dae_rober(out, du, u, p, t)
     out[1] = -0.04u[1] + 1e4 * u[2] * u[3] - du[1]
@@ -140,7 +140,7 @@ tspan = (0.0, 100000.0)
 differential_vars = [true, true, false]
 prob2 = DAEProblem(dae_rober, du₀, u₀, tspan, differential_vars = differential_vars)
 
-dae_ref_sol = solve(odaeprob, DFBDF(), abstol = 1 / 10^14, reltol = 1 / 10^14);
+dae_ref_sol = solve(prob2, DFBDF(), abstol = 1 / 10^14, reltol = 1 / 10^14);
 
 probs = [prob1, prob2]
 setups = [Dict(:alg => Rodas5())
