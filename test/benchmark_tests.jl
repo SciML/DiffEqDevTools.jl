@@ -47,7 +47,7 @@ set = ShootoutSet(probs, setups; dt = 1 / 2^(4))
 #println(set[:])
 set[end]
 set[1][:]
-@test all(x -> x.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"], set)
+@test all(x -> x.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"], set.shootouts)
 
 ## WorkPrecision Tests
 println("WorkPrecision Tests")
