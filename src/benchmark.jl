@@ -4,7 +4,9 @@ using Statistics
 # Workaround for `MethodOfSteps` algorithms, otherwise they are all called "MethodOfSteps"
 # Ideally this would be a trait (in SciMLBase?), so packages could implement it
 _default_name(alg) = __default_name(alg)
-_default_name(alg::AbstractDDEAlgorithm) = isdefined(alg, :alg) ? _default_name(alg.alg) : __default_name(alg)
+function _default_name(alg::AbstractDDEAlgorithm)
+    isdefined(alg, :alg) ? _default_name(alg.alg) : __default_name(alg)
+end
 __default_name(alg) = string(nameof(typeof(alg)))
 
 ## Shootouts
