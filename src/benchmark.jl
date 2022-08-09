@@ -1,4 +1,12 @@
 using Statistics
+
+# Default names of algorithms:
+# Workaround for `MethodOfSteps` algorithms, otherwise they are all called "MethodOfSteps"
+# Ideally this would be a trait (in SciMLBase?), so packages could implement it
+_default_name(alg) = __default_name(alg)
+_default_name(alg::AbstractDDEAlgorithm) = isdefined(alg, :alg) ? _default_name(alg.alg) : __default_name(alg)
+__default_name(alg) = string(nameof(typeof(alg)))
+
 ## Shootouts
 
 mutable struct Shootout
@@ -39,7 +47,7 @@ function Shootout(prob, setups; appxsol = nothing, names = nothing, error_estima
     timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
     dense_errors = error_estimate ∈ DENSE_ERRORS
     if names === nothing
-        names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
+        names = [_default_name(setup[:alg]) for setup in setups]
     end
     for i in eachindex(setups)
         sol = solve(prob, setups[i][:alg]; timeseries_errors = timeseries_errors,
@@ -107,7 +115,7 @@ function ShootoutSet(probs, setups; probaux = nothing,
     shootouts = Vector{Shootout}(undef, N)
     winners = Vector{String}(undef, N)
     if names === nothing
-        names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
+        names = [_default_name(setup[:alg]) for setup in setups]
     end
     if probaux === nothing
         probaux = Vector{Dict{Symbol, Any}}(undef, N)
@@ -272,7 +280,7 @@ function WorkPrecisionSet(prob,
     @assert names === nothing || length(setups) == length(names)
     wps = Vector{WorkPrecision}(undef, N)
     if names === nothing
-        names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
+        names = [_default_name(setup[:alg]) for setup in setups]
     end
     for i in 1:N
         print_names && println(names[i])
@@ -351,7 +359,7 @@ function WorkPrecisionSet(prob::AbstractRODEProblem, abstols, reltols, setups,
     times = Array{Float64}(undef, M, N)
     tmp_solutions = Array{Any}(undef, numruns_error, M, N)
     if names === nothing
-        names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
+        names = [_default_name(setup[:alg]) for setup in setups]
     end
     time_tmp = Vector{Float64}(undef, numruns)
 
@@ -434,7 +442,7 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem, abstols, reltols, setup
     times = Array{Float64}(undef, M, N)
     solutions = Array{Any}(undef, M, N)
     if names === nothing
-        names = [string(nameof(typeof(setup[:alg]))) for setup in setups]
+        names = [_default_name(setup[:alg]) for setup in setups]
     end
     time_tmp = Vector{Float64}(undef, numruns)
 
