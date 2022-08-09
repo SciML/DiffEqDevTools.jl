@@ -39,6 +39,7 @@ shoot = Shootout(prob, setups, dt = 1 / 2^(4))
 #show(shoot)
 #println(shoot)
 shoot[end]
+@test shoot.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"]
 
 set = ShootoutSet(probs, setups; dt = 1 / 2^(4))
 
@@ -46,7 +47,7 @@ set = ShootoutSet(probs, setups; dt = 1 / 2^(4))
 #println(set[:])
 set[end]
 set[1][:]
-@test set.names == ["RK4", "Midpoint"]
+@test all(x -> x.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"], set)
 
 ## WorkPrecision Tests
 println("WorkPrecision Tests")
@@ -66,7 +67,7 @@ wp_set[end]
 #println(wp_set)
 #show(wp_set)
 @test (minimum(diff(wp_set[2].errors) .== 0)) # The errors for a fixed timestep method should be constant
-@test wp_set.names == ["RK4", "Midpoint"]
+@test wp_set.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"]
 
 prob = prob_ode_2Dlinear
 
