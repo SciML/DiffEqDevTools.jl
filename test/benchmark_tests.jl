@@ -39,6 +39,7 @@ shoot = Shootout(prob, setups, dt = 1 / 2^(4))
 #show(shoot)
 #println(shoot)
 shoot[end]
+@test shoot.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"]
 
 set = ShootoutSet(probs, setups; dt = 1 / 2^(4))
 
@@ -46,6 +47,7 @@ set = ShootoutSet(probs, setups; dt = 1 / 2^(4))
 #println(set[:])
 set[end]
 set[1][:]
+@test all(x -> x.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"], set.shootouts)
 
 ## WorkPrecision Tests
 println("WorkPrecision Tests")
@@ -65,6 +67,7 @@ wp_set[end]
 #println(wp_set)
 #show(wp_set)
 @test (minimum(diff(wp_set[2].errors) .== 0)) # The errors for a fixed timestep method should be constant
+@test wp_set.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"]
 
 prob = prob_ode_2Dlinear
 
@@ -81,6 +84,7 @@ test_sol1 = TestSolution(sol)
 println("Test DP5 and Tsit5")
 wp = WorkPrecisionSet(prob, abstols, reltols, setups; save_everystep = false)
 
+@test wp.names == ["DP5", "Tsit5"]
 @test length(wp[1]) == 5
 @test length(wp[2]) == 4
 
@@ -102,6 +106,7 @@ setups = [Dict(:alg => DP5())
 println("Test DP5, Tsit5, and Vern6")
 wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol,
                       save_everystep = false, numruns = 20, maxiters = 10000)
+@test wp.names == ["DP5", "Tsit5", "Vern6"]
 
 # Dual Problem
 
@@ -112,8 +117,10 @@ setups = [Dict(:alg => DP5())
 println("Test DP5, Tsit5, and Vern6")
 wp = WorkPrecisionSet(probs, abstols, reltols, setups; appxsol = [test_sol, nothing],
                       save_everystep = false, numruns = 20, maxiters = 10000)
+@test wp.names == ["DP5", "Tsit5", "Vern6"]
 wp = WorkPrecisionSet(probs, abstols, reltols, setups; appxsol = [test_sol, test_sol1],
                       save_everystep = false, numruns = 20, maxiters = 10000)
+@test wp.names == ["DP5", "Tsit5", "Vern6"]
 
 # Dual DAE Problems
 function rober(du, u, p, t)
@@ -147,6 +154,7 @@ setups = [Dict(:alg => Rodas5())
           Dict(:alg => DFBDF(), :prob_choice => 2)]
 wp = WorkPrecisionSet(probs, abstols, reltols, setups; appxsol = [ode_ref_sol, dae_ref_sol],
                       save_everystep = false, numruns = 20, maxiters = 10000)
+@test wp.names == ["Rodas5", "DFBDF"]
 
 # DDE problem
 prob = prob_dde_constant_1delay_ip
@@ -160,8 +168,8 @@ test_sol = TestSolution(sol)
 setups = [Dict(:alg => MethodOfSteps(BS3()))
           Dict(:alg => MethodOfSteps(Tsit5()))]
 println("Test MethodOfSteps BS3 and Tsit5")
-#Travis compile time issue
-#wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol)
+wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol)
+@test wp.names == ["BS3", "Tsit5"]
 println("DDE Done")
 
 __f(u, p, t) = 1.01 * u
@@ -172,3 +180,4 @@ sol = solve(prob, Rodas4(), reltol = 1e-8, abstol = 1e-8)
 setups = [Dict(:alg => RadauIIA5()),
     Dict(:alg => RosShamp4())]
 shoot = Shootout(prob, setups; appxsol = TestSolution(sol))
+@test shoot.names == ["RadauIIA5", "RosShamp4"]

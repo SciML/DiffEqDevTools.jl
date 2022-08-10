@@ -8,7 +8,7 @@ using Statistics
 
 import Base: length
 
-import DiffEqBase: AbstractODEProblem, AbstractDDEProblem,
+import DiffEqBase: AbstractODEProblem, AbstractDDEProblem, AbstractDDEAlgorithm,
                    AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
                    AbstractSDDEProblem, AbstractEnsembleProblem,
                    AbstractDAEProblem, @def, ConvergenceSetup, DEAlgorithm,
