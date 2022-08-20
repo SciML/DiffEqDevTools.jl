@@ -1,7 +1,5 @@
 using StochasticDiffEq, DiffEqDevTools, Test
-using DiffEqProblemLibrary.SDEProblemLibrary: importsdeproblems;
-importsdeproblems();
-using DiffEqProblemLibrary.SDEProblemLibrary: prob_sde_additivesystem
+using SDEProblemLibrary: prob_sde_additivesystem
 
 prob = prob_sde_additivesystem
 prob = SDEProblem(prob.f, prob.g, prob.u0, (0.0, 0.1), prob.p)
