@@ -1,11 +1,6 @@
 using OrdinaryDiffEq, DelayDiffEq, DiffEqDevTools, DiffEqBase, Test
-using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems;
-importodeproblems();
-using DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear
-
-using DiffEqProblemLibrary.DDEProblemLibrary: importddeproblems;
-importddeproblems();
-using DiffEqProblemLibrary.DDEProblemLibrary: prob_dde_constant_1delay_ip
+using ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear
+using DDEProblemLibrary: prob_dde_constant_1delay_ip
 
 ## Setup Tests
 
