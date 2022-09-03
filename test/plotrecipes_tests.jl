@@ -20,6 +20,7 @@ end
 tspan = (0.0,10.0)
 prob = ODEProblem(ODEFunction(f2d,analytic=f2d_analytic),rand(10,10),tspan)
 
+
 abstols = 1.0 ./ 10.0 .^ (3:8)
 reltols = 1.0 ./ 10.0 .^ (0:5)
 
@@ -35,25 +36,28 @@ plt = @test_nowarn plot(wp)
 @test plt[1][2][:x] ≈ wp[2].errors
 @test plt[1][1][:label] == names[1]
 @test plt[1][2][:label] == names[2]
+@test_nowarn plot(wp, color=[1 2])
+@test_nowarn plot(wp, color=:blue)
 @test_throws ArgumentError plot(wp, view=:dt_convergence)
 
 dts = 1.0./2.0.^((1:length(reltols)) .+ 1)
 setups = [
     Dict(:alg=>Euler(),:dts=>dts)
     Dict(:alg=>Heun(),:dts=>dts)
-    Dict(:alg=>DP5(),:dts=>dts,:adaptive=>false)
     Dict(:alg=>Tsit5(),:dts=>dts,:adaptive=>false)
     Dict(:alg=>Tsit5())
 ]
-names = ["Euler", "Heun", "DP5 fixed step", "Tsit5 fixed step", "Tsit5 adaptive"]
+names = ["Euler", "Heun", "Tsit5 fixed step", "Tsit5 adaptive"]
 wp = WorkPrecisionSet(prob,abstols,reltols,setups,names=names,save_everystep=false,numruns=100)
 
 plt = @test_nowarn plot(wp)
-@test all(plt[1][i][:x] ≈ wp[i].errors for i in 1:5)
-@test all(plt[1][i][:label] == names[i] for i in 1:5)
+@test all(plt[1][i][:x] ≈ wp[i].errors for i in 1:4)
+@test all(plt[1][i][:label] == names[i] for i in 1:4)
 
 plt = @test_nowarn plot(wp, view=:dt_convergence, legend=:bottomright)
-@test all(plt[1][i][:x] == plt[1][i+4][:x] == dts == wp.setups[i][:dts] for i in 1:4)
-@test all(plt[1][i+4][:y] ≈ wp[i].errors for i in 1:4)
-@test all(startswith(plt[1][i+4][:label], names[i]) for i in 1:4)
-@test_throws BoundsError plt[1][9]
+@test all(plt[1][i][:x] == plt[1][i+3][:x] == dts == wp.setups[i][:dts] for i in 1:3)
+@test all(plt[1][i+3][:y] ≈ wp[i].errors for i in 1:3)
+@test all(startswith(plt[1][i+3][:label], names[i]) for i in 1:3)
+@test_throws BoundsError plt[1][7]
+@test_nowarn plot(wp, view=:dt_convergence, color=[:red :orange :green])
+@test_nowarn plot(wp, view=:dt_convergence, color=:lightblue, title="Δt Convergence")
