@@ -69,7 +69,8 @@ end
             push!(ps, p)
             push!(convs, exp(lc) * dts[end] .^ p)
         end
-        names = wp_set.names[idts] .* map(p -> " (Δᵖ order p=$(round(p, sigdigits=2)))", ps)
+        names = wp_set.names[idts] .*
+                map(p -> " (Δtᵖ order p=$(round(p, sigdigits=2)))", ps)
         if color === nothing
             color = reshape(1:length(idts), 1, :)
         end
