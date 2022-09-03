@@ -6,19 +6,19 @@ Random.seed!(123)
 
 gr()
 
-# 2D Linear ODE
-function f2d(du, u, p, t)
+# Linear ODE
+function f(du, u, p, t)
     @inbounds for i in eachindex(u)
         du[i] = cos(t) * u[i]
     end
 end
 
-function f2d_analytic(u₀, p, t)
+function f_analytic(u₀, p, t)
     u₀ * exp(sin(t))
 end
 
 tspan = (0.0, 10.0)
-prob = ODEProblem(ODEFunction(f2d, analytic = f2d_analytic), rand(10, 10), tspan)
+prob = ODEProblem(ODEFunction(f, analytic = f_analytic), rand(10, 10), tspan)
 
 abstols = 1.0 ./ 10.0 .^ (3:8)
 reltols = 1.0 ./ 10.0 .^ (0:5)
