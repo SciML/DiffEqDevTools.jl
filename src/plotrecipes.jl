@@ -37,7 +37,7 @@ end
     wp.errors, wp.times
 end
 
-@recipe function f(wp_set::WorkPrecisionSet; view=:benchmark, color=nothing)
+@recipe function f(wp_set::WorkPrecisionSet; view = :benchmark, color = nothing)
     if view == :benchmark
         seriestype --> :path
         linewidth --> 3
@@ -55,8 +55,9 @@ end
         label --> reshape(wp_set.names, 1, length(wp_set))
         return errors, times
     elseif view == :dt_convergence
-        idts =  filter(i -> haskey(wp_set.setups[i], :dts), 1:length(wp_set))
-        length(idts) > 0 || throw(ArgumentError("Convergence with respect to Δt requires runs with fixed time steps"))
+        idts = filter(i -> haskey(wp_set.setups[i], :dts), 1:length(wp_set))
+        length(idts) > 0 ||
+            throw(ArgumentError("Convergence with respect to Δt requires runs with fixed time steps"))
         dts = Vector{Any}(undef, 0)
         errors = Vector{Any}(undef, 0)
         ps = Vector{Any}(undef, 0)
