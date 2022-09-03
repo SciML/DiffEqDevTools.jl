@@ -37,7 +37,7 @@ end
     wp.errors, wp.times
 end
 
-@recipe function f(wp_set::WorkPrecisionSet; color=reshape(1:length(wp_set), 1, :), view=:benchmark)
+@recipe function f(wp_set::WorkPrecisionSet; view=:benchmark, color=nothing)
     if view == :benchmark
         seriestype --> :path
         linewidth --> 3
@@ -69,11 +69,14 @@ end
             push!(convs, exp(lc) * dts[end] .^ p)
         end
         names = wp_set.names[idts] .* map(p -> " (Δᵖ order p=$(round(p, sigdigits=2)))", ps)
+        if color === nothing
+            color = reshape(1:length(idts), 1, :)
+        end
         @series begin
             seriestype --> :path
             linestyle --> :dash
             linewidth --> 1
-            color --> permutedims(color[idts])
+            color --> color
             xscale --> :log10
             yscale --> :log10
             markersize --> 0
@@ -83,7 +86,7 @@ end
         @series begin
             seriestype --> :path
             linewidth --> 3
-            color --> permutedims(color[idts])
+            color --> color
             yguide --> "Error"
             xguide --> "Δt"
             xscale --> :log10
