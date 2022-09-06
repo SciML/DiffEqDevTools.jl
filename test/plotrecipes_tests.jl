@@ -7,18 +7,18 @@ Random.seed!(123)
 gr()
 
 # Linear ODE
-function f(du, u, p, t)
+function flin(du, u, p, t)
     @inbounds for i in eachindex(u)
         du[i] = cos(t) * u[i]
     end
 end
 
-function f_analytic(u₀, p, t)
+function flin_analytic(u₀, p, t)
     u₀ * exp(sin(t))
 end
 
 tspan = (0.0, 10.0)
-prob = ODEProblem(ODEFunction(f, analytic = f_analytic), rand(10, 10), tspan)
+prob = ODEProblem(ODEFunction(flin, analytic = flin_analytic), rand(10, 10), tspan)
 
 abstols = 1.0 ./ 10.0 .^ (3:8)
 reltols = 1.0 ./ 10.0 .^ (0:5)
