@@ -37,22 +37,69 @@ end
     wp.errors, wp.times
 end
 
-@recipe function f(wp_set::WorkPrecisionSet)
-    seriestype --> :path
-    linewidth --> 3
-    yguide --> "Time (s)"
-    xguide --> "Error"
-    xscale --> :log10
-    yscale --> :log10
-    marker --> :auto
-    errors = Vector{Any}(undef, 0)
-    times = Vector{Any}(undef, 0)
-    for i in 1:length(wp_set)
-        push!(errors, wp_set[i].errors)
-        push!(times, wp_set[i].times)
+@recipe function f(wp_set::WorkPrecisionSet; view = :benchmark, color = nothing)
+    if view == :benchmark
+        seriestype --> :path
+        linewidth --> 3
+        yguide --> "Time (s)"
+        xguide --> "Error"
+        xscale --> :log10
+        yscale --> :log10
+        marker --> :auto
+        errors = Vector{Any}(undef, 0)
+        times = Vector{Any}(undef, 0)
+        for i in 1:length(wp_set)
+            push!(errors, wp_set[i].errors)
+            push!(times, wp_set[i].times)
+        end
+        label --> reshape(wp_set.names, 1, length(wp_set))
+        return errors, times
+    elseif view == :dt_convergence
+        idts = filter(i -> haskey(wp_set.setups[i], :dts), 1:length(wp_set))
+        length(idts) > 0 ||
+            throw(ArgumentError("Convergence with respect to Δt requires runs with fixed time steps"))
+        dts = Vector{Any}(undef, 0)
+        errors = Vector{Any}(undef, 0)
+        ps = Vector{Any}(undef, 0)
+        convs = Vector{Any}(undef, 0)
+        for i in idts
+            push!(dts, wp_set.setups[i][:dts])
+            push!(errors, wp_set[i].errors)
+            lc, p = [one.(dts[end]) log.(dts[end])] \ log.(errors[end])
+            push!(ps, p)
+            push!(convs, exp(lc) * dts[end] .^ p)
+        end
+        names = wp_set.names[idts] .*
+                map(p -> " (Δtᵖ order p=$(round(p, sigdigits=2)))", ps)
+        if color === nothing
+            color = reshape(1:length(idts), 1, :)
+        end
+        @series begin
+            seriestype --> :path
+            linestyle --> :dash
+            linewidth --> 1
+            color --> color
+            xscale --> :log10
+            yscale --> :log10
+            markersize --> 0
+            label --> nothing
+            return dts, convs
+        end
+        @series begin
+            seriestype --> :path
+            linewidth --> 3
+            color --> color
+            yguide --> "Error"
+            xguide --> "Δt"
+            xscale --> :log10
+            yscale --> :log10
+            marker --> :auto
+            label --> reshape(names, 1, length(idts))
+            return dts, errors
+        end
+    else
+        throw(ArgumentError("view argument `$view` not implemented"))
     end
-    label --> reshape(wp_set.names, 1, length(wp_set))
-    errors, times
 end
 
 @recipe function f(tab::ODERKTableau; dx = 1 / 100, dy = 1 / 100, order_star = false,
