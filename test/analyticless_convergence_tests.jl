@@ -14,6 +14,8 @@ test_setup = Dict(:alg => Vern9(), :reltol => 1e-25, :abstol => 1e-25)
 sim1 = analyticless_test_convergence(dts, prob, Tsit5(), test_setup)
 sim2 = analyticless_test_convergence(dts, prob, Vern9(), test_setup)
 
+@test_throws "No analytical solution set." test_convergence(dts, prob, Tsit5())
+
 @test abs(sim1.𝒪est[:final] - 5) < 0.2
 @test abs(sim2.𝒪est[:final] - 9) < 0.2
 
