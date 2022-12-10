@@ -210,15 +210,15 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
                             dense_errors = dense_errors)
             end
 
-            if haskey(kwargs, :prob_choice)
-                cur_appxsol = appxsol[kwargs[:prob_choice]]
-            elseif prob isa AbstractArray
-                cur_appxsol = appxsol[1]
-            else
+            if appxsol !== nothing
                 cur_appxsol = appxsol
-            end
-
-            if cur_appxsol !== nothing
+                if haskey(kwargs, :prob_choice)
+                    cur_appxsol = appxsol[kwargs[:prob_choice]]
+                elseif prob isa AbstractArray
+                    cur_appxsol = appxsol[1]
+                else
+                    cur_appxsol = appxsol
+                end
                 errsol = appxtrue(sol, cur_appxsol)
                 errors[i] = mean(errsol.errors[error_estimate])
             else
