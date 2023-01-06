@@ -8,23 +8,25 @@ mutable struct TestSolution{T, N, hasinterp, tType, uType, iType} <:
     u::uType
     interp::iType
     dense::Bool
-    retcode::Symbol
+    retcode::ReturnCode.T
 end
 (T::TestSolution)(t) = T.interp(t)
 function TestSolution(t, u)
     T = eltype(eltype(u))
     N = length((size(u[1])..., length(u)))
-    TestSolution{T, N, false, typeof(t), typeof(u), Nothing}(t, u, nothing, false, :Success)
+    TestSolution{T, N, false, typeof(t), typeof(u), Nothing}(t, u, nothing, false,
+                                                             ReturnCode.Success)
 end
 function TestSolution(t, u, interp)
     T = eltype(eltype(u))
     N = length((size(u[1])..., length(u)))
     TestSolution{T, N, true, typeof(t), typeof(u), typeof(interp)}(t, u, interp, true,
-                                                                   :Success)
+                                                                   ReturnCode.Success)
 end
 function TestSolution(interp::DESolution)
     TestSolution{Nothing, 0, true, Nothing, Nothing, typeof(interp)}(nothing, nothing,
-                                                                     interp, true, :Success)
+                                                                     interp, true,
+                                                                     ReturnCode.Success)
 end
 function hasinterp(::TestSolution{T, N, hi, tType, uType, iType}) where {T, N, hi, tType,
                                                                          uType, iType}
