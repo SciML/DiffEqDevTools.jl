@@ -1,7 +1,7 @@
 name = "DiffEqDevTools"
 uuid = "f3b72e0c-5b89-59e1-b016-84e28bfd966d"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "2.32.2"
+version = "2.33.0"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
@@ -13,6 +13,7 @@ NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 RootedTrees = "47965b36-3f3e-11e9-0dcf-4570dfd42a8c"
+SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
@@ -23,6 +24,7 @@ NLsolve = "4.2"
 RecipesBase = "0.7, 0.8, 1.0"
 RecursiveArrayTools = "2"
 RootedTrees = "1, 2"
+SciMLBase = "1.74"
 julia = "1.6"
 
 [extras]
