@@ -33,7 +33,7 @@ include("tableau_info.jl")
 
 export ConvergenceSimulation, Shootout, ShootoutSet, TestSolution
 
-#Benchmark Functions
+#Benchmark Functionss
 export Shootout, ShootoutSet, WorkPrecision, WorkPrecisionSet
 
 export test_convergence, analyticless_test_convergence, appxtrue!, appxtrue
