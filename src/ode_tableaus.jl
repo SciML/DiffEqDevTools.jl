@@ -148,7 +148,7 @@ function constructHeun(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 2, αEEst = αEEst, adaptiveorder = 1))
+    return (ExplicitRKTableau(A, c, α, 2, αEEst = αEEst, adaptiveorder = 1, stability_size = 2.0))
 end
 """
 Ralston's Order 2 method.
@@ -161,7 +161,7 @@ function constructRalston(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 2))
+    return (ExplicitRKTableau(A, c, α, 2, stability_size = 2.0))
 end
 
 """
@@ -175,7 +175,7 @@ function constructEuler(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 1))
+    return (ExplicitRKTableau(A, c, α, 1, stability_size = 2.0))
 end
 
 """
@@ -190,7 +190,7 @@ function constructKutta3(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 3))
+    return (ExplicitRKTableau(A, c, α, 3, stability_size = 2.5127453266183286))
 end
 
 """
@@ -206,7 +206,7 @@ function constructRK4(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 4))
+    return (ExplicitRKTableau(A, c, α, 4, stability_size = 2.785293563405282))
 end
 
 """
@@ -222,7 +222,7 @@ function constructRK438Rule(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 4))
+    return (ExplicitRKTableau(A, c, α, 4, stability_size = 2.785293563405282))
 end
 
 """
@@ -251,7 +251,7 @@ function constructRalston4(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return ExplicitRKTableau(A, c, α, 4)
+    return ExplicitRKTableau(A, c, α, 4, stability_size = 2.7852935634052822)
 end
 
 """
@@ -265,7 +265,7 @@ function constructSSPRK22(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 2))
+    return (ExplicitRKTableau(A, c, α, 2, stability_size = -2.0))
 end
 
 """
@@ -280,7 +280,7 @@ function constructSSPRK33(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 3))
+    return (ExplicitRKTableau(A, c, α, 3, stability_size = 2.5127453266183286))
 end
 
 """
@@ -296,7 +296,7 @@ function constructSSPRK43(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 3))
+    return (ExplicitRKTableau(A, c, α, 3, stability_size = 5.149486147774043))
 end
 
 """
@@ -319,7 +319,7 @@ function constructSSPRK104(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 4))
+    return (ExplicitRKTableau(A, c, α, 4, stability_size = 13.917047464637367))
 end
 
 """
@@ -464,7 +464,7 @@ function constructLobattoIIICStar2(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 2))
+    return (ExplicitRKTableau(A, c, α, 2, stability_size = -2.0))
 end
 
 """
@@ -598,7 +598,7 @@ function constructRKF5(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4))
+    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, stability_size = 3.6777066213218945))
 end
 
 """
@@ -639,7 +639,7 @@ function constructRungeFirst5(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 5))
+    return (ExplicitRKTableau(A, c, α, 5, stability_size = 3.2170478666401054))
 end
 
 """
@@ -679,7 +679,7 @@ function constructCassity5(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 5))
+    return (ExplicitRKTableau(A, c, α, 5, stability_size = 2.1686021275264866))
 end
 
 """
@@ -723,7 +723,7 @@ function constructLawson5(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 5))
+    return (ExplicitRKTableau(A, c, α, 5, stability_size = 3.7343596072347225))
 end
 
 """
@@ -766,7 +766,7 @@ function constructLutherKonen5(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 5))
+    return (ExplicitRKTableau(A, c, α, 5, stability_size = 3.217047866640106))
 end
 
 """
@@ -809,7 +809,7 @@ function constructLutherKonen52(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 5))
+    return (ExplicitRKTableau(A, c, α, 5, stability_size = 2.6515956444339794))
 end
 
 """
@@ -852,7 +852,7 @@ function constructLutherKonen53(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 5))
+    return (ExplicitRKTableau(A, c, α, 5, stability_size = 3.679935798458283))
 end
 
 """
@@ -912,7 +912,7 @@ function constructPapakostasPapaGeorgiou5(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, fsal = true))
+    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, fsal = true, stability_size = 3.306567892634947))
 end
 
 """
@@ -975,7 +975,7 @@ function constructPapakostasPapaGeorgiou52(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, fsal = true))
+    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, fsal = true, stability_size = 3.4272251630453394))
 end
 
 """
@@ -1062,7 +1062,7 @@ function constructTsitouras5(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, fsal = true))
+    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, fsal = true, stability_size = 3.5068469938049547))
 end
 
 """
@@ -1134,7 +1134,7 @@ function constructBogakiShampine5(T::Type = Float64)
     αEEst2[6] = 2272 // 6561
     αEEst2[7] = 79937 // 1113912
     αEEst2[8] = 3293 // 556956
-    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4))
+    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, stability_size = 3.9879271987261333))
 end
 
 """
@@ -1193,7 +1193,7 @@ function constructSharpSmart5(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4))
+    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, stability_size = 3.9156746135081772))
 end
 
 """
@@ -1213,7 +1213,7 @@ function constructBogakiShampine3(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 3, αEEst = αEEst, adaptiveorder = 2))
+    return (ExplicitRKTableau(A, c, α, 3, αEEst = αEEst, adaptiveorder = 2, stability_size = 2.5127453266183286))
 end
 
 """
@@ -1235,7 +1235,7 @@ function constructCashKarp(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4))
+    return (ExplicitRKTableau(A, c, α, 5, αEEst = αEEst, adaptiveorder = 4, stability_size = 3.7343596072347225))
 end
 
 """
@@ -1254,7 +1254,7 @@ function constructRKF4(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 4, αEEst = αEEst, adaptiveorder = 3))
+    return (ExplicitRKTableau(A, c, α, 4, αEEst = αEEst, adaptiveorder = 3, stability_size = 4.109222736949077))
 end
 
 """
@@ -1277,7 +1277,7 @@ function constructButcher63(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 2.856108978668386))
 end
 
 """
@@ -1330,7 +1330,7 @@ function constructButcher6(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 2.865620537276994))
 end
 
 """
@@ -1383,7 +1383,7 @@ function constructButcher62(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 2.8561089786683866))
 end
 
 """
@@ -1456,7 +1456,7 @@ function constructVerner6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, stability_size = 3.9541297306311853))
 end
 
 """
@@ -1528,7 +1528,7 @@ function constructDormandPrince6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, stability_size = 3.954129730631186))
 end
 
 """
@@ -1610,7 +1610,7 @@ function constructSharpVerner6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, fsal = true))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, fsal = true, stability_size = 4.470828492062036))
 end
 
 """
@@ -1692,7 +1692,7 @@ function constructVerner9162(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, stability_size = 4.239991338165166))
 end
 
 """
@@ -1775,7 +1775,7 @@ function constructVerner916(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, stability_size = 4.250607671658528))
 end
 
 """
@@ -1854,7 +1854,7 @@ function constructVernerRobust6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, stability_size = 4.3240258134292215))
 end
 
 """
@@ -1938,7 +1938,7 @@ function constructVernerEfficient6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, fsal = true))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, fsal = true, stability_size = 4.8552743145651425))
 end
 
 function constructVerner7(T::Type = Float64)
@@ -2027,7 +2027,7 @@ function constructVerner7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, adaptiveorder = 6, αEEst = αEEst))
+    return (ExplicitRKTableau(A, c, α, 7, adaptiveorder = 6, αEEst = αEEst, stability_size = 4.640024335337557))
 end
 
 """
@@ -2164,7 +2164,7 @@ function constructVerner8(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 8, adaptiveorder = 7, αEEst = αEEst))
+    return (ExplicitRKTableau(A, c, α, 8, adaptiveorder = 7, αEEst = αEEst, stability_size = 5.864113239353444))
 end
 
 """
@@ -2246,7 +2246,7 @@ function constructPapakostas6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, fsal = true))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, fsal = true, stability_size = 4.449984142037165))
 end
 
 """
@@ -2299,7 +2299,7 @@ function constructLawson6(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 6.463163498924733))
 end
 
 """
@@ -2371,7 +2371,7 @@ function constructTsitourasPapakostas6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, stability_size = 3.954129730631186))
 end
 
 """
@@ -2454,7 +2454,7 @@ function constructDormandLockyerMcCorriganPrince6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, fsal = true))
+    return (ExplicitRKTableau(A, c, α, 6, adaptiveorder = 5, αEEst = αEEst, fsal = true, stability_size = 4.371949555657634))
 end
 
 """
@@ -2556,7 +2556,7 @@ function constructTanakaKasugaYamashitaYazaki6D(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 7.723403386984321))
 end
 
 """
@@ -2655,7 +2655,7 @@ function constructTanakaKasugaYamashitaYazaki6C(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 9.727143096983585))
 end
 
 """
@@ -2739,7 +2739,7 @@ function constructTanakaKasugaYamashitaYazaki6B(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 6.007860841958881))
 end
 
 """
@@ -2840,7 +2840,7 @@ function constructTanakaKasugaYamashitaYazaki6A(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 4.730235594027788))
 end
 
 """
@@ -2904,7 +2904,7 @@ function constructMikkawyEisa(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 3.932606644665211))
 end
 
 """
@@ -2958,7 +2958,7 @@ function constructChummund6(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 2.9052272747717307))
 end
 
 """
@@ -3096,7 +3096,7 @@ function constructChummund62(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 2.87113148977662))
 end
 
 """
@@ -3160,7 +3160,7 @@ function constructHuta62(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 4.042886866789528))
 end
 
 """
@@ -3224,7 +3224,7 @@ function constructHuta6(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 6))
+    return (ExplicitRKTableau(A, c, α, 6, stability_size = 3.8400244379056505))
 end
 
 """
@@ -3316,7 +3316,7 @@ function constructEnrightVerner7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6))
+    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, stability_size = 4.499873870264921))
 end
 
 """
@@ -3413,7 +3413,7 @@ function constructVernerRobust7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6))
+    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, stability_size = 4.635489309972309))
 end
 
 """
@@ -3528,7 +3528,7 @@ function constructVernerEfficient7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6))
+    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, stability_size = 4.640792701835124))
 end
 
 """
@@ -3646,7 +3646,7 @@ function constructSharpVerner7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, fsal = true))
+    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, fsal = true, stability_size = 4.622084785418665))
 end
 
 """
@@ -3757,7 +3757,7 @@ function constructSharpSmart7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6))
+    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, stability_size = 3.8994534847171285))
 end
 
 """
@@ -3889,7 +3889,7 @@ function constructTanakaYamashitaEfficient7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6))
+    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, stability_size = 4.912538831797948))
 end
 
 """
@@ -4005,7 +4005,7 @@ function constructTanakaYamashitaStable7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6))
+    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, stability_size = 9.29902700964581))
 end
 
 """
@@ -4097,7 +4097,7 @@ function constructCooperVerner8(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 8))
+    return (ExplicitRKTableau(A, c, α, 8, stability_size = 4.142567934840205))
 end
 
 """
@@ -4189,7 +4189,7 @@ function constructCooperVerner82(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 8))
+    return (ExplicitRKTableau(A, c, α, 8, stability_size = 3.715376401690181))
 end
 
 """
@@ -4283,7 +4283,7 @@ function constructCurtis8(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 8))
+    return (ExplicitRKTableau(A, c, α, 8, stability_size = 5.6599472616274795))
 end
 
 """
@@ -4465,7 +4465,7 @@ function constructEnrightVerner8(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7))
+    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7, stability_size = 5.642563947370989))
 end
 
 """
@@ -4616,7 +4616,7 @@ function constructdverk78(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7))
+    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7, stability_size = 5.785500208507322))
 end
 
 """
@@ -4788,7 +4788,7 @@ function constructTsitourasPapakostas8(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7))
+    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7, stability_size = 5.906883483660496))
 end
 
 """
@@ -5094,7 +5094,7 @@ function constructVernerRobust9(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8))
+    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8, stability_size = 4.5214477514362255))
 end
 
 """
@@ -5429,7 +5429,7 @@ function constructVernerEfficient9(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8))
+    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8, stability_size = 4.476172722561913))
 end
 
 """
@@ -5710,7 +5710,7 @@ function constructSharp9(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8))
+    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8, stability_size = 5.191689996466664))
 end
 
 """
@@ -5988,7 +5988,7 @@ function constructTsitouras9(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8))
+    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8, stability_size = 3.939793900092272))
 end
 
 """
@@ -6326,7 +6326,7 @@ function constructTsitouras92(T::Type = Float64)
     α = map(T, α)
     αEEst = map(T, αEEst)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8))
+    return (ExplicitRKTableau(A, c, α, 9, αEEst = αEEst, adaptiveorder = 8, stability_size = 4.501341330915361))
 end
 
 """
@@ -6763,7 +6763,7 @@ function constructBaker10(T::Type = BigFloat)
     α = map(T, α)
     αEEst = map(T, αEEst)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 10, αEEst = αEEst, adaptiveorder = 9))
+    return (ExplicitRKTableau(A, c, α, 10, αEEst = αEEst, adaptiveorder = 9, stability_size = 5.827746350596612))
 end
 
 """
@@ -7061,7 +7061,7 @@ function constructOno10(T::Type = BigFloat)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 10))
+    return (ExplicitRKTableau(A, c, α, 10, stability_size = 3.381557905977185))
 end
 
 """
@@ -7347,7 +7347,7 @@ function constructFeagin10(T::Type = BigFloat)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 10))
+    return (ExplicitRKTableau(A, c, α, 10, stability_size = 2.527944696214181))
 end
 
 """
@@ -7645,7 +7645,7 @@ function constructHairer10(T::Type = BigFloat)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 10))
+    return (ExplicitRKTableau(A, c, α, 10, stability_size = 2.7046790686948667))
 end
 
 """
@@ -7959,7 +7959,7 @@ function constructCurtis10(T::Type = BigFloat)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 10))
+    return (ExplicitRKTableau(A, c, α, 10, stability_size = 3.826924804386427))
 end
 
 """
@@ -8499,7 +8499,7 @@ function constructOno12(T::Type = BigFloat)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 12))
+    return (ExplicitRKTableau(A, c, α, 12, stability_size = 3.028073429132015))
 end
 
 """
@@ -9050,7 +9050,7 @@ function constructFeagin12(T::Type = BigFloat)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 12))
+    return (ExplicitRKTableau(A, c, α, 12, stability_size = 4.0696679617637175))
 end
 
 """
@@ -10080,7 +10080,7 @@ function constructFeagin14(T::Type = BigFloat)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 14))
+    return (ExplicitRKTableau(A, c, α, 14, stability_size = 1.873815353775539))
 end
 
 function constructButcher7(T::Type = Float64)
@@ -10106,7 +10106,7 @@ function constructButcher7(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 7))
+    return (ExplicitRKTableau(A, c, α, 7, stability_size = 2.6662179256363756))
 end
 
 function constructDverk(T::Type = Float64)
@@ -10125,7 +10125,7 @@ function constructDverk(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, αEEst = αEEst, adaptiveorder = 5))
+    return (ExplicitRKTableau(A, c, α, 6, αEEst = αEEst, adaptiveorder = 5, stability_size = 4.064777441244461))
 end
 
 """
@@ -10148,7 +10148,7 @@ function constructClassicVerner6(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 6, αEEst = αEEst, adaptiveorder = 5))
+    return (ExplicitRKTableau(A, c, α, 6, αEEst = αEEst, adaptiveorder = 5, stability_size = 4.457242953908324))
 end
 
 """
@@ -10174,7 +10174,7 @@ function constructClassicVerner7(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6))
+    return (ExplicitRKTableau(A, c, α, 7, αEEst = αEEst, adaptiveorder = 6, stability_size = 5.062347991796731))
 end
 
 """
@@ -10205,7 +10205,7 @@ function constructClassicVerner8(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7))
+    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7, stability_size = 5.076743619212314))
 end
 
 """
@@ -10237,7 +10237,7 @@ function constructRKF8(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7))
+    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7, stability_size = 5.007588848940572))
 end
 
 """
@@ -10273,7 +10273,7 @@ function constructDormandPrince8_64bit(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7))
+    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7, stability_size = 5.166633619968106))
 end
 
 """
@@ -10325,7 +10325,7 @@ function constructDormandPrince8(T::Type = Float64)
     α = map(T, α)
     c = map(T, c)
     αEEst = map(T, αEEst)
-    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7))
+    return (ExplicitRKTableau(A, c, α, 8, αEEst = αEEst, adaptiveorder = 7, stability_size = 5.166633619968108))
 end
 
 """
@@ -10373,5 +10373,5 @@ function constructRKO65(T::Type = Float64)
     A = map(T, A)
     α = map(T, α)
     c = map(T, c)
-    return (ExplicitRKTableau(A, c, α, 5))
+    return (ExplicitRKTableau(A, c, α, 5, stability_size = 4.165854606804698))
 end
