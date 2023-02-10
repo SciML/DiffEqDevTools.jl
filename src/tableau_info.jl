@@ -29,11 +29,11 @@ end
 
 Calculates the length of the stability region in the real axis.
 """
-function stability_region(tab::ODERKTableau; initial_guess = -3.0)
+function stability_region(tab::ODERKTableau; initial_guess = -3.0, kw...)
     residual! = function (resid, x)
         resid[1] = abs(stability_region(x[1], tab)) - 1
     end
-    sol = nlsolve(residual!, [initial_guess])
+    sol = nlsolve(residual!, [initial_guess]; kw...)
     sol.zero[1]
 end
 
@@ -54,7 +54,7 @@ function RootedTrees.residual_order_condition(tab::ODERKTableau, order::Int,
     return resid
 end
 
-isfsal(::ExplicitRKTableau{M, V, fsal}) where {M, V, fsal} = fsal
+isfsal(tab::ExplicitRKTableau) = tab.fsal
 isfsal(::ImplicitRKTableau) = nothing
 function check_tableau(tab; tol = 10eps(1.0))
     order = all(i -> residual_order_condition(tab, i, +, abs) < tol, 1:(tab.order))
