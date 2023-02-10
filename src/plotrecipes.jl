@@ -33,7 +33,7 @@ end
     xguide --> "Error"
     xscale --> :log10
     yscale --> :log10
-    marker --> :auto
+    markershape --> :auto
     wp.errors, wp.times
 end
 
@@ -45,7 +45,7 @@ end
         xguide --> "Error"
         xscale --> :log10
         yscale --> :log10
-        marker --> :auto
+        markershape --> :auto
         errors = Vector{Any}(undef, 0)
         times = Vector{Any}(undef, 0)
         for i in 1:length(wp_set)
@@ -93,7 +93,7 @@ end
             xguide --> "Δt"
             xscale --> :log10
             yscale --> :log10
-            marker --> :auto
+            markershape --> :auto
             label --> reshape(names, 1, length(idts))
             return dts, errors
         end
