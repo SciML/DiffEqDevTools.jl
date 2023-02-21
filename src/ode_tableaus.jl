@@ -10168,7 +10168,7 @@ function constructDverk(T::Type = Float64)
 end
 
 """
-EXPLICIT RUNGE-KUTFA METHODS WITH
+EXPLICIT RUNGE-KUTTA METHODS WITH
 ESTIMATES OF THE LOCAL TRUNCATION ERROR
 """
 function constructClassicVerner6(T::Type = Float64)
@@ -10192,7 +10192,7 @@ function constructClassicVerner6(T::Type = Float64)
 end
 
 """
-EXPLICIT RUNGE-KUTFA METHODS WITH
+EXPLICIT RUNGE-KUTTA METHODS WITH
 ESTIMATES OF THE LOCAL TRUNCATION ERROR
 """
 function constructClassicVerner7(T::Type = Float64)
@@ -10219,7 +10219,7 @@ function constructClassicVerner7(T::Type = Float64)
 end
 
 """
-EXPLICIT RUNGE-KUTFA METHODS WITH
+EXPLICIT RUNGE-KUTTA METHODS WITH
 ESTIMATES OF THE LOCAL TRUNCATION ERROR
 """
 function constructClassicVerner8(T::Type = Float64)
