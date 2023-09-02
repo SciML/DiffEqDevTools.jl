@@ -9,3 +9,4 @@ DiffEqDevTools.jl is a component package in the DifferentialEquations ecosystem.
 convergence testing, benchmarking, and error approximation functionality which is
 used by the other component packages in order to test for correctness. Users interested in using this
 functionality should check out [DifferentialEquations.jl](https://github.com/JuliaDiffEq/DifferentialEquations.jl)
+
