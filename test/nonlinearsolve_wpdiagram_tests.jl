@@ -1,9 +1,9 @@
 # Fetch pakages.
-using NonlinearSolve, StaticArrays, DiffEqDevTools, Plots
+using NonlinearSolve, DiffEqDevTools, Plots
 
 # Prepares NonlinearProblem.
 f(u, p) = u .* u .- p
-u0 = @SVector[1.0, 1.0]
+u0 = [1.0, 1.0]
 p = 2.0
 static_prob = NonlinearProblem(f, u0, p)
 real_sol = solve(static_prob, NewtonRaphson(), reltol = 1e-15, abstol = 1e-15)
