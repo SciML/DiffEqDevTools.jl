@@ -30,6 +30,7 @@ julia = "1.6"
 [extras]
 DelayDiffEq = "bcd4f6db-9728-5f36-b5f7-82caef46ccdb"
 DDEProblemLibrary = "f42792ee-6ffc-4e2a-ae83-8ee2f22de800"
+NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 ODEProblemLibrary = "fdc4e326-1af4-4b90-96e7-779fcce2daa5"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 ParameterizedFunctions = "65888b18-ceab-5e60-b2b9-181511a3b968"
