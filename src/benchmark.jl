@@ -273,6 +273,56 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
     return WorkPrecision(prob, abstols, reltols, errors, times, name, N)
 end
 
+# Work precision information for a nonlinear problem.
+function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = nothing; name = nothing, appxsol = nothing, error_estimate = :l2, numruns = 20, seconds = 2, kwargs...)
+    isnothing(appxsol) && error("Must provide the real value as the \"appxsol\" kwarg.")
+
+    N = length(abstols)
+    errors = Vector{Float64}(undef, N)
+    times = Vector{Float64}(undef, N)
+    if name === nothing
+        name = "WP-Alg"
+    end
+
+    if haskey(kwargs, :prob_choice)
+        _prob = prob[kwargs[:prob_choice]]
+    elseif prob isa AbstractArray
+        _prob = prob[1]
+    else
+        _prob = prob
+    end
+
+    let _prob = _prob
+        for i in 1:N
+            sol = solve(_prob, alg; kwargs..., abstol = abstols[i], reltol = reltols[i])
+
+            if error_estimate == :l2
+                errors[i] = sqrt(sum(abs2, sol .- appxsol))
+            else
+                error("Unsupported norm used: $(error_estimate).")
+            end
+
+            benchmark_f = let dts = dts, _prob = _prob, alg = alg, sol = sol,
+                abstols = abstols, reltols = reltols, kwargs = kwargs
+
+                () -> @elapsed solve(_prob, alg;
+                                            abstol = abstols[i],
+                                            reltol = reltols[i],
+                                            kwargs...)
+            end
+            benchmark_f() # pre-compile
+
+            b_t = benchmark_f()
+            if b_t > seconds
+                times[i] = b_t
+            else
+                times[i] = mapreduce(i -> benchmark_f(), min, 2:numruns; init = b_t)
+            end
+        end
+    end
+    return WorkPrecision(prob, abstols, reltols, errors, times, name, N)
+end
+
 function WorkPrecisionSet(prob,
                           abstols, reltols, setups;
                           print_names = false, names = nothing, appxsol = nothing,

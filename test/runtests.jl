@@ -9,3 +9,4 @@ using Test
 @time @testset "Analyticless Stochastic WP" begin include("analyticless_stochastic_wp.jl") end
 @time @testset "Stability Region Tests" begin include("stability_region_test.jl") end
 @time @testset "Plot Recipes" begin include("plotrecipes_tests.jl") end
+@time @testset "Plot Recipes (Nonlinearsolve WP-diagrams)" begin include("nonlinearsolve_wpdiagram_tests.jl") end
