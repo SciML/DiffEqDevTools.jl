@@ -12,12 +12,19 @@ let
     # Sets WP input.
     abstols = 1.0 ./ 10.0 .^ (8:12)
     reltols = 1.0 ./ 10.0 .^ (8:12)
-    setups = [Dict(:alg=>NewtonRaphson())
-            Dict(:alg=>TrustRegion())]
-    solnames = ["NewtonRaphson";"TrustRegion"]
+    setups = [Dict(:alg => NewtonRaphson())
+        Dict(:alg => TrustRegion())]
+    solnames = ["NewtonRaphson"; "TrustRegion"]
 
     # Makes WP-diagram
-    wp = WorkPrecisionSet(static_prob, abstols, reltols, setups; names=solnames, numruns=100, appxsol=real_sol, error_estimate=:l2) 
+    wp = WorkPrecisionSet(static_prob,
+        abstols,
+        reltols,
+        setups;
+        names = solnames,
+        numruns = 100,
+        appxsol = real_sol,
+        error_estimate = :l2)
 
     # Checks that all errors are small (they definitely should be).
     all(vcat(getfield.(wp.wps, :errors)...) .< 10e-9)

@@ -1,6 +1,7 @@
-using OrdinaryDiffEq, DelayDiffEq, DiffEqDevTools, DiffEqBase, Test
+using OrdinaryDiffEq, DelayDiffEq, BoundaryValueDiffEq, DiffEqDevTools, DiffEqBase, Test
 using ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear
 using DDEProblemLibrary: prob_dde_constant_1delay_ip
+using BVProblemLibrary: prob_bvp_linear_1
 
 ## Setup Tests
 
@@ -17,8 +18,8 @@ tspans[2] = tspan;
 abstols = 1 ./ 10 .^ (3:10)
 reltols = 1 ./ 10 .^ (3:10)
 
-setups = [Dict(:alg => RK4()); Dict(:alg => Euler()); Dict(:alg => BS3());
-          Dict(:alg => Midpoint()); Dict(:alg => BS5()); Dict(:alg => DP5())]
+setups = [Dict(:alg => RK4()) Dict(:alg => Euler()) Dict(:alg => BS3())
+    Dict(:alg => Midpoint()) Dict(:alg => BS5()) Dict(:alg => DP5())]
 
 t1 = @elapsed sol = solve(prob, RK4(), dt = 1 / 2^(4))
 t2 = @elapsed sol2 = solve(prob, setups[1][:alg], dt = 1 / 2^(4))
@@ -70,9 +71,9 @@ abstols = 1 ./ 10 .^ (3:7)
 reltols = 1 ./ 10 .^ (0:4)
 
 setups = [Dict(:alg => DP5())
-          Dict(:alg => Tsit5(),
-               :abstols => 1 ./ 10 .^ (4:7),
-               :reltols => 1 ./ 10 .^ (1:4))]
+    Dict(:alg => Tsit5(),
+    :abstols => 1 ./ 10 .^ (4:7),
+    :reltols => 1 ./ 10 .^ (1:4))]
 
 sol = solve(prob, Vern7(), abstol = 1 / 10^14, reltol = 1 / 10^14)
 test_sol1 = TestSolution(sol)
@@ -96,25 +97,25 @@ sol = solve(prob, Vern7(), abstol = 1 / 10^14, reltol = 1 / 10^14)
 test_sol = TestSolution(sol)
 
 setups = [Dict(:alg => DP5())
-          Dict(:alg => Tsit5())
-          Dict(:alg => Vern6())]
+    Dict(:alg => Tsit5())
+    Dict(:alg => Vern6())]
 println("Test DP5, Tsit5, and Vern6")
 wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol,
-                      save_everystep = false, numruns = 20, maxiters = 10000)
+    save_everystep = false, numruns = 20, maxiters = 10000)
 @test wp.names == ["DP5", "Tsit5", "Vern6"]
 
 # Dual Problem
 
 probs = [prob, prob_ode_2Dlinear]
 setups = [Dict(:alg => DP5())
-          Dict(:alg => Tsit5(), :prob_choice => 2)
-          Dict(:alg => Vern6(), :prob_choice => 2)]
+    Dict(:alg => Tsit5(), :prob_choice => 2)
+    Dict(:alg => Vern6(), :prob_choice => 2)]
 println("Test DP5, Tsit5, and Vern6")
 wp = WorkPrecisionSet(probs, abstols, reltols, setups; appxsol = [test_sol, nothing],
-                      save_everystep = false, numruns = 20, maxiters = 10000)
+    save_everystep = false, numruns = 20, maxiters = 10000)
 @test wp.names == ["DP5", "Tsit5", "Vern6"]
 wp = WorkPrecisionSet(probs, abstols, reltols, setups; appxsol = [test_sol, test_sol1],
-                      save_everystep = false, numruns = 20, maxiters = 10000)
+    save_everystep = false, numruns = 20, maxiters = 10000)
 @test wp.names == ["DP5", "Tsit5", "Vern6"]
 
 # Dual DAE Problems
@@ -146,9 +147,9 @@ dae_ref_sol = solve(prob2, DFBDF(), abstol = 1 / 10^14, reltol = 1 / 10^14);
 
 probs = [prob1, prob2]
 setups = [Dict(:alg => Rodas5())
-          Dict(:alg => DFBDF(), :prob_choice => 2)]
+    Dict(:alg => DFBDF(), :prob_choice => 2)]
 wp = WorkPrecisionSet(probs, abstols, reltols, setups; appxsol = [ode_ref_sol, dae_ref_sol],
-                      save_everystep = false, numruns = 20, maxiters = 10000)
+    save_everystep = false, numruns = 20, maxiters = 10000)
 @test wp.names == ["Rodas5", "DFBDF"]
 
 # DDE problem
@@ -157,11 +158,11 @@ prob = prob_dde_constant_1delay_ip
 abstols = 1 ./ 10 .^ (7:10)
 reltols = 1 ./ 10 .^ (4:7)
 sol = solve(prob, MethodOfSteps(Vern9(), fpsolve = NLFunctional(; max_iter = 1000));
-            reltol = 1e-8, abstol = 1e-8)
+    reltol = 1e-8, abstol = 1e-8)
 test_sol = TestSolution(sol)
 
 setups = [Dict(:alg => MethodOfSteps(BS3()))
-          Dict(:alg => MethodOfSteps(Tsit5()))]
+    Dict(:alg => MethodOfSteps(Tsit5()))]
 println("Test MethodOfSteps BS3 and Tsit5")
 wp = WorkPrecisionSet(prob, abstols, reltols, setups; appxsol = test_sol)
 @test wp.names == ["BS3", "Tsit5"]
@@ -176,3 +177,23 @@ setups = [Dict(:alg => RadauIIA5()),
     Dict(:alg => RosShamp4())]
 shoot = Shootout(prob, setups; appxsol = TestSolution(sol))
 @test shoot.names == ["RadauIIA5", "RosShamp4"]
+
+# BVP problem
+prob = prob_bvp_linear_1
+abstols = 1.0 ./ 10.0 .^ (2:3)
+reltols = 1.0 ./ 10.0 .^ (2:3)
+sol = solve(prob, Shooting(Tsit5()), abstol = 1e-14, reltol = 1e-14)
+test_sol = TestSolution(sol.t, sol.u)
+
+setups = [Dict(:alg => MIRK4(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))
+    Dict(:alg => MIRK5(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))]
+println("Test MIRK4 and MIRK5")
+wp = WorkPrecisionSet(prob,
+    abstols,
+    reltols,
+    setups;
+    approxsol = sol,
+    names = labels,
+    print_names = true)
+@test wp.names == ["MIRK4", "MIRK5"]
+println("BVP Done")

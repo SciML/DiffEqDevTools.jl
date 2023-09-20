@@ -15,21 +15,28 @@ function TestSolution(t, u)
     T = eltype(eltype(u))
     N = length((size(u[1])..., length(u)))
     TestSolution{T, N, false, typeof(t), typeof(u), Nothing}(t, u, nothing, false,
-                                                             ReturnCode.Success)
+        ReturnCode.Success)
 end
 function TestSolution(t, u, interp)
     T = eltype(eltype(u))
     N = length((size(u[1])..., length(u)))
     TestSolution{T, N, true, typeof(t), typeof(u), typeof(interp)}(t, u, interp, true,
-                                                                   ReturnCode.Success)
+        ReturnCode.Success)
 end
 function TestSolution(interp::DESolution)
     TestSolution{Nothing, 0, true, Nothing, Nothing, typeof(interp)}(nothing, nothing,
-                                                                     interp, true,
-                                                                     ReturnCode.Success)
+        interp, true,
+        ReturnCode.Success)
 end
-function hasinterp(::TestSolution{T, N, hi, tType, uType, iType}) where {T, N, hi, tType,
-                                                                         uType, iType}
+function hasinterp(::TestSolution{
+    T,
+    N,
+    hi,
+    tType,
+    uType,
+    iType,
+}) where {T, N, hi, tType,
+    uType, iType}
     hi
 end
 """
@@ -51,22 +58,22 @@ function appxtrue(sol::AbstractODESolution, sol2::TestSolution)
         timeseries_analytic = _sol(sol.t)
         errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
         errors[:l2] = sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
-                                                      sol - timeseries_analytic)))
+            sol - timeseries_analytic)))
         densetimes = collect(range(sol.t[1], stop = sol.t[end], length = 100))
         interp_u = sol(densetimes)
         interp_analytic = _sol(densetimes)
         interp_errors = Dict(:L∞ => maximum(vecvecapply((x) -> abs.(x),
-                                                        interp_u - interp_analytic)),
-                             :L2 => sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
-                                                                    interp_u -
-                                                                    interp_analytic))))
+                interp_u - interp_analytic)),
+            :L2 => sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
+                interp_u -
+                interp_analytic))))
         errors = merge(errors, interp_errors)
     else
         timeseries_analytic = sol2.u
         if sol.t == sol2.t
             errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
             errors[:l2] = sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
-                                                          sol - timeseries_analytic)))
+                sol - timeseries_analytic)))
         end
     end
     DiffEqBase.build_solution(sol, timeseries_analytic, errors)
@@ -80,22 +87,22 @@ errors for sol. If sol2 has no interpolant, only the final error is
 calculated.
 """
 function appxtrue(sol::AbstractODESolution, sol2::AbstractODESolution;
-                  timeseries_errors = sol2.dense, dense_errors = sol2.dense)
+    timeseries_errors = sol2.dense, dense_errors = sol2.dense)
     errors = Dict(:final => recursive_mean(abs.(sol[end] - sol2[end])))
     if sol2.dense
         timeseries_analytic = sol2(sol.t)
         errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
         errors[:l2] = sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
-                                                      sol - timeseries_analytic)))
+            sol - timeseries_analytic)))
         if dense_errors
             densetimes = collect(range(sol.t[1], stop = sol.t[end], length = 100))
             interp_u = sol(densetimes)
             interp_analytic = sol2(densetimes)
             interp_errors = Dict(:L∞ => maximum(vecvecapply((x) -> abs.(x),
-                                                            interp_u - interp_analytic)),
-                                 :L2 => sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
-                                                                        interp_u -
-                                                                        interp_analytic))))
+                    interp_u - interp_analytic)),
+                :L2 => sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
+                    interp_u -
+                    interp_analytic))))
             errors = merge(errors, interp_errors)
         end
     else
@@ -103,7 +110,7 @@ function appxtrue(sol::AbstractODESolution, sol2::AbstractODESolution;
         if timeseries_errors && sol.t == sol2.t
             errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
             errors[:l2] = sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
-                                                          sol - timeseries_analytic)))
+                sol - timeseries_analytic)))
         end
     end
     DiffEqBase.build_solution(sol, timeseries_analytic, errors)
@@ -114,11 +121,11 @@ function appxtrue(sim::EnsembleSolution, appx_setup; kwargs...)
     for i in eachindex(sim)
         prob = sim[i].prob
         prob2 = SDEProblem(prob.f, prob.g, prob.u0, prob.tspan,
-                           noise = NoiseWrapper(sim[i].W))
+            noise = NoiseWrapper(sim[i].W))
         true_sol = solve(prob2, appx_setup[:alg]; appx_setup...)
         _new_sols[i] = appxtrue(sim[i], true_sol)
     end
     new_sols = convert(Vector{typeof(_new_sols[1])}, _new_sols)
     calculate_ensemble_errors(new_sols; converged = sim.converged,
-                              elapsedTime = sim.elapsedTime, kwargs...)
+        elapsedTime = sim.elapsedTime, kwargs...)
 end

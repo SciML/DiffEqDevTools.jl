@@ -103,7 +103,7 @@ end
 end
 
 @recipe function f(tab::ODERKTableau; dx = 1 / 100, dy = 1 / 100, order_star = false,
-                   embedded = false)
+    embedded = false)
     xlims = get(plotattributes, :xlims, (-6, 1))
     ylims = get(plotattributes, :ylims, (-5, 5))
     x = xlims[1]:dx:xlims[2]

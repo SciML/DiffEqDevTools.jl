@@ -38,8 +38,8 @@ function stability_region(tab::ODERKTableau; initial_guess = -3.0, kw...)
 end
 
 function RootedTrees.residual_order_condition(tab::ODERKTableau, order::Int,
-                                              reducer = nothing, mapper = x -> x^2;
-                                              embedded = false)
+    reducer = nothing, mapper = x -> x^2;
+    embedded = false)
     A, c = tab.A, tab.c
     b = embedded ? tab.αEEst : tab.α
     if reducer === nothing
@@ -63,8 +63,8 @@ function check_tableau(tab; tol = 10eps(1.0))
     end
     if tab.adaptiveorder != 0
         embedded_order = all(i -> residual_order_condition(tab, i, +, abs;
-                                                           embedded = true) < tol,
-                             tab.adaptiveorder)
+                embedded = true) < tol,
+            tab.adaptiveorder)
         if !embedded_order
             error("Tableau's embedded order is not correct.")
         end
