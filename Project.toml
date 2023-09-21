@@ -1,7 +1,7 @@
 name = "DiffEqDevTools"
 uuid = "f3b72e0c-5b89-59e1-b016-84e28bfd966d"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "2.36.0"
+version = "2.37.0"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
@@ -28,6 +28,8 @@ SciMLBase = "1.74"
 julia = "1.6"
 
 [extras]
+BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d"
+BVProblemLibrary = "ded0fc24-dfea-4565-b1d9-79c027d14d84"
 DelayDiffEq = "bcd4f6db-9728-5f36-b5f7-82caef46ccdb"
 DDEProblemLibrary = "f42792ee-6ffc-4e2a-ae83-8ee2f22de800"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
@@ -42,4 +44,4 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["DelayDiffEq", "DDEProblemLibrary", "NonlinearSolve", "ODEProblemLibrary", "SDEProblemLibrary", "OrdinaryDiffEq", "ParameterizedFunctions", "Random", "StochasticDiffEq", "StochasticDelayDiffEq", "Plots", "Test"]
+test = ["BoundaryValueDiffEq", "BVProblemLibrary", "DelayDiffEq", "DDEProblemLibrary", "NonlinearSolve", "ODEProblemLibrary", "SDEProblemLibrary", "OrdinaryDiffEq", "ParameterizedFunctions", "Random", "StochasticDiffEq", "StochasticDelayDiffEq", "Plots", "Test"]
