@@ -187,6 +187,8 @@ test_sol = TestSolution(sol.t, sol.u)
 
 setups = [Dict(:alg => MIRK4(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))
     Dict(:alg => MIRK5(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))]
+labels = ["MIRK4", "MIRK5"]
+
 println("Test MIRK4 and MIRK5")
 wp = WorkPrecisionSet(prob,
     abstols,
