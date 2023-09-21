@@ -11,7 +11,7 @@ import Base: length
 import DiffEqBase: AbstractODEProblem, AbstractDDEProblem, AbstractDDEAlgorithm,
                    AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
                    AbstractSDDEProblem, AbstractEnsembleProblem,
-                   AbstractDAEProblem, @def, ConvergenceSetup, DEAlgorithm,
+                   AbstractDAEProblem, AbstractBVProblem, @def, ConvergenceSetup, DEAlgorithm,
                    ODERKTableau, AbstractTimeseriesSolution, ExplicitRKTableau,
                    ImplicitRKTableau
 

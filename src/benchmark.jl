@@ -273,6 +273,103 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
     return WorkPrecision(prob, abstols, reltols, errors, times, name, N)
 end
 
+# Work precision information for a BVP
+function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = nothing;
+    name = nothing, appxsol = nothing, error_estimate = :final,
+    numruns = 20, seconds = 2, kwargs...)
+    N = length(abstols)
+    errors = Vector{Float64}(undef, N)
+    times = Vector{Float64}(undef, N)
+    if name === nothing
+        name = "WP-Alg"
+    end
+
+    if haskey(kwargs, :prob_choice)
+        _prob = prob[kwargs[:prob_choice]]
+    elseif prob isa AbstractArray
+        _prob = prob[1]
+    else
+        _prob = prob
+    end
+
+    let _prob = _prob
+        timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
+        dense_errors = error_estimate ∈ DENSE_ERRORS
+        for i in 1:N
+            if dts === nothing
+                sol = solve(_prob, alg; kwargs..., abstol = abstols[i],
+                    reltol = reltols[i], timeseries_errors = timeseries_errors,
+                    dense_errors = dense_errors)
+            else
+                sol = DiffEqBase.solve(_prob, alg; kwargs..., abstol = abstols[i],
+                    reltol = reltols[i], dt = dts[i],
+                    timeseries_errors = timeseries_errors,
+                    dense_errors = dense_errors)
+            end
+
+            if haskey(kwargs, :prob_choice)
+                cur_appxsol = appxsol[kwargs[:prob_choice]]
+            elseif prob isa AbstractArray
+                cur_appxsol = appxsol[1]
+            else
+                cur_appxsol = appxsol
+            end
+
+            if cur_appxsol !== nothing
+                errsol = appxtrue(sol, cur_appxsol)
+                errors[i] = mean(errsol.errors[error_estimate])
+            else
+                errors[i] = mean(sol.errors[error_estimate])
+            end
+
+            benchmark_f = let dts = dts, _prob = _prob, alg = alg, sol = sol,
+                abstols = abstols, reltols = reltols, kwargs = kwargs
+
+                if dts === nothing
+                    if typeof(_prob) <: DAEProblem
+                        () -> @elapsed solve(_prob, alg;
+                            abstol = abstols[i],
+                            reltol = reltols[i],
+                            timeseries_errors = false,
+                            dense_errors = false, kwargs...)
+                    else
+                        () -> @elapsed solve(_prob, alg;
+                            abstol = abstols[i],
+                            reltol = reltols[i],
+                            timeseries_errors = false,
+                            dense_errors = false, kwargs...)
+                    end
+                else
+                    if typeof(_prob) <: DAEProblem
+                        () -> @elapsed solve(_prob, alg;
+                            abstol = abstols[i],
+                            reltol = reltols[i],
+                            dt = dts[i],
+                            timeseries_errors = false,
+                            dense_errors = false, kwargs...)
+                    else
+                        () -> @elapsed solve(_prob, alg;
+                            abstol = abstols[i],
+                            reltol = reltols[i],
+                            dt = dts[i],
+                            timeseries_errors = false,
+                            dense_errors = false, kwargs...)
+                    end
+                end
+            end
+            benchmark_f() # pre-compile
+
+            b_t = benchmark_f()
+            if b_t > seconds
+                times[i] = b_t
+            else
+                times[i] = mapreduce(i -> benchmark_f(), min, 2:numruns; init = b_t)
+            end
+        end
+    end
+    return WorkPrecision(prob, abstols, reltols, errors, times, name, N)
+end
+
 # Work precision information for a nonlinear problem.
 function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = nothing; name = nothing, appxsol = nothing, error_estimate = :l2, numruns = 20, seconds = 2, kwargs...)
     isnothing(appxsol) && error("Must provide the real value as the \"appxsol\" kwarg.")
@@ -585,6 +682,33 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem, abstols, reltols, setup
            for i in 1:N]
     WorkPrecisionSet(wps, N, abstols, reltols, prob, setups, names, error_estimate,
                      Int(trajectories))
+end
+
+function WorkPrecisionSet(prob::AbstractBVProblem,
+    abstols, reltols, setups;
+    print_names = false, names = nothing, appxsol = nothing,
+    error_estimate = :final,
+    test_dt = nothing, kwargs...)
+    N = length(setups)
+    @assert names === nothing || length(setups) == length(names)
+    wps = Vector{WorkPrecision}(undef, N)
+    if names === nothing
+        names = [_default_name(setup[:alg]) for setup in setups]
+    end
+    for i in 1:N
+        print_names && println(names[i])
+        _abstols = get(setups[i], :abstols, abstols)
+        _reltols = get(setups[i], :reltols, reltols)
+        _dts = get(setups[i], :dts, nothing)
+        filtered_setup = filter(p -> p.first in DiffEqBase.allowedkeywords, setups[i])
+
+        wps[i] = WorkPrecision(prob, setups[i][:alg], _abstols, _reltols, _dts;
+            appxsol = appxsol,
+            error_estimate = error_estimate,
+            name = names[i], kwargs..., filtered_setup...)
+    end
+    return WorkPrecisionSet(wps, N, abstols, reltols, prob, setups, names, error_estimate,
+        nothing)
 end
 
 function get_sample_errors(prob::AbstractRODEProblem, setup, test_dt = nothing;

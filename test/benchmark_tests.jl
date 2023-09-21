@@ -1,6 +1,7 @@
-using OrdinaryDiffEq, DelayDiffEq, DiffEqDevTools, DiffEqBase, Test
+using OrdinaryDiffEq, DelayDiffEq, BoundaryValueDiffEq, DiffEqDevTools, DiffEqBase, Test
 using ODEProblemLibrary: prob_ode_2Dlinear, prob_ode_linear
 using DDEProblemLibrary: prob_dde_constant_1delay_ip
+using BVProblemLibrary: prob_bvp_linear_1
 
 ## Setup Tests
 
@@ -176,3 +177,23 @@ setups = [Dict(:alg => RadauIIA5()),
     Dict(:alg => RosShamp4())]
 shoot = Shootout(prob, setups; appxsol = TestSolution(sol))
 @test shoot.names == ["RadauIIA5", "RosShamp4"]
+
+# BVP problem
+prob = prob_bvp_linear_1
+abstols = 1.0 ./ 10.0 .^ (2:3)
+reltols = 1.0 ./ 10.0 .^ (2:3)
+sol = solve(prob, Shooting(Tsit5()), abstol = 1e-14, reltol = 1e-14)
+test_sol = TestSolution(sol.t, sol.u)
+
+setups = [Dict(:alg => MIRK4(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))
+    Dict(:alg => MIRK5(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))]
+println("Test MIRK4 and MIRK5")
+wp = WorkPrecisionSet(prob,
+    abstols,
+    reltols,
+    setups;
+    approxsol = sol,
+    names = labels,
+    print_names = true)
+@test wp.names == ["MIRK4", "MIRK5"]
+println("BVP Done")
