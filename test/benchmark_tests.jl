@@ -194,7 +194,7 @@ wp = WorkPrecisionSet(prob,
     abstols,
     reltols,
     setups;
-    appxsol = sol,
+    appxsol = test_sol,
     names = labels,
     print_names = true)
 @test wp.names == ["MIRK4", "MIRK5"]
