@@ -20,5 +20,9 @@ let
     wp = WorkPrecisionSet(static_prob, abstols, reltols, setups; names=solnames, numruns=100, appxsol=real_sol, error_estimate=:l2) 
 
     # Checks that all errors are small (they definitely should be).
-    all(vcat(getfield.(wp.wps, :errors)...) .< 10e-9)
+    @test all(vcat(getfield.(wp.wps, :errors)...) .< 10e-9)
+
+    # Check without appxsol.
+    wp = WorkPrecisionSet(static_prob, abstols, reltols, setups; names=solnames, numruns=100, error_estimate=:l2) 
+    @test all(vcat(getfield.(wp.wps, :errors)...) .< 10e-9)
 end
