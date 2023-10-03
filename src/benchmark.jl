@@ -394,7 +394,11 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
             sol = solve(_prob, alg; kwargs..., abstol = abstols[i], reltol = reltols[i])
 
             if error_estimate == :l2
-                errors[i] = sqrt(sum(abs2, sol .- appxsol))
+                if appxsol==nothing
+                    errors[i] = sqrt(sum(sol.resid))                    
+                else
+                    errors[i] = sqrt(sum(abs2, sol .- appxsol))
+                end
             else
                 error("Unsupported norm used: $(error_estimate).")
             end
