@@ -3,7 +3,7 @@ using NonlinearSolve, DiffEqDevTools, Plots
 
 # Prepares NonlinearProblem.
 let
-    f(u, p) = u .* u .- p
+    f(u, p) = u .- p
     u0 = [1.0, 1.0]
     p = 2.0
     static_prob = NonlinearProblem(f, u0, p)
