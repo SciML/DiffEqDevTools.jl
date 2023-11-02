@@ -229,7 +229,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
                 abstols = abstols, reltols = reltols, kwargs = kwargs
 
                 if dts === nothing
-                    if typeof(_prob) <: DAEProblem
+                    if _prob isa DAEProblem
                         () -> @elapsed solve(_prob, alg, sol.u, sol.t;
                                              abstol = abstols[i],
                                              reltol = reltols[i],
@@ -243,7 +243,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
                                              dense_errors = false, kwargs...)
                     end
                 else
-                    if typeof(_prob) <: DAEProblem
+                    if _prob isa DAEProblem
                         () -> @elapsed solve(_prob, alg, sol.u, sol.t;
                                              abstol = abstols[i],
                                              reltol = reltols[i],
@@ -326,7 +326,7 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
                 abstols = abstols, reltols = reltols, kwargs = kwargs
 
                 if dts === nothing
-                    if typeof(_prob) <: DAEProblem
+                    if _prob isa DAEProblem
                         () -> @elapsed solve(_prob, alg;
                             abstol = abstols[i],
                             reltol = reltols[i],
@@ -340,7 +340,7 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
                             dense_errors = false, kwargs...)
                     end
                 else
-                    if typeof(_prob) <: DAEProblem
+                    if _prob isa DAEProblem
                         () -> @elapsed solve(_prob, alg;
                             abstol = abstols[i],
                             reltol = reltols[i],
@@ -747,7 +747,7 @@ function get_sample_errors(prob::AbstractRODEProblem, setup, test_dt = nothing;
     if DiffEqBase.has_analytic(prob.f)
         analytical_mean_end = mean(1:sample_error_runs) do i
             _dt = prob.tspan[2] - prob.tspan[1]
-            if typeof(prob.u0) <: Number
+            if prob.u0 isa Number
                 W = sqrt(_dt) * randn()
             else
                 W = sqrt(_dt) * randn(size(prob.u0))
