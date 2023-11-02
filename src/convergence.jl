@@ -51,7 +51,7 @@ function test_convergence(dts::AbstractArray,
                           expected_value = nothing, kwargs...)
     N = length(dts)
 
-    if typeof(prob) <: AbstractEnsembleProblem
+    if prob isa AbstractEnsembleProblem
         ensemble_prob = prob
     else
         ensemble_prob = EnsembleProblem(prob)
@@ -84,13 +84,13 @@ function test_convergence(dts::AbstractArray,
 
     else
         additional_errors = Dict()
-        if length(expected_value) == 1 || typeof(expected_value) <: Number
+        if length(expected_value) == 1 || expected_value isa Number
             additional_errors[:weak_final] = []
         else
             additional_errors[:weak_l2] = []
         end
         for sol in _solutions
-            if length(expected_value) == 1 || typeof(expected_value) <: Number
+            if length(expected_value) == 1 || expected_value isa Number
                 weak_final = LinearAlgebra.norm(Statistics.mean(sol.u .- expected_value))
                 push!(additional_errors[:weak_final], weak_final)
             else

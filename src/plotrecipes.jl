@@ -1,6 +1,6 @@
 @recipe function f(sim::ConvergenceSimulation)
     if any((x) -> ndims(x) > 1, values(sim.errors)) #Monte Carlo
-        vals = [typeof(x) <: AbstractVector ? x : vec(mean(x, 1))
+        vals = [x isa AbstractVector ? x : vec(mean(x, 1))
                 for x in values(sim.errors)]
     else #Deterministic
         vals = [x for x in values(sim.errors)]
