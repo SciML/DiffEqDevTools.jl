@@ -42,7 +42,7 @@ end
         seriestype --> :path
         linewidth --> 3
         yguide --> "Time (s)"
-        xguide --> "Error"
+        xguide --> "Error ($(wp_set.error_estimate))"
         xscale --> :log10
         yscale --> :log10
         markershape --> :auto
