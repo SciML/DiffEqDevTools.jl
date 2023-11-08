@@ -17,8 +17,8 @@ SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
-BVProblemLibrary = "0.1"
-BoundaryValueDiffEq = "4, 5"
+BVProblemLibrary = "0.1.4"
+BoundaryValueDiffEq = "5"
 DDEProblemLibrary = "0.1"
 DelayDiffEq = "5.20"
 DiffEqBase = "6.94.4"
