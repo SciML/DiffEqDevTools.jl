@@ -443,7 +443,7 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
+    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, error_estimate, N)
 end
 
 function WorkPrecisionSet(prob,
