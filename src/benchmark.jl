@@ -332,9 +332,15 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
 
             if cur_appxsol !== nothing
                 errsol = appxtrue(sol, cur_appxsol)
-                errors[i] = mean(errsol.errors[error_estimate])
+                errors[i] = Dict{Symbol,Float64}()
+                for err in keys(errsol.errors)
+                    errors[i][err] = mean(errsol.errors[err])
+                end
             else
-                errors[i] = mean(sol.errors[error_estimate])
+                errors[i] = Dict{Symbol,Float64}()
+                for err in keys(errsol.errors)
+                    errors[i][err] = mean(errsol.errors[err])
+                end
             end
 
             benchmark_f = let dts = dts, _prob = _prob, alg = alg, sol = sol,
@@ -382,7 +388,7 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
+    return WorkPrecision(prob, abstols, reltols, StructArray(NamedTuple.(errors)), times, dts, stats, name, error_estimate, N)
 end
 
 # Work precision information for a nonlinear problem.
