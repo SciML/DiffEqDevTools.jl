@@ -285,6 +285,7 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
     N = length(abstols)
     errors = Vector{Float64}(undef, N)
     times = Vector{Float64}(undef, N)
+    stats = Vector{Any}(undef, N)
     if name === nothing
         name = "WP-Alg"
     end
@@ -311,6 +312,8 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
                     timeseries_errors = timeseries_errors,
                     dense_errors = dense_errors)
             end
+
+            stats[i] = sol.stats
 
             if haskey(kwargs, :prob_choice)
                 cur_appxsol = appxsol[kwargs[:prob_choice]]
@@ -372,7 +375,7 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, name, N)
+    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
 end
 
 # Work precision information for a nonlinear problem.
@@ -380,6 +383,7 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
     N = length(abstols)
     errors = Vector{Float64}(undef, N)
     times = Vector{Float64}(undef, N)
+    stats = Vector{Any}(undef, N)
     if name === nothing
         name = "WP-Alg"
     end
@@ -396,9 +400,11 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
         for i in 1:N
             sol = solve(_prob, alg; kwargs..., abstol = abstols[i], reltol = reltols[i])
 
+            stats[i] = sol.stats
+
             if error_estimate == :l2
                 if isnothing(appxsol)
-                    errors[i] = sqrt(sum(abs2, sol.resid))                    
+                    errors[i] = sqrt(sum(abs2, sol.resid))
                 else
                     errors[i] = sqrt(sum(abs2, sol .- appxsol))
                 end
@@ -424,7 +430,7 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, name, N)
+    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
 end
 
 function WorkPrecisionSet(prob,
