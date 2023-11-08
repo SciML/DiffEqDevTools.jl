@@ -185,7 +185,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
     N = length(abstols)
     errors = Vector{Float64}(undef, N)
     times = Vector{Float64}(undef, N)
-    stats = Vector{SciMLBase.DEStats}(undef, N)
+    stats = Vector{Any}(undef, N)
     if name === nothing
         name = "WP-Alg"
     end
