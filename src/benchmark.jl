@@ -161,6 +161,8 @@ mutable struct WorkPrecision
     reltols::Any
     errors::Any
     times::Any
+    dts::Any
+    stats::Any
     name::Any
     N::Int
 end
@@ -183,6 +185,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
     N = length(abstols)
     errors = Vector{Float64}(undef, N)
     times = Vector{Float64}(undef, N)
+    stats = Vector{SciMLBase.DEStats}(undef, N)
     if name === nothing
         name = "WP-Alg"
     end
@@ -209,6 +212,8 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
                             timeseries_errors = timeseries_errors,
                             dense_errors = dense_errors)
             end
+
+            stats[i] = sol.stats
 
             if haskey(kwargs, :prob_choice)
                 cur_appxsol = appxsol[kwargs[:prob_choice]]
@@ -270,7 +275,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, name, N)
+    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
 end
 
 # Work precision information for a BVP
