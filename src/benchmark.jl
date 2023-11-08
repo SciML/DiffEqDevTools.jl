@@ -164,6 +164,7 @@ mutable struct WorkPrecision
     dts::Any
     stats::Any
     name::Any
+    error_estimate::Any
     N::Int
 end
 
@@ -183,7 +184,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
                        name = nothing, appxsol = nothing, error_estimate = :final,
                        numruns = 20, seconds = 2, kwargs...)
     N = length(abstols)
-    errors = Vector{Float64}(undef, N)
+    errors = Vector{Dict{Symbol,Float64}}(undef, N)
     times = Vector{Float64}(undef, N)
     stats = Vector{Any}(undef, N)
     if name === nothing
@@ -225,9 +226,15 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
 
             if cur_appxsol !== nothing
                 errsol = appxtrue(sol, cur_appxsol)
-                errors[i] = mean(errsol.errors[error_estimate])
+                errors[i] = Dict{Symbol,Float64}()
+                for err in keys(errsol.errors)
+                    errors[i][err] = mean(errsol.errors[err])
+                end
             else
-                errors[i] = mean(sol.errors[error_estimate])
+                errors[i] = Dict{Symbol,Float64}()
+                for err in keys(sol.errors)
+                    errors[i][err] = mean(sol.errors[err])
+                end
             end
 
             benchmark_f = let dts = dts, _prob = _prob, alg = alg, sol = sol,
@@ -275,7 +282,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
+    return WorkPrecision(prob, abstols, reltols, StructArray(NamedTuple.(errors)), times, dts, stats, name, error_estimate, N)
 end
 
 # Work precision information for a BVP
