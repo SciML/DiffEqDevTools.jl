@@ -596,7 +596,9 @@ function WorkPrecisionSet(prob::AbstractRODEProblem, abstols, reltols, setups,
     end
 
     stats = nothing
-    wps = [WorkPrecision(prob, _abstols[i], _reltols[i], errors[i], times[:, i], _dts[i], stats, names[i], error_estimate, N)
+    wps = [WorkPrecision(prob, _abstols[i], _reltols[i],
+                         StructArray(NamedTuple.(errors[i])),
+                         times[:, i], _dts[i], stats, names[i], error_estimate, N)
            for i in 1:N]
     WorkPrecisionSet(wps, N, abstols, reltols, prob, setups, names, error_estimate,
                      numruns_error)
