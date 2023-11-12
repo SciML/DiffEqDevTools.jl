@@ -67,13 +67,6 @@ end
 
 
 @testset "SDE WorkPrecisionSet" begin
-    f_additive_iip(du, u, p, t) = @.(du=p[2] / sqrt(1 + t) - u / (2 * (1 + t)))
-    σ_additive_iip(du, u, p, t) = @.(du=p[1] * p[2] / sqrt(1 + t))
-    additive_analytic(u0, p, t, W) = @. u0 / sqrt(1 + t) + p[2] * (t + p[1] * W) / sqrt(1 + t)
-    ff_additive_iip = SDEFunction(f_additive_iip, σ_additive_iip, analytic = additive_analytic)
-    p = ([0.1; 0.1; 0.1; 0.1], [0.5; 0.25; 0.125; 0.1115])
-    prob_sde_additivesystem = SDEProblem(ff_additive_iip, [1.0; 1.0; 1.0; 1.0],
-                                         (0.0, 1.0), p)
     prob = remake(prob_sde_additivesystem,tspan=(0.0,1.0))
 
     reltols = 1.0 ./ 10.0 .^ (1:5)
