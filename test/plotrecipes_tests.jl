@@ -32,8 +32,8 @@ wp = WorkPrecisionSet(prob, abstols, reltols, setups, names = wp_names,
                       numruns = 100)
 
 plt = @test_nowarn plot(wp)
-@test plt[1][1][:x] ≈ wp[1].errors
-@test plt[1][2][:x] ≈ wp[2].errors
+@test plt[1][1][:x] ≈ getproperty(wp[1].errors, wp[1].error_estimate)
+@test plt[1][2][:x] ≈ getproperty(wp[2].errors, wp[2].error_estimate)
 @test plt[1][1][:label] == wp_names[1]
 @test plt[1][2][:label] == wp_names[2]
 @test_nowarn plot(wp, color = [1 2])
@@ -51,12 +51,12 @@ wp = WorkPrecisionSet(prob, abstols, reltols, setups, names = wp_names,
                       numruns = 100)
 
 plt = @test_nowarn plot(wp)
-@test all(plt[1][i][:x] ≈ wp[i].errors for i in 1:4)
+@test all(plt[1][i][:x] ≈ getproperty(wp[i].errors, wp[i].error_estimate) for i in 1:4)
 @test all(plt[1][i][:label] == wp_names[i] for i in 1:4)
 
 plt = @test_nowarn plot(wp, view = :dt_convergence, legend = :bottomright)
 @test all(plt[1][i][:x] == plt[1][i + 3][:x] == dts == wp.setups[i][:dts] for i in 1:3)
-@test all(plt[1][i + 3][:y] ≈ wp[i].errors for i in 1:3)
+@test all(plt[1][i + 3][:y] ≈ getproperty(wp[i].errors, wp[i].error_estimate) for i in 1:3)
 @test all(startswith(plt[1][i + 3][:label], wp_names[i]) for i in 1:3)
 @test_throws BoundsError plt[1][7]
 @test_nowarn plot(wp, view = :dt_convergence, color = [:red :orange :green])
