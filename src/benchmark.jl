@@ -164,6 +164,7 @@ mutable struct WorkPrecision
     dts::Any
     stats::Any
     name::Any
+    error_estimate::Any
     N::Int
 end
 
@@ -183,7 +184,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
                        name = nothing, appxsol = nothing, error_estimate = :final,
                        numruns = 20, seconds = 2, kwargs...)
     N = length(abstols)
-    errors = Vector{Float64}(undef, N)
+    errors = Vector{Dict{Symbol,Float64}}(undef, N)
     times = Vector{Float64}(undef, N)
     stats = Vector{Any}(undef, N)
     if name === nothing
@@ -225,9 +226,15 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
 
             if cur_appxsol !== nothing
                 errsol = appxtrue(sol, cur_appxsol)
-                errors[i] = mean(errsol.errors[error_estimate])
+                errors[i] = Dict{Symbol,Float64}()
+                for err in keys(errsol.errors)
+                    errors[i][err] = mean(errsol.errors[err])
+                end
             else
-                errors[i] = mean(sol.errors[error_estimate])
+                errors[i] = Dict{Symbol,Float64}()
+                for err in keys(sol.errors)
+                    errors[i][err] = mean(sol.errors[err])
+                end
             end
 
             benchmark_f = let dts = dts, _prob = _prob, alg = alg, sol = sol,
@@ -275,7 +282,7 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
+    return WorkPrecision(prob, abstols, reltols, StructArray(NamedTuple.(errors)), times, dts, stats, name, error_estimate, N)
 end
 
 # Work precision information for a BVP
@@ -283,7 +290,7 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
     name = nothing, appxsol = nothing, error_estimate = :final,
     numruns = 20, seconds = 2, kwargs...)
     N = length(abstols)
-    errors = Vector{Float64}(undef, N)
+    errors = Vector{Dict{Symbol,Float64}}(undef, N)
     times = Vector{Float64}(undef, N)
     stats = Vector{Any}(undef, N)
     if name === nothing
@@ -325,9 +332,15 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
 
             if cur_appxsol !== nothing
                 errsol = appxtrue(sol, cur_appxsol)
-                errors[i] = mean(errsol.errors[error_estimate])
+                errors[i] = Dict{Symbol,Float64}()
+                for err in keys(errsol.errors)
+                    errors[i][err] = mean(errsol.errors[err])
+                end
             else
-                errors[i] = mean(sol.errors[error_estimate])
+                errors[i] = Dict{Symbol,Float64}()
+                for err in keys(errsol.errors)
+                    errors[i][err] = mean(errsol.errors[err])
+                end
             end
 
             benchmark_f = let dts = dts, _prob = _prob, alg = alg, sol = sol,
@@ -375,13 +388,13 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
+    return WorkPrecision(prob, abstols, reltols, StructArray(NamedTuple.(errors)), times, dts, stats, name, error_estimate, N)
 end
 
 # Work precision information for a nonlinear problem.
 function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = nothing; name = nothing, appxsol = nothing, error_estimate = :l2, numruns = 20, seconds = 2, kwargs...)
     N = length(abstols)
-    errors = Vector{Float64}(undef, N)
+    errors = Vector{Dict{Symbol,Float64}}(undef, N)
     times = Vector{Float64}(undef, N)
     stats = Vector{Any}(undef, N)
     if name === nothing
@@ -404,9 +417,9 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
 
             if error_estimate == :l2
                 if isnothing(appxsol)
-                    errors[i] = sqrt(sum(abs2, sol.resid))
+                    errors[i] = Dict(error_estimate => sqrt(sum(abs2, sol.resid)))
                 else
-                    errors[i] = sqrt(sum(abs2, sol .- appxsol))
+                    errors[i] = Dict(error_estimate => sqrt(sum(abs2, sol .- appxsol)))
                 end
             else
                 error("Unsupported norm used: $(error_estimate).")
@@ -430,7 +443,8 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, N)
+
+    return WorkPrecision(prob, abstols, reltols, StructArray(NamedTuple.(errors)), times, dts, stats, name, error_estimate, N)
 end
 
 function WorkPrecisionSet(prob,
@@ -582,7 +596,9 @@ function WorkPrecisionSet(prob::AbstractRODEProblem, abstols, reltols, setups,
     end
 
     stats = nothing
-    wps = [WorkPrecision(prob, _abstols[i], _reltols[i], errors[i], times[:, i], _dts[i], stats, names[i], N)
+    wps = [WorkPrecision(prob, _abstols[i], _reltols[i],
+                         StructArray(NamedTuple.(errors[i])),
+                         times[:, i], _dts[i], stats, names[i], error_estimate, N)
            for i in 1:N]
     WorkPrecisionSet(wps, N, abstols, reltols, prob, setups, names, error_estimate,
                      numruns_error)
@@ -689,7 +705,7 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem, abstols, reltols, setup
         end
     end
     stats = nothing
-    wps = [WorkPrecision(prob, _abstols[i], _reltols[i], errors[i], times[:, i], _dts[i], stats, names[i], N)
+    wps = [WorkPrecision(prob, _abstols[i], _reltols[i], errors[i], times[:, i], _dts[i], stats, names[i], error_estimate, N)
            for i in 1:N]
     WorkPrecisionSet(wps, N, abstols, reltols, prob, setups, names, error_estimate,
                      Int(trajectories))
