@@ -394,7 +394,7 @@ end
 # Work precision information for a nonlinear problem.
 function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = nothing; name = nothing, appxsol = nothing, error_estimate = :l2, numruns = 20, seconds = 2, kwargs...)
     N = length(abstols)
-    errors = Vector{Float64}(undef, N)
+    errors = Vector{Dict{Symbol,Float64}}(undef, N)
     times = Vector{Float64}(undef, N)
     stats = Vector{Any}(undef, N)
     if name === nothing
@@ -417,9 +417,9 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
 
             if error_estimate == :l2
                 if isnothing(appxsol)
-                    errors[i] = sqrt(sum(abs2, sol.resid))
+                    errors[i] = Dict(error_estimate => sqrt(sum(abs2, sol.resid)))
                 else
-                    errors[i] = sqrt(sum(abs2, sol .- appxsol))
+                    errors[i] = Dict(error_estimate => sqrt(sum(abs2, sol .- appxsol)))
                 end
             else
                 error("Unsupported norm used: $(error_estimate).")
@@ -443,7 +443,8 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
             end
         end
     end
-    return WorkPrecision(prob, abstols, reltols, errors, times, dts, stats, name, error_estimate, N)
+
+    return WorkPrecision(prob, abstols, reltols, StructArray(NamedTuple.(errors)), times, dts, stats, name, error_estimate, N)
 end
 
 function WorkPrecisionSet(prob,
