@@ -290,7 +290,7 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
     name = nothing, appxsol = nothing, error_estimate = :final,
     numruns = 20, seconds = 2, kwargs...)
     N = length(abstols)
-    errors = Vector{Float64}(undef, N)
+    errors = Vector{Dict{Symbol,Float64}}(undef, N)
     times = Vector{Float64}(undef, N)
     stats = Vector{Any}(undef, N)
     if name === nothing
