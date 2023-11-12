@@ -96,7 +96,7 @@ end
         wp_set[end]
         #println(wp_set)
         #show(wp_set)
-        @test (minimum(diff(wp_set[2].errors) .== 0)) # The errors for a fixed timestep method should be constant
+        @test (minimum(diff(wp_set[2].errors.final) .== 0)) # The errors for a fixed timestep method should be constant
         @test wp_set.names == ["RK4", "Euler", "BS3", "Midpoint", "BS5", "DP5"]
     end
 
