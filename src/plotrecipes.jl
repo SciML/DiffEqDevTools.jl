@@ -47,7 +47,7 @@ function get_val_from_wp(wp::WorkPrecision, key::Symbol)
         return wp.times
     elseif key == :dts
         return wp.dts
-    elseif key in propertynames(wp.stats[1])
+    elseif !isnothing(wp.stats) && key in propertynames(wp.stats[1])
         return [getproperty(s, key) for s in wp.stats]
     elseif key in propertynames(wp.errors)
         return getproperty(wp.errors, key)
