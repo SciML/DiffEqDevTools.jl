@@ -67,6 +67,29 @@ function key_to_label(key::Symbol)
         return "Δt"
     elseif key in ALL_ERRORS
         return "Error ($key)"
+    # Some DEStats cases copied from SciMLBase: src/solutions/ode_solutions.jl#L43-L56
+    elseif key == :nf
+        return "Number of function evaluations"
+    elseif key == :nf2
+        return "Number of function 2 evaluations"
+    elseif key == :nw
+        return "Number of W matrix evaluations"
+    elseif key == :nsolve
+        return "Number of linear solves"
+    elseif key == :njacs
+        return "Number of Jacobians created"
+    elseif key == :nnonliniter
+        return "Number of nonlinear solver iterations"
+    elseif key == :nnonlinconvfail
+        return "Number of nonlinear solver convergence failures"
+    elseif key == :ncondition
+        return "Number of rootfind condition calls"
+    elseif key == :naccept
+        return "Number of accepted steps"
+    elseif key == :nreject
+        return "Number of rejected steps"
+    elseif key == :maxeig
+            return "Maximum eigenvalue recorded"
     else
         return key
     end
