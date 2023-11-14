@@ -314,7 +314,7 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
                     reltol = reltols[i], timeseries_errors = timeseries_errors,
                     dense_errors = dense_errors)
             else
-                sol = DiffEqBase.solve(_prob, alg; kwargs..., abstol = abstols[i],
+                sol = solve(_prob, alg; kwargs..., abstol = abstols[i],
                     reltol = reltols[i], dt = dts[i],
                     timeseries_errors = timeseries_errors,
                     dense_errors = dense_errors)
