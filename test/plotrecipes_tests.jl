@@ -42,6 +42,11 @@ gr()
     @test_nowarn plot(wp, color = :blue)
     @test_throws ArgumentError plot(wp, view = :dt_convergence)
 
+    @test_nowarn plot(wp, x = :abstols, y = :final)
+    @test_nowarn plot(wp, x = :reltols, y = :nf)
+    @test_nowarn plot(wp, x = :naccept, y = :nreject)
+    @test_throws ArgumentError plot(wp, x = :notakey, y = :final)
+
     dts = 1.0 ./ 2.0 .^ ((1:length(reltols)) .+ 1)
     setups = [Dict(:alg => Euler(), :dts => dts)
               Dict(:alg => Heun(), :dts => dts)
@@ -55,6 +60,8 @@ gr()
     plt = @test_nowarn plot(wp)
     @test all(plt[1][i][:x] ≈ getproperty(wp[i].errors, wp[i].error_estimate) for i in 1:4)
     @test all(plt[1][i][:label] == wp_names[i] for i in 1:4)
+
+    @test_nowarn plot(wp, x = :dts, y = :final)
 
     plt = @test_nowarn plot(wp, view = :dt_convergence, legend = :bottomright)
     @test all(plt[1][i][:x] == plt[1][i + 3][:x] == dts == wp.setups[i][:dts] for i in 1:3)

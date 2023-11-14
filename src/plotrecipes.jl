@@ -38,23 +38,80 @@ end
     return errors, wp.times
 end
 
-@recipe function f(wp_set::WorkPrecisionSet; view = :benchmark, color = nothing)
+function get_val_from_wp(wp::WorkPrecision, key::Symbol)
+    if key == :abstols
+        return wp.abstols
+    elseif key == :reltols
+        return wp.reltols
+    elseif key == :times
+        return wp.times
+    elseif key == :dts
+        return wp.dts
+    elseif !isnothing(wp.stats) && key in propertynames(wp.stats[1])
+        return [getproperty(s, key) for s in wp.stats]
+    elseif key in propertynames(wp.errors)
+        return getproperty(wp.errors, key)
+    else
+        throw(ArgumentError("Key $key does not specify a valid property of WorkPrecision"))
+    end
+end
+
+function key_to_label(key::Symbol)
+    if key == :abstols
+        return "Absolute tolerance"
+    elseif key == :reltols
+        return "Relative tolerance"
+    elseif key == :times
+        return "Time (s)"
+    elseif key == :dts
+        return "Δt"
+    elseif key in ALL_ERRORS
+        return "Error ($key)"
+    # Some DEStats cases copied from SciMLBase: src/solutions/ode_solutions.jl#L43-L56
+    elseif key == :nf
+        return "Number of function evaluations"
+    elseif key == :nf2
+        return "Number of function 2 evaluations"
+    elseif key == :nw
+        return "Number of W matrix evaluations"
+    elseif key == :nsolve
+        return "Number of linear solves"
+    elseif key == :njacs
+        return "Number of Jacobians created"
+    elseif key == :nnonliniter
+        return "Number of nonlinear solver iterations"
+    elseif key == :nnonlinconvfail
+        return "Number of nonlinear solver convergence failures"
+    elseif key == :ncondition
+        return "Number of rootfind condition calls"
+    elseif key == :naccept
+        return "Number of accepted steps"
+    elseif key == :nreject
+        return "Number of rejected steps"
+    elseif key == :maxeig
+            return "Maximum eigenvalue recorded"
+    else
+        return key
+    end
+end
+
+@recipe function f(wp_set::WorkPrecisionSet;
+    x::Symbol = wp_set.error_estimate,
+    y::Symbol = :times,
+    view = :benchmark,
+    color = nothing)
     if view == :benchmark
         seriestype --> :path
         linewidth --> 3
-        yguide --> "Time (s)"
-        xguide --> "Error ($(wp_set.error_estimate))"
         xscale --> :log10
         yscale --> :log10
         markershape --> :auto
-        errors = Vector{Any}(undef, 0)
-        times = Vector{Any}(undef, 0)
-        for i in 1:length(wp_set)
-            push!(errors, getproperty(wp_set[i].errors, wp_set.error_estimate))
-            push!(times, wp_set[i].times)
-        end
+        xs = [get_val_from_wp(wp, x) for wp in wp_set.wps]
+        ys = [get_val_from_wp(wp, y) for wp in wp_set.wps]
+        xguide --> key_to_label(x)
+        yguide --> key_to_label(y)
         label --> reshape(wp_set.names, 1, length(wp_set))
-        return errors, times
+        return xs, ys
     elseif view == :dt_convergence
         idts = filter(i -> haskey(wp_set.setups[i], :dts), 1:length(wp_set))
         length(idts) > 0 ||
@@ -90,7 +147,7 @@ end
             seriestype --> :path
             linewidth --> 3
             color --> color
-            yguide --> "Error"
+            yguide --> "Error ($(wp_set.error_estimate))"
             xguide --> "Δt"
             xscale --> :log10
             yscale --> :log10
