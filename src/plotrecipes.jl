@@ -30,11 +30,12 @@ end
     label --> wp.name
     linewidth --> 3
     yguide --> "Time (s)"
-    xguide --> "Error"
+    xguide --> "Error ($(wp.error_estimate))"
     xscale --> :log10
     yscale --> :log10
     markershape --> :auto
-    wp.errors, wp.times
+    errors = getproperty(wp.errors, wp.error_estimate)
+    return errors, wp.times
 end
 
 @recipe function f(wp_set::WorkPrecisionSet; view = :benchmark, color = nothing)
@@ -42,14 +43,14 @@ end
         seriestype --> :path
         linewidth --> 3
         yguide --> "Time (s)"
-        xguide --> "Error"
+        xguide --> "Error ($(wp_set.error_estimate))"
         xscale --> :log10
         yscale --> :log10
         markershape --> :auto
         errors = Vector{Any}(undef, 0)
         times = Vector{Any}(undef, 0)
         for i in 1:length(wp_set)
-            push!(errors, wp_set[i].errors)
+            push!(errors, getproperty(wp_set[i].errors, wp_set.error_estimate))
             push!(times, wp_set[i].times)
         end
         label --> reshape(wp_set.names, 1, length(wp_set))
@@ -64,7 +65,7 @@ end
         convs = Vector{Any}(undef, 0)
         for i in idts
             push!(dts, wp_set.setups[i][:dts])
-            push!(errors, wp_set[i].errors)
+            push!(errors, getproperty(wp_set[i].errors, wp_set.error_estimate))
             lc, p = [one.(dts[end]) log.(dts[end])] \ log.(errors[end])
             push!(ps, p)
             push!(convs, exp(lc) * dts[end] .^ p)
