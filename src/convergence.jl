@@ -114,11 +114,14 @@ function analyticless_test_convergence(dts::AbstractArray,
                                        timeseries_errors = save_everystep, adaptive = false,
                                        weak_timeseries_errors = false,
                                        weak_dense_errors = false, use_noise_grid = true,
+                                       verbose = true,
                                        kwargs...)
     _solutions = []
     tmp_solutions = Array{Any}(undef, trajectories, length(dts))
     for j in 1:trajectories
-        @info "Monte Carlo iteration: $j/$trajectories"
+        if verbose
+            @info "Monte Carlo iteration: $j/$trajectories"
+        end
         t = prob.tspan[1]:test_dt:prob.tspan[2]
         if use_noise_grid
             if prob.noise_rate_prototype === nothing
