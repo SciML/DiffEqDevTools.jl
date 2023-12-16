@@ -415,12 +415,11 @@ function WorkPrecision(prob::NonlinearProblem, alg, abstols, reltols, dts = noth
 
             stats[i] = sol.stats
 
+            err = appxsol === nothing ? sol.resid : (sol .- appxsol)
             if error_estimate == :l2
-                if isnothing(appxsol)
-                    errors[i] = Dict(error_estimate => sqrt(sum(abs2, sol.resid)))
-                else
-                    errors[i] = Dict(error_estimate => sqrt(sum(abs2, sol .- appxsol)))
-                end
+                errors[i] = Dict(error_estimate => norm(err, 2))
+            elseif error_estimate == :l∞ || error_estimate == :linf
+                errors[i] = Dict(error_estimate => norm(err, Inf))
             else
                 error("Unsupported norm used: $(error_estimate).")
             end
