@@ -46,7 +46,7 @@ function appxtrue(sol::AbstractODESolution, sol2::TestSolution)
         _sol = sol2
     end
 
-    errors = Dict(:final => recursive_mean(abs.(sol[end] - _sol[end])))
+    errors = Dict(:final => recursive_mean(abs.(sol.u[end] - _sol.u[end])))
     if _sol.dense
         timeseries_analytic = _sol(sol.t)
         errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
@@ -81,7 +81,7 @@ calculated.
 """
 function appxtrue(sol::AbstractODESolution, sol2::AbstractODESolution;
                   timeseries_errors = sol2.dense, dense_errors = sol2.dense)
-    errors = Dict(:final => recursive_mean(abs.(sol[end] - sol2[end])))
+    errors = Dict(:final => recursive_mean(abs.(sol.u[end] - sol2.u[end])))
     if sol2.dense
         timeseries_analytic = sol2(sol.t)
         errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
