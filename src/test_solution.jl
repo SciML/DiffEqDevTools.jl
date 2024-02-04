@@ -41,7 +41,7 @@ calculated.
 """
 function appxtrue(sol::AbstractODESolution, sol2::TestSolution)
     if sol2.u == nothing && hasinterp(sol2)
-        _sol = TestSolution(sol.t, sol2(sol.t), sol2)
+        _sol = TestSolution(sol.t, sol2(sol.t).u, sol2)
     else
         _sol = sol2
     end
