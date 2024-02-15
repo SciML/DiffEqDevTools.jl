@@ -22,7 +22,7 @@ for constructfun in filter(x -> startswith(string(x), "construct"), names(DiffEq
     tab = getproperty(DiffEqDevTools, constructfun)(BigFloat)
     if tab.order < 12
         if constructfun in (:constructTsitouras9,  # order 1 ???!!!
-                            :constructTsitouras92)
+            :constructTsitouras92)
             @info "Failed $constructfun..."
             @test_broken check_tableau(tab)
         else
@@ -46,7 +46,7 @@ for i in 1:2 # 1 = num, 2 = ExplicitRK
     for tab in [
         constructFeagin12(BigFloat),
         constructFeagin14(BigFloat),
-        constructOno12(BigFloat),
+        constructOno12(BigFloat)
     ]
         @info "Testing..."
         tabalg = ExplicitRK(tableau = tab)

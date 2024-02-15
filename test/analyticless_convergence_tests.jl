@@ -41,7 +41,7 @@ sim1 = analyticless_test_convergence(dts, prob, SRIW1(), test_dt, trajectories =
 dts = (1 / 2) .^ (7:-1:4)
 test_dt = 1 / 2^8
 sim2 = analyticless_test_convergence(dts, prob, SRIW1(), test_dt, trajectories = 100,
-                                     use_noise_grid = false)
+    use_noise_grid = false)
 @test abs(sim2.𝒪est[:final] - 1.5) < 0.3
 @show sim2.𝒪est[:final]
 
@@ -74,12 +74,12 @@ seed = 100
 Random.seed!(seed)
 seeds = rand(UInt, numtraj)
 ensemble_prob = EnsembleProblem(prob;
-                                output_func = (sol, i) -> (h2(sol[end][1]), false),
-                                prob_func = prob_func)
+    output_func = (sol, i) -> (h2(sol[end][1]), false),
+    prob_func = prob_func)
 sim = test_convergence(dts, ensemble_prob, DRI1(), save_everystep = false,
-                       trajectories = numtraj, save_start = false, adaptive = false,
-                       weak_timeseries_errors = false, weak_dense_errors = false,
-                       expected_value = exp(-3.0))
+    trajectories = numtraj, save_start = false, adaptive = false,
+    weak_timeseries_errors = false, weak_dense_errors = false,
+    expected_value = exp(-3.0))
 
 @test abs(sim.𝒪est[:weak_final] - 2.0) < 0.3
 @show sim.𝒪est[:weak_final]
@@ -101,9 +101,9 @@ pmul = [1.0, -4.0, -2.0, 10.0, -1.3, -1.2, 1.1]
 padd = [1.0, -4.0, -2.0, 10.0, -0.0, -0.0, 0.1]
 
 prob = SDDEProblem(hayes_modelf, hayes_modelg, [1.0], h, tspan, pmul;
-                   constant_lags = (pmul[1],));
+    constant_lags = (pmul[1],));
 dts = (1 / 2) .^ (7:-1:3)
 test_dt = 1 / 2^8
 sim2 = analyticless_test_convergence(dts, prob, RKMil(), test_dt, trajectories = 100,
-                                     use_noise_grid = false)
+    use_noise_grid = false)
 @test abs(sim2.𝒪est[:final] - 1.0) < 0.3

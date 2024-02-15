@@ -67,7 +67,7 @@ function key_to_label(key::Symbol)
         return "Δt"
     elseif key in ALL_ERRORS
         return "Error ($key)"
-    # Some DEStats cases copied from SciMLBase: src/solutions/ode_solutions.jl#L43-L56
+        # Some DEStats cases copied from SciMLBase: src/solutions/ode_solutions.jl#L43-L56
     elseif key == :nf
         return "Number of function evaluations"
     elseif key == :nf2
@@ -89,17 +89,17 @@ function key_to_label(key::Symbol)
     elseif key == :nreject
         return "Number of rejected steps"
     elseif key == :maxeig
-            return "Maximum eigenvalue recorded"
+        return "Maximum eigenvalue recorded"
     else
         return key
     end
 end
 
 @recipe function f(wp_set::WorkPrecisionSet;
-    x::Symbol = wp_set.error_estimate,
-    y::Symbol = :times,
-    view = :benchmark,
-    color = nothing)
+        x::Symbol = wp_set.error_estimate,
+        y::Symbol = :times,
+        view = :benchmark,
+        color = nothing)
     if view == :benchmark
         seriestype --> :path
         linewidth --> 3
@@ -161,7 +161,7 @@ end
 end
 
 @recipe function f(tab::ODERKTableau; dx = 1 / 100, dy = 1 / 100, order_star = false,
-                   embedded = false)
+        embedded = false)
     xlims = get(plotattributes, :xlims, (-6, 1))
     ylims = get(plotattributes, :ylims, (-5, 5))
     x = xlims[1]:dx:xlims[2]
