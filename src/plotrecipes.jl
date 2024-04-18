@@ -96,8 +96,8 @@ function key_to_label(key::Symbol)
 end
 
 @recipe function f(wp_set::WorkPrecisionSet;
-        x::Symbol = wp_set.error_estimate,
-        y::Symbol = :times,
+        x = wp_set.error_estimate,
+        y = :times,
         view = :benchmark,
         color = nothing)
     if view == :benchmark
