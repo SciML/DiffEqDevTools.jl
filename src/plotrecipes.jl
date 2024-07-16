@@ -110,6 +110,7 @@ end
         ys = [get_val_from_wp(wp, y) for wp in wp_set.wps]
         xguide --> key_to_label(x)
         yguide --> key_to_label(y)
+        legend --> :outerright
         label --> reshape(wp_set.names, 1, length(wp_set))
         return xs, ys
     elseif view == :dt_convergence
