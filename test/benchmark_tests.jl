@@ -23,7 +23,7 @@ setups = [Dict(:alg => RK4()); Dict(:alg => Euler()); Dict(:alg => BS3());
 t1 = @elapsed sol = solve(prob, RK4(), dt = 1 / 2^(4))
 t2 = @elapsed sol2 = solve(prob, setups[1][:alg], dt = 1 / 2^(4))
 
-@test (sol2[end] == sol[end])
+@test (sol2.u[end] == sol.u[end])
 
 test_sol_2Dlinear = TestSolution(
     solve(prob_ode_2Dlinear, Vern7(), abstol = 1 / 10^14, reltol = 1 / 10^14))

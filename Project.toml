@@ -1,7 +1,7 @@
 name = "DiffEqDevTools"
 uuid = "f3b72e0c-5b89-59e1-b016-84e28bfd966d"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "2.44.3"
+version = "2.44.4"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
@@ -28,7 +28,7 @@ Distributed = "1.9"
 LinearAlgebra = "1.9"
 Logging = "1.9"
 NLsolve = "4.2"
-NonlinearSolve = "1, 2"
+NonlinearSolve = "3.13"
 ODEProblemLibrary = "0.1"
 OrdinaryDiffEq = "6"
 ParameterizedFunctions = "5"
