@@ -117,9 +117,9 @@ function appxtrue(sim::EnsembleSolution, appx_setup; kwargs...)
     for i in eachindex(sim)
         prob = sim[i].prob
         prob2 = SDEProblem(prob.f, prob.g, prob.u0, prob.tspan,
-            noise = NoiseWrapper(sim[i].W))
+            noise = NoiseWrapper(sim.u[i].W))
         true_sol = solve(prob2, appx_setup[:alg]; appx_setup...)
-        _new_sols[i] = appxtrue(sim[i], true_sol)
+        _new_sols[i] = appxtrue(sim.u[i], true_sol)
     end
     new_sols = convert(Vector{typeof(_new_sols[1])}, _new_sols)
     calculate_ensemble_errors(new_sols; converged = sim.converged,
