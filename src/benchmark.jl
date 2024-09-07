@@ -284,7 +284,8 @@ function WorkPrecision(prob, alg, abstols, reltols, dts = nothing;
                 end
             else
                 # Unsuccessful retcode, give NaN time
-                errors[i] = Dict(:l∞ => NaN, :L2 => NaN, :final => NaN, :l2 => NaN, :L∞ => NaN)
+                errors[i] = Dict(
+                    :l∞ => NaN, :L2 => NaN, :final => NaN, :l2 => NaN, :L∞ => NaN)
                 times[i] = NaN
             end
         end

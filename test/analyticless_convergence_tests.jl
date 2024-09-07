@@ -74,7 +74,7 @@ seed = 100
 Random.seed!(seed)
 seeds = rand(UInt, numtraj)
 ensemble_prob = EnsembleProblem(prob;
-    output_func = (sol, i) -> (h2(sol[end][1]), false),
+    output_func = (sol, i) -> (h2(sol[1, end]), false),
     prob_func = prob_func)
 sim = test_convergence(dts, ensemble_prob, DRI1(), save_everystep = false,
     trajectories = numtraj, save_start = false, adaptive = false,
