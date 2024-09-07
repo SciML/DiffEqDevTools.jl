@@ -1,6 +1,7 @@
 module DiffEqDevTools
 
 using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqNoiseProcess, StructArrays
+using NLsolve, LinearAlgebra, RootedTrees
 
 using LinearAlgebra, Distributed
 

@@ -1,4 +1,3 @@
-using NLsolve, LinearAlgebra, RootedTrees
 """
 `Base.length(tab::ODERKTableau)`
 
@@ -48,7 +47,7 @@ function RootedTrees.residual_order_condition(tab::ODERKTableau, order::Int,
         end
     else
         resid = mapreduce(reducer, RootedTreeIterator(order)) do t
-            mapper(residual_order_condition(t, A, b, c))
+            mapper(residual_order_condition(t, RungeKuttaMethod(A, b, c)))
         end
     end
     return resid
