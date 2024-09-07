@@ -74,7 +74,7 @@ seed = 100
 Random.seed!(seed)
 seeds = rand(UInt, numtraj)
 ensemble_prob = EnsembleProblem(prob;
-    output_func = (sol, i) -> (h2(sol[1,end]), false),
+    output_func = (sol, i) -> (h2(sol[1, end]), false),
     prob_func = prob_func)
 
 reltols = 1.0 ./ 4.0 .^ (1:4)
