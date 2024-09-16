@@ -317,6 +317,8 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
     let _prob = _prob
         timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
         dense_errors = error_estimate ∈ DENSE_ERRORS
+        println(
+            "timeseries_errors: $timeseries_errors dense_errors: $dense_errors ", @__LINE__)
         for i in 1:N
             if dts === nothing
                 sol = solve(_prob, alg; kwargs..., abstol = abstols[i],
@@ -464,7 +466,9 @@ function WorkPrecisionSet(prob,
         print_names = false, names = nothing, appxsol = nothing,
         error_estimate = :final,
         test_dt = nothing, kwargs...)
+    println(@__LINE__)
     N = length(setups)
+    @assert test_dt isa Nothing || test_dt isa Real
     @assert names === nothing || length(setups) == length(names)
     wps = Vector{WorkPrecision}(undef, N)
     if names === nothing
@@ -487,7 +491,9 @@ function WorkPrecisionSet(prob,
 end
 
 @def error_calculation begin
+    println("line: ", @__LINE__)
     if !DiffEqBase.has_analytic(prob.f)
+        println("No analytic line: ", @__LINE__)
         t = prob.tspan[1]:test_dt:prob.tspan[2]
         if prob.noise_rate_prototype === nothing
             brownian_values = cumsum([[zeros(size(prob.u0))];
@@ -531,6 +537,9 @@ end
         _dts = get(setups[k], :dts, zeros(length(_abstols)))
         filtered_setup = filter(p -> p.first in DiffEqBase.allowedkeywords, setups[k])
 
+        println("error_estimate: ", error_estimate, " line: ", @__LINE__)
+        println("timeseries_errors: $timeseries_errors dense_errors: $dense_errors line: ",
+            @__LINE__)
         sol = solve(_prob, setups[k][:alg];
             kwargs..., filtered_setup..., abstol = _abstols[j],
             reltol = _reltols[j], dt = _dts[j],
@@ -538,7 +547,42 @@ end
             dense_errors = dense_errors)
         DiffEqBase.has_analytic(prob.f) ? err_sol = sol : err_sol = appxtrue(sol, true_sol)
         tmp_solutions[i, j, k] = err_sol
+        println(err_sol.errors)
     end
+end
+
+import Base: isless
+function Base.isless(a::Union{Complex, AbstractFloat}, b::Union{Complex, AbstractFloat})
+    # This is a workaround for the issue that SciMLBase incorrectly infers the solutions
+    # errors type. Not having this leads to crash while calculating the median.
+    return Real(a) < Real(b)
+end
+
+import SciMLBase: EnsembleTestSolution
+function fix_SciMLBase_error_type_issue(sol::EnsembleTestSolution)
+    # This is a workaround for the issue that SciMLBase incorrectly infers the type of the
+    # EnsembleTestSolution.errors from the solution's state vector element type, instead of from
+    # the solution's error type. If the solution state is a Vector{ComplexF64}, this incorrectly leads
+    # errors with type Dict{Symbol, Vector{ComplexF64}} which should be Dict{Symbol, Vector{Float64}}.
+    T = eltype(Real.(collect(sol.errors)[1][2]))
+    new_errors = Dict{Symbol, Vector{T}}()
+    for (key, value) in sol.errors
+        new_errors[key] = Real.(sol.errors[key])
+    end
+    new_weak_errors = Dict{Symbol, T}()
+    for (key, value) in sol.weak_errors
+        new_weak_errors[key] = Real(sol.weak_errors[key])
+    end
+    new_error_means = Dict{Symbol, T}()
+    for (key, value) in sol.error_means
+        new_error_means[key] = Real(sol.error_means[key])
+    end
+    new_error_medians = Dict{Symbol, T}()
+    for (key, value) in sol.error_medians
+        new_error_medians[key] = Real(sol.error_medians[key])
+    end
+    return EnsembleTestSolution(sol.u, new_errors, new_weak_errors, new_error_means,
+        new_error_medians, sol.elapsedTime, sol.converged)
 end
 
 function WorkPrecisionSet(prob::AbstractRODEProblem, abstols, reltols, setups,
@@ -547,12 +591,15 @@ function WorkPrecisionSet(prob::AbstractRODEProblem, abstols, reltols, setups,
         print_names = false, names = nothing, appxsol_setup = nothing,
         error_estimate = :final, parallel_type = :none,
         kwargs...)
+    println(@__LINE__)
+    @assert test_dt isa Nothing || test_dt isa Real
     @assert names === nothing || length(setups) == length(names)
-    timeseries_errors = DiffEqBase.has_analytic(prob.f) &&
-                        error_estimate ∈ TIMESERIES_ERRORS
+    timeseries_errors = error_estimate ∈ TIMESERIES_ERRORS
     weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
     weak_dense_errors = error_estimate ∈ WEAK_DENSE_ERRORS
-    dense_errors = DiffEqBase.has_analytic(prob.f) && error_estimate ∈ DENSE_ERRORS
+    dense_errors = error_estimate ∈ DENSE_ERRORS
+    println(
+        "timeseries_errors: $timeseries_errors weak_timeseries_errors: $weak_timeseries_errors dense_errors: $dense_errors weak_dense_errors: $weak_dense_errors line: ", @__LINE__)
     N = length(setups)
     M = length(abstols)
     times = Array{Float64}(undef, M, N)
@@ -576,10 +623,11 @@ function WorkPrecisionSet(prob::AbstractRODEProblem, abstols, reltols, setups,
 
     _solutions_k = [[EnsembleSolution(tmp_solutions[:, j, k], 0.0, true) for j in 1:M]
                     for k in 1:N]
-    solutions = [[DiffEqBase.calculate_ensemble_errors(sim;
+    solutions = [[fix_SciMLBase_error_type_issue(DiffEqBase.calculate_ensemble_errors(sim;
                       weak_timeseries_errors = weak_timeseries_errors,
-                      weak_dense_errors = weak_dense_errors)
+                      weak_dense_errors = weak_dense_errors))
                   for sim in sol_k] for sol_k in _solutions_k]
+    println("mean errors: ", solutions[1][1].error_means)
     if error_estimate ∈ WEAK_ERRORS
         errors = [[solutions[j][i].weak_errors for i in 1:M] for j in 1:N]
     else
@@ -606,6 +654,8 @@ function WorkPrecisionSet(prob::AbstractRODEProblem, abstols, reltols, setups,
         GC.gc()
         for j in 1:M
             for i in 1:numruns
+                # println("$(names[k]) ($i/$numruns) the number j $j")
+                # println("$(_abstols[k]) $(_reltols[k]) $(_dts[k])")
                 time_tmp[i] = @elapsed sol = solve(prob, setups[k][:alg];
                     kwargs..., filtered_setup...,
                     abstol = _abstols[k][j],
@@ -634,6 +684,7 @@ function WorkPrecisionSet(prob::AbstractEnsembleProblem, abstols, reltols, setup
         expected_value = nothing,
         error_estimate = :weak_final, ensemblealg = EnsembleThreads(),
         kwargs...)
+    println(@__LINE__)
     @assert names === nothing || length(setups) == length(names)
 
     weak_timeseries_errors = error_estimate ∈ WEAK_TIMESERIES_ERRORS
@@ -741,6 +792,7 @@ function WorkPrecisionSet(prob::AbstractBVProblem,
         print_names = false, names = nothing, appxsol = nothing,
         error_estimate = :final,
         test_dt = nothing, kwargs...)
+    println(@__LINE__)
     N = length(setups)
     @assert names === nothing || length(setups) == length(names)
     wps = Vector{WorkPrecision}(undef, N)
@@ -799,8 +851,10 @@ function get_sample_errors(prob::AbstractRODEProblem, setup, test_dt = nothing;
             _dt = prob.tspan[2] - prob.tspan[1]
             if prob.u0 isa Number
                 W = sqrt(_dt) * randn()
+            elseif prob.noise_rate_prototype isa Nothing
+                W = sqrt(_dt) * randn(size(prob.u0))
             else
-                W = sqrt(_dt) * randn(noise_dim)
+                W = sqrt(_dt) * randn(size(prob.noise_rate_prototype, 2))
             end
             prob.f.analytic(prob.u0, prob.p, prob.tspan[2], W)
         end
