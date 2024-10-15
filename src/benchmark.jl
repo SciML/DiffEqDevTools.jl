@@ -330,70 +330,76 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
             end
 
             stats[i] = sol.stats
-
-            if haskey(kwargs, :prob_choice)
-                cur_appxsol = appxsol[kwargs[:prob_choice]]
-            elseif prob isa AbstractArray
-                cur_appxsol = appxsol[1]
-            else
-                cur_appxsol = appxsol
-            end
-
-            if cur_appxsol !== nothing
-                errsol = appxtrue(sol, cur_appxsol)
-                errors[i] = Dict{Symbol, Float64}()
-                for err in keys(errsol.errors)
-                    errors[i][err] = mean(errsol.errors[err])
+            if SciMLBase.successful_retcode(sol)
+                if haskey(kwargs, :prob_choice)
+                    cur_appxsol = appxsol[kwargs[:prob_choice]]
+                elseif prob isa AbstractArray
+                    cur_appxsol = appxsol[1]
+                else
+                    cur_appxsol = appxsol
                 end
-            else
-                errors[i] = Dict{Symbol, Float64}()
-                for err in keys(errsol.errors)
-                    errors[i][err] = mean(errsol.errors[err])
-                end
-            end
 
-            benchmark_f = let dts = dts, _prob = _prob, alg = alg, sol = sol,
-                abstols = abstols, reltols = reltols, kwargs = kwargs
-
-                if dts === nothing
-                    if _prob isa DAEProblem
-                        () -> @elapsed solve(_prob, alg;
-                            abstol = abstols[i],
-                            reltol = reltols[i],
-                            timeseries_errors = false,
-                            dense_errors = false, kwargs...)
-                    else
-                        () -> @elapsed solve(_prob, alg;
-                            abstol = abstols[i],
-                            reltol = reltols[i],
-                            timeseries_errors = false,
-                            dense_errors = false, kwargs...)
+                if cur_appxsol !== nothing
+                    errsol = appxtrue(sol, cur_appxsol)
+                    errors[i] = Dict{Symbol, Float64}()
+                    for err in keys(errsol.errors)
+                        errors[i][err] = mean(errsol.errors[err])
                     end
                 else
-                    if _prob isa DAEProblem
-                        () -> @elapsed solve(_prob, alg;
-                            abstol = abstols[i],
-                            reltol = reltols[i],
-                            dt = dts[i],
-                            timeseries_errors = false,
-                            dense_errors = false, kwargs...)
-                    else
-                        () -> @elapsed solve(_prob, alg;
-                            abstol = abstols[i],
-                            reltol = reltols[i],
-                            dt = dts[i],
-                            timeseries_errors = false,
-                            dense_errors = false, kwargs...)
+                    errors[i] = Dict{Symbol, Float64}()
+                    for err in keys(errsol.errors)
+                        errors[i][err] = mean(errsol.errors[err])
                     end
                 end
-            end
-            benchmark_f() # pre-compile
 
-            b_t = benchmark_f()
-            if b_t > seconds
-                times[i] = b_t
+                benchmark_f = let dts = dts, _prob = _prob, alg = alg, sol = sol,
+                    abstols = abstols, reltols = reltols, kwargs = kwargs
+
+                    if dts === nothing
+                        if _prob isa DAEProblem
+                            () -> @elapsed solve(_prob, alg;
+                                abstol = abstols[i],
+                                reltol = reltols[i],
+                                timeseries_errors = false,
+                                dense_errors = false, kwargs...)
+                        else
+                            () -> @elapsed solve(_prob, alg;
+                                abstol = abstols[i],
+                                reltol = reltols[i],
+                                timeseries_errors = false,
+                                dense_errors = false, kwargs...)
+                        end
+                    else
+                        if _prob isa DAEProblem
+                            () -> @elapsed solve(_prob, alg;
+                                abstol = abstols[i],
+                                reltol = reltols[i],
+                                dt = dts[i],
+                                timeseries_errors = false,
+                                dense_errors = false, kwargs...)
+                        else
+                            () -> @elapsed solve(_prob, alg;
+                                abstol = abstols[i],
+                                reltol = reltols[i],
+                                dt = dts[i],
+                                timeseries_errors = false,
+                                dense_errors = false, kwargs...)
+                        end
+                    end
+                end
+                benchmark_f() # pre-compile
+
+                b_t = benchmark_f()
+                if b_t > seconds
+                    times[i] = b_t
+                else
+                    times[i] = mapreduce(i -> benchmark_f(), min, 2:numruns; init = b_t)
+                end
             else
-                times[i] = mapreduce(i -> benchmark_f(), min, 2:numruns; init = b_t)
+                # Unsuccessful retcode, give NaN error and time
+                errors[i] = Dict(
+                    :l∞ => NaN, :L2 => NaN, :final => NaN, :l2 => NaN, :L∞ => NaN)
+                times[i] = NaN
             end
         end
     end
