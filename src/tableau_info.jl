@@ -27,10 +27,29 @@ end
 `stability_region(tab::ODERKTableau; initial_guess=-3.0)`
 
 Calculates the length of the stability region in the real axis.
+See also [`imaginary_stability_interval`](@ref).
 """
 function stability_region(tab::ODERKTableau; initial_guess = -3.0, kw...)
     residual! = function (resid, x)
         resid[1] = abs(stability_region(x[1], tab)) - 1
+    end
+    sol = nlsolve(residual!, [initial_guess]; kw...)
+    sol.zero[1]
+end
+
+"""
+    imaginary_stability_interval(tab::ODERKTableau;
+                                 initial_guess = length(tab) - 1)
+
+Calculates the length of the imaginary stability interval, i.e.,
+the size of the stability region on the imaginary axis.
+See also [`stability_region`](@ref).
+"""
+function imaginary_stability_interval(tab::ODERKTableau;
+                                      initial_guess = length(tab) - one(eltype(tab.A)),
+                                      kw...)
+    residual! = function (resid, x)
+        resid[1] = abs(stability_region(im * x[1], tab)) - 1
     end
     sol = nlsolve(residual!, [initial_guess]; kw...)
     sol.zero[1]

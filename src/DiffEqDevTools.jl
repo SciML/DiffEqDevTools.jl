@@ -45,7 +45,7 @@ export test_convergence, analyticless_test_convergence, appxtrue!, appxtrue
 export get_sample_errors
 
 #Tab Functions
-export stability_region, residual_order_condition, check_tableau
+export stability_region, residual_order_condition, check_tableau, imaginary_stability_interval
 
 #Tableaus
 export deduce_Butcher_tableau
