@@ -7,7 +7,7 @@ using LinearAlgebra, Distributed
 
 using Statistics
 
-import Base: length
+import Base: length, isless
 
 import DiffEqBase: AbstractODEProblem, AbstractDDEProblem, AbstractDDEAlgorithm,
                    AbstractODESolution, AbstractRODEProblem, AbstractSDEProblem,
