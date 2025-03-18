@@ -1,5 +1,5 @@
 """
-    deduce_Butcher_tableau(erk, T=Float64)
+    deduce_Butcher_tableau(erk, T = Float64)
 
 Deduce and return the Butcher coefficients `A, b, c` by solving some
 specific ordinary differential equations using the explicit Runge-Kutta
