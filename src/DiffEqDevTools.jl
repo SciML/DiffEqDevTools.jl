@@ -1,5 +1,6 @@
 module DiffEqDevTools
 
+using DiffEqBase: AbstractODEAlgorithm
 using DiffEqBase, RecipesBase, RecursiveArrayTools, DiffEqNoiseProcess, StructArrays
 using NLsolve, LinearAlgebra, RootedTrees
 
