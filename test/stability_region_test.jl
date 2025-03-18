@@ -7,6 +7,7 @@ using OrdinaryDiffEq
 
 @test @inferred(stability_region(constructTsitouras5()))≈@inferred(stability_region(Tsit5()))
 @test @inferred(stability_region(constructSSPRK104()))≈@inferred(stability_region(SSPRK104()))
+@test @inferred(stability_region(constructImplicitEuler()))≈@inferred(stability_region(ImplicitEuler()))
 
 @test @inferred(imaginary_stability_interval(constructSSPRK33()))≈sqrt(3)
 @test @inferred(imaginary_stability_interval(constructSSPRK33(Float32)))≈sqrt(3.0f0)
