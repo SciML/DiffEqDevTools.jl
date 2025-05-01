@@ -94,7 +94,7 @@ function imaginary_stability_interval(tab::ODERKTableau;
 end
 
 """
-    imaginary_stability_interval(alg::ODERKTableau;
+    imaginary_stability_interval(alg::AbstractODEAlgorithm;
                                  initial_guess = 20.0)
 
 Calculates the length of the imaginary stability interval, i.e.,
