@@ -169,8 +169,9 @@ end
     y = ylims[1]:dy:ylims[2]
 
     if order_star
-        f = (u, v) -> abs(stability_region(u + v * im, tab; embedded = embedded) /
-                          exp(u + v * im)) < 1
+        f = (u,
+            v) -> abs(stability_region(u + v * im, tab; embedded = embedded) /
+                      exp(u + v * im)) < 1
     else
         f = (u, v) -> abs(stability_region(u + v * im, tab; embedded = embedded)) < 1
     end
