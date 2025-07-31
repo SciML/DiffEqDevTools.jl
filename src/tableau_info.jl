@@ -67,7 +67,7 @@ Calculates the length of the stability region in the real axis.
 See also [`imaginary_stability_interval`](@ref).
 """
 function stability_region(tab_or_alg::Union{ODERKTableau, AbstractODEAlgorithm};
-                          initial_guess = -3.0, kw...)
+        initial_guess = -3.0, kw...)
     residual! = function (resid, x)
         resid[1] = abs(stability_region(x[1], tab_or_alg)) - 1
     end
@@ -84,8 +84,8 @@ the size of the stability region on the imaginary axis.
 See also [`stability_region`](@ref).
 """
 function imaginary_stability_interval(tab::ODERKTableau;
-                                      initial_guess = length(tab) - one(eltype(tab.A)),
-                                      kw...)
+        initial_guess = length(tab) - one(eltype(tab.A)),
+        kw...)
     residual! = function (resid, x)
         resid[1] = abs(stability_region(im * x[1], tab)) - 1
     end
@@ -102,8 +102,8 @@ the size of the stability region on the imaginary axis.
 See also [`stability_region`](@ref).
 """
 function imaginary_stability_interval(alg::AbstractODEAlgorithm;
-                                      initial_guess = 20.0,
-                                      kw...)
+        initial_guess = 20.0,
+        kw...)
     residual! = function (resid, x)
         resid[1] = abs(stability_region(im * x[1], alg)) - 1
     end

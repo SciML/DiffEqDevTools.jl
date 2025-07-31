@@ -98,6 +98,7 @@ function Shootout(
         effs[i] = 1 / (errors[i] * times[i])
     end
     for j in 1:N, i in 1:N
+
         effratios[i, j] = effs[i] / effs[j]
     end
     bestidx = findall((y) -> y == maximum(effs), effs)[1]
@@ -521,6 +522,7 @@ end
         dense_errors = false)
 
     for j in 1:M, k in 1:N
+
         _abstols = get(setups[k], :abstols, abstols)
         _reltols = get(setups[k], :reltols, reltols)
         _dts = get(setups[k], :dts, zeros(length(_abstols)))
