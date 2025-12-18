@@ -90,8 +90,119 @@ end
                   :adaptive => false)
               Dict(:alg => SRA1())]
     names = ["SRIW1", "EM", "RKMil", "SRIW1 Fixed", "SRA1 Fixed", "SRA1"]
+    test_dt = 0.1
     wp = WorkPrecisionSet(prob, abstols, reltols, setups; numruns = 10,
         names = names, maxiters = 1e7, error_estimate = :l2)
+
+    plt = @test_nowarn plot(wp)
+    for i in 1:length(names)
+        @test plt[1][i][:x] ≈ getproperty(wp[i].errors, wp[i].error_estimate)
+        @test plt[1][i][:label] == names[i]
+    end
+end
+
+@testset "Analyticless SDE WorkPrecisionSet" begin
+    prob = remake(prob_sde_additivesystem, tspan = (0.0, 1.0))
+
+    reltols = 1.0 ./ 10.0 .^ (1:5)
+    abstols = reltols#[0.0 for i in eachindex(reltols)]
+    setups = [Dict(:alg => SRIW1())
+              Dict(:alg => EM(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))
+              Dict(:alg => RKMil(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1),
+                  :adaptive => false)
+              Dict(:alg => SRIW1(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1),
+                  :adaptive => false)
+              Dict(:alg => SRA1(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1),
+                  :adaptive => false)
+              Dict(:alg => SRA1())]
+    names = ["SRIW1", "EM", "RKMil", "SRIW1 Fixed", "SRA1 Fixed", "SRA1"]
+    test_dt = 0.1
+    wp = WorkPrecisionSet(prob, abstols, reltols, setups, test_dt;
+        numruns = 5, names = names, error_estimate = :l2,
+        appxsol_setup = Dict(:alg => RKMilGeneral(; ii_approx = IICommutative())), maxiters = 1e7)
+
+    plt = @test_nowarn plot(wp)
+    for i in 1:length(names)
+        @test plt[1][i][:x] ≈ getproperty(wp[i].errors, wp[i].error_estimate)
+        @test plt[1][i][:label] == names[i]
+    end
+end
+
+@testset failfast=true "Complex SDE WorkPrecisionSet" begin
+    # Linear SDE system
+    f_lin = function (du, u, p, t)
+        du = -0.5 .* u
+    end
+
+    g_lin = function (du, u, p, t)
+        du = im .* u
+    end
+
+    lin_analytic = function (u₀, p, t, Wt)
+        u₀ .* exp.(im .* Wt)
+    end
+
+    tspan = (0.0, 1.0)
+    noise = StochasticDiffEq.RealWienerProcess!(0.0, [0.0], [0.0])
+    prob = SDEProblem(SDEFunction(f_lin, g_lin; analytic = lin_analytic),
+        ComplexF64[1.0], tspan, noise = noise)
+
+    reltols = 1.0 ./ 10.0 .^ (1:5)
+    abstols = reltols#[0.0 for i in eachindex(reltols)]
+    setups = [Dict(:alg => EM(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))
+              Dict(:alg => RKMil(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1),
+                  :adaptive => false)
+              Dict(:alg => SRA1(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1),
+                  :adaptive => false)
+              Dict(:alg => SRA1(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1),
+                  :adaptive => true)]
+    names = ["EM", "RKMil", "SRA1 Fixed", "SRA1"]
+    wp = WorkPrecisionSet(prob, abstols, reltols, setups; numruns = 10, numruns_error = 1,
+        names = names, maxiters = 1e7, error_estimate = :l2)
+
+    plt = @test_nowarn plot(wp)
+    for i in 1:length(names)
+        @test plt[1][i][:x] ≈ getproperty(wp[i].errors, wp[i].error_estimate)
+        @test plt[1][i][:label] == names[i]
+    end
+end
+
+@testset failfast=true "Non-diagonal SDE WorkPrecisionSet" begin
+    # Linear SDE system
+    f_lin = function (du, u, p, t)
+        du = -0.5 .* u
+    end
+
+    g_lin = function (du, u, p, t)
+        du[1, 1] = im
+        du[2, 1] = im
+        du[3, 1] = 0.1
+        du[1, 2] = 0.1
+        du[2, 2] = 0.1
+        du[3, 2] = 0.2
+    end
+
+    tspan = (0.0, 1.0)
+    noise_rate_prototype = zeros(ComplexF64, 3, 2)
+    noise = StochasticDiffEq.RealWienerProcess!(0.0, [0.0, 0.0], [0.0, 0.0])
+    prob = SDEProblem(SDEFunction(f_lin, g_lin),
+        ComplexF64[1.0, 0.0, 0.0], tspan, noise = noise, noise_rate_prototype = noise_rate_prototype)
+
+    reltols = 1.0 ./ 10.0 .^ (1:5)
+    abstols = reltols#[0.0 for i in eachindex(reltols)]
+    setups = [Dict(:alg => EM(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1))
+              Dict(:alg => RKMilGeneral(; ii_approx = IICommutative()),
+                  :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1),
+                  :adaptive => false);
+              Dict(:alg => EulerHeun(), :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1),
+                  :adaptive => false)
+              Dict(:alg => LambaEulerHeun(),
+                  :dts => 1.0 ./ 5.0 .^ ((1:length(reltols)) .+ 1), :adaptive => true)]
+    names = ["EM", "RKMilGeneral", "EulerHeun Fixed", "LambaEulerHeun"]
+    test_dt = 0.1#(1.0 / 5.0)^6
+    wp = WorkPrecisionSet(prob, abstols, reltols, setups, test_dt;
+        numruns = 5, names = names, error_estimate = :l2,
+        appxsol_setup = Dict(:alg => RKMilGeneral(; ii_approx = IICommutative())), maxiters = 1e7)
 
     plt = @test_nowarn plot(wp)
     for i in 1:length(names)

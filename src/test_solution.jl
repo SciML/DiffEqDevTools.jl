@@ -50,8 +50,10 @@ function appxtrue(sol::AbstractODESolution, sol2::TestSolution)
     errors = Dict(:final => recursive_mean(abs.(sol.u[end] - _sol.u[end])))
     if _sol.dense
         timeseries_analytic = _sol(sol.t)
-        errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
-        errors[:l2] = sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
+        errors[:l∞] = maximum(vecvecapply(
+            (x) -> abs.(x), sol - timeseries_analytic))
+        errors[:l2] = sqrt(recursive_mean(vecvecapply(
+            (x) -> Real.(conj.(float(x)) .* float(x)),
             sol - timeseries_analytic)))
         densetimes = collect(range(sol.t[1], stop = sol.t[end], length = 100))
         interp_u = sol(densetimes)
@@ -59,15 +61,18 @@ function appxtrue(sol::AbstractODESolution, sol2::TestSolution)
         interp_errors = Dict(
             :L∞ => maximum(vecvecapply((x) -> abs.(x),
                 interp_u - interp_analytic)),
-            :L2 => sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
+            :L2 => sqrt(recursive_mean(vecvecapply(
+                (x) -> Real.(conj.(float(x)) .* float(x)),
                 interp_u -
                 interp_analytic))))
         errors = merge(errors, interp_errors)
     else
         timeseries_analytic = sol2.u
         if sol.t == sol2.t
-            errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
-            errors[:l2] = sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
+            errors[:l∞] = maximum(vecvecapply(
+                (x) -> abs.(x), sol - timeseries_analytic))
+            errors[:l2] = sqrt(recursive_mean(vecvecapply(
+                (x) -> Real.(conj.(float(x)) .* float(x)),
                 sol - timeseries_analytic)))
         end
     end
@@ -84,10 +89,14 @@ calculated.
 function appxtrue(sol::AbstractODESolution, sol2::AbstractODESolution;
         timeseries_errors = sol2.dense, dense_errors = sol2.dense)
     errors = Dict(:final => recursive_mean(abs.(sol.u[end] - sol2.u[end])))
+    println("Made it to appxtrue")
     if sol2.dense
+        println("Made it to dense")
         timeseries_analytic = sol2(sol.t)
-        errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
-        errors[:l2] = sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
+        errors[:l∞] = maximum(vecvecapply(
+            (x) -> abs.(x), sol - timeseries_analytic))
+        errors[:l2] = sqrt(recursive_mean(vecvecapply(
+            (x) -> Real.(conj.(float(x)) .* float(x)),
             sol - timeseries_analytic)))
         if dense_errors
             densetimes = collect(range(sol.t[1], stop = sol.t[end], length = 100))
@@ -96,16 +105,32 @@ function appxtrue(sol::AbstractODESolution, sol2::AbstractODESolution;
             interp_errors = Dict(
                 :L∞ => maximum(vecvecapply((x) -> abs.(x),
                     interp_u - interp_analytic)),
-                :L2 => sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
+                :L2 => sqrt(recursive_mean(vecvecapply(
+                    (x) -> Real.(conj.(float(x)) .* float(x)),
                     interp_u -
                     interp_analytic))))
             errors = merge(errors, interp_errors)
         end
     else
+        println("Made it to timeseries")
         timeseries_analytic = sol2.u
+        println("typeof timeseries_analytic: ", typeof(timeseries_analytic))
+        println("timeseries_errors: ", timeseries_errors,
+            " does sol.t==sol2.t: ", sol.t == sol2.t)
         if timeseries_errors && sol.t == sol2.t
-            errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
-            errors[:l2] = sqrt(recursive_mean(vecvecapply((x) -> float(x) .^ 2,
+            errors[:l∞] = maximum(vecvecapply(
+                (x) -> abs.(x), sol - timeseries_analytic))
+            errors[:l2] = sqrt(recursive_mean(vecvecapply(
+                (x) -> Real.(conj.(float(x)) .* float(x)),
+                sol - timeseries_analytic)))
+        elseif timeseries_errors
+            println(stderr,
+                "Warning: timeseries_errors requested but appxsol_setup's timesteps do not match solution. Switching to interpolated solution for this run.")
+            timeseries_analytic = sol2(sol.t)
+            errors[:l∞] = maximum(vecvecapply(
+                (x) -> abs.(x), sol - timeseries_analytic))
+            errors[:l2] = sqrt(recursive_mean(vecvecapply(
+                (x) -> Real.(conj.(float(x)) .* float(x)),
                 sol - timeseries_analytic)))
         end
     end
