@@ -495,12 +495,13 @@ end
 
 @def error_calculation begin
     if !DiffEqBase.has_analytic(prob.f)
+        T = eltype(prob.u0)
         t = prob.tspan[1]:test_dt:prob.tspan[2]
-        brownian_values = cumsum([[zeros(size(prob.u0))];
-                                  [sqrt(test_dt) * randn(size(prob.u0))
+        brownian_values = cumsum([[zeros(T, size(prob.u0))];
+                                  [sqrt(test_dt) * randn(T, size(prob.u0))
                                    for i in 1:(length(t) - 1)]])
-        brownian_values2 = cumsum([[zeros(size(prob.u0))];
-                                   [sqrt(test_dt) * randn(size(prob.u0))
+        brownian_values2 = cumsum([[zeros(T, size(prob.u0))];
+                                   [sqrt(test_dt) * randn(T, size(prob.u0))
                                     for i in 1:(length(t) - 1)]])
         np = NoiseGrid(t, brownian_values, brownian_values2)
         _prob = remake(prob, noise = np)
@@ -794,10 +795,11 @@ function get_sample_errors(prob::AbstractRODEProblem, setup, test_dt = nothing;
     if DiffEqBase.has_analytic(prob.f)
         analytical_mean_end = mean(1:sample_error_runs) do i
             _dt = prob.tspan[2] - prob.tspan[1]
+            T = eltype(prob.u0)
             if prob.u0 isa Number
-                W = sqrt(_dt) * randn()
+                W = sqrt(_dt) * randn(T)
             else
-                W = sqrt(_dt) * randn(size(prob.u0))
+                W = sqrt(_dt) * randn(T, size(prob.u0))
             end
             prob.f.analytic(prob.u0, prob.p, prob.tspan[2], W)
         end
