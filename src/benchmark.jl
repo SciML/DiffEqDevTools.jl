@@ -33,8 +33,8 @@ mutable struct ShootoutSet
 end
 
 function ode_shootout(args...; kwargs...)
-    @warn("ode_shootout is deprecated. Use ShootOut instead")
-    ShootOut(args...; kwargs...)
+    @warn("ode_shootout is deprecated. Use Shootout instead")
+    Shootout(args...; kwargs...)
 end
 
 function Shootout(
@@ -348,8 +348,8 @@ function WorkPrecision(prob::AbstractBVProblem, alg, abstols, reltols, dts = not
                     end
                 else
                     errors[i] = Dict{Symbol, Float64}()
-                    for err in keys(errsol.errors)
-                        errors[i][err] = mean(errsol.errors[err])
+                    for err in keys(sol.errors)
+                        errors[i][err] = mean(sol.errors[err])
                     end
                 end
 

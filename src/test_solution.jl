@@ -122,6 +122,6 @@ function appxtrue(sim::EnsembleSolution, appx_setup; kwargs...)
         _new_sols[i] = appxtrue(sim.u[i], true_sol)
     end
     new_sols = convert(Vector{typeof(_new_sols[1])}, _new_sols)
-    calculate_ensemble_errors(new_sols; converged = sim.converged,
+    DiffEqBase.calculate_ensemble_errors(new_sols; converged = sim.converged,
         elapsedTime = sim.elapsedTime, kwargs...)
 end
