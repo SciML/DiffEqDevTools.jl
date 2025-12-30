@@ -247,7 +247,7 @@ end
 """
 length(simres::ConvergenceSimulation)
 
-Returns the number of simultations in the Convergence Simulation
+Returns the number of simulations in the Convergence Simulation
 """
 Base.length(sim::ConvergenceSimulation) = sim.N
 Base.getindex(sim::ConvergenceSimulation, i::Int) = sim.solutions[i]
