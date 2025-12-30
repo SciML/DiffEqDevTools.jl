@@ -124,21 +124,22 @@ function analyticless_test_convergence(dts::AbstractArray,
         end
         t = prob.tspan[1]:test_dt:prob.tspan[2]
         if use_noise_grid
+            T = eltype(prob.u0)
             if prob.noise_rate_prototype === nothing
-                brownian_values = cumsum([[zeros(size(prob.u0))];
-                                          [sqrt(test_dt) * randn(size(prob.u0))
+                brownian_values = cumsum([[zeros(T, size(prob.u0))];
+                                          [sqrt(test_dt) * randn(T, size(prob.u0))
                                            for i in 1:(length(t) - 1)]])
-                brownian_values2 = cumsum([[zeros(size(prob.u0))];
-                                           [sqrt(test_dt) * randn(size(prob.u0))
+                brownian_values2 = cumsum([[zeros(T, size(prob.u0))];
+                                           [sqrt(test_dt) * randn(T, size(prob.u0))
                                             for i in 1:(length(t) - 1)]])
             else
-                brownian_values = cumsum([[zeros(size(prob.noise_rate_prototype, 2))];
+                brownian_values = cumsum([[zeros(T, size(prob.noise_rate_prototype, 2))];
                                           [sqrt(test_dt) *
-                                           randn(size(prob.noise_rate_prototype, 2))
+                                           randn(T, size(prob.noise_rate_prototype, 2))
                                            for i in 1:(length(t) - 1)]])
-                brownian_values2 = cumsum([[zeros(size(prob.noise_rate_prototype, 2))];
+                brownian_values2 = cumsum([[zeros(T, size(prob.noise_rate_prototype, 2))];
                                            [sqrt(test_dt) *
-                                            randn(size(prob.noise_rate_prototype, 2))
+                                            randn(T, size(prob.noise_rate_prototype, 2))
                                             for i in 1:(length(t) - 1)]])
             end
             np = NoiseGrid(t, brownian_values, brownian_values2)
