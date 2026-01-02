@@ -91,7 +91,7 @@ function key_to_label(key::Symbol)
     elseif key == :maxeig
         return "Maximum eigenvalue recorded"
     else
-        return key
+        return String(key)
     end
 end
 

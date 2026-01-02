@@ -82,7 +82,7 @@ errors for sol. If sol2 has no interpolant, only the final error is
 calculated.
 """
 function appxtrue(sol::AbstractODESolution, sol2::AbstractODESolution;
-        timeseries_errors = sol2.dense, dense_errors = sol2.dense)
+        timeseries_errors::Bool = sol2.dense, dense_errors::Bool = sol2.dense)
     errors = Dict(:final => recursive_mean(abs.(sol.u[end] - sol2.u[end])))
     if sol2.dense
         timeseries_analytic = sol2(sol.t)

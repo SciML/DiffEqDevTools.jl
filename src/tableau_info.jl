@@ -18,7 +18,7 @@ r(z) = 1 + z bᵀ(I - zA)⁻¹ e
 ```
 where e denotes a vector of ones.
 """
-function stability_region(z, tab::ODERKTableau; embedded = false)
+function stability_region(z::Number, tab::ODERKTableau; embedded::Bool = false)
     A, c = tab.A, tab.c
     b = embedded ? tab.αEEst : tab.α
     e = ones(eltype(A), length(b))
@@ -50,7 +50,7 @@ julia> stability_region(nextfloat(typemin(Float64)), ImplicitEuler())
 0.0
 ```
 """
-function stability_region(z, alg::AbstractODEAlgorithm)
+function stability_region(z::Number, alg::AbstractODEAlgorithm)
     u0 = one(z)
     tspan = (zero(real(z)), one(real(z)))
     ode = ODEProblem{false}((u, p, t) -> z * u, u0, tspan)
@@ -111,9 +111,9 @@ function imaginary_stability_interval(alg::AbstractODEAlgorithm;
     sol.zero[1]
 end
 
-function RootedTrees.residual_order_condition(tab::ODERKTableau, order::Int,
+function RootedTrees.residual_order_condition(tab::ODERKTableau, order::Integer,
         reducer = nothing, mapper = x -> x^2;
-        embedded = false)
+        embedded::Bool = false)
     A, c = tab.A, tab.c
     b = embedded ? tab.αEEst : tab.α
     if reducer === nothing
@@ -130,7 +130,7 @@ end
 
 isfsal(tab::ExplicitRKTableau) = tab.fsal
 isfsal(::ImplicitRKTableau) = nothing
-function check_tableau(tab; tol = 10eps(1.0))
+function check_tableau(tab::ODERKTableau; tol::Real = 10eps(1.0))
     order = all(i -> residual_order_condition(tab, i, +, abs) < tol, 1:(tab.order))
     if !order
         error("Tableau's order is not correct.")
