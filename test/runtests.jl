@@ -2,6 +2,9 @@ using DiffEqDevTools
 using Test
 
 # write your own tests here
+@time @testset "Explicit Imports" begin
+    include("explicit_imports.jl")
+end
 @time @testset "Benchmark Tests" begin
     include("benchmark_tests.jl")
 end
