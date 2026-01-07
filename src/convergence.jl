@@ -30,16 +30,6 @@ function ConvergenceSimulation(
     end
 
     𝒪est = Dict((calc𝒪estimates(p) for p in pairs(errors)))
-    #𝒪est = Dict(map(calc𝒪estimates,errors))
-    𝒪esttmp = Dict() #Makes Dict of Any to be more compatible
-    for (k, v) in 𝒪est
-        if length(v) == 1
-            push!(𝒪esttmp, Pair(k, v[1]))
-        else
-            push!(𝒪esttmp, Pair(k, v))
-        end
-    end
-    𝒪est = 𝒪esttmp
     return (ConvergenceSimulation(solutions, errors, N, auxdata, 𝒪est, convergence_axis))
 end
 
@@ -120,6 +110,21 @@ function test_convergence(
     )
 end
 
+"""
+    _generate_brownian_values!(brownian_values, test_dt, T, dims)
+
+Pre-allocate and fill Brownian motion values in-place.
+"""
+function _generate_brownian_values!(brownian_values, test_dt, T, dims)
+    sqrt_dt = sqrt(test_dt)
+    len = length(brownian_values)
+    @inbounds brownian_values[1] = zeros(T, dims)
+    @inbounds for i in 2:len
+        brownian_values[i] = brownian_values[i - 1] + sqrt_dt * randn(T, dims)
+    end
+    return brownian_values
+end
+
 function analyticless_test_convergence(
         dts::AbstractArray,
         prob::Union{
@@ -136,54 +141,32 @@ function analyticless_test_convergence(
     )
     _solutions = []
     tmp_solutions = Array{Any}(undef, trajectories, length(dts))
+
+    # Pre-compute time grid (constant across all trajectories)
+    t = prob.tspan[1]:test_dt:prob.tspan[2]
+    len_t = length(t)
+    T = eltype(prob.u0)
+
+    # Determine Brownian motion dimensions
+    if prob.noise_rate_prototype === nothing
+        noise_dims = size(prob.u0)
+    else
+        noise_dims = (size(prob.noise_rate_prototype, 2),)
+    end
+
     for j in 1:trajectories
         if verbose
             @info "Monte Carlo iteration: $j/$trajectories"
         end
-        t = prob.tspan[1]:test_dt:prob.tspan[2]
         if use_noise_grid
-            T = eltype(prob.u0)
-            if prob.noise_rate_prototype === nothing
-                brownian_values = cumsum(
-                    [
-                        [zeros(T, size(prob.u0))];
-                        [
-                            sqrt(test_dt) * randn(T, size(prob.u0))
-                                for i in 1:(length(t) - 1)
-                        ]
-                    ]
-                )
-                brownian_values2 = cumsum(
-                    [
-                        [zeros(T, size(prob.u0))];
-                        [
-                            sqrt(test_dt) * randn(T, size(prob.u0))
-                                for i in 1:(length(t) - 1)
-                        ]
-                    ]
-                )
-            else
-                brownian_values = cumsum(
-                    [
-                        [zeros(T, size(prob.noise_rate_prototype, 2))];
-                        [
-                            sqrt(test_dt) *
-                                randn(T, size(prob.noise_rate_prototype, 2))
-                                for i in 1:(length(t) - 1)
-                        ]
-                    ]
-                )
-                brownian_values2 = cumsum(
-                    [
-                        [zeros(T, size(prob.noise_rate_prototype, 2))];
-                        [
-                            sqrt(test_dt) *
-                                randn(T, size(prob.noise_rate_prototype, 2))
-                                for i in 1:(length(t) - 1)
-                        ]
-                    ]
-                )
-            end
+            # Pre-allocate Brownian motion arrays
+            brownian_values = Vector{Array{T, length(noise_dims)}}(undef, len_t)
+            brownian_values2 = Vector{Array{T, length(noise_dims)}}(undef, len_t)
+
+            # Generate Brownian motions in-place
+            _generate_brownian_values!(brownian_values, test_dt, T, noise_dims)
+            _generate_brownian_values!(brownian_values2, test_dt, T, noise_dims)
+
             np = NoiseGrid(t, brownian_values, brownian_values2)
 
             if prob isa AbstractSDDEProblem
@@ -303,16 +286,19 @@ end
 
 function calc𝒪estimates(error::Pair)
     key = error.first
-    error = error.second
+    error_vals = error.second
 
-    if ndims(error) > 1
-        error = mean(error, 1)
+    if ndims(error_vals) > 1
+        error_vals = mean(error_vals, dims = 1)
     end
-    S = Vector{eltype(error)}(undef, length(error) - 1)
-    for i in 1:(length(error) - 1)
-        S[i] = log2(error[i + 1] / error[i])
+    n = length(error_vals)
+    # Compute mean of log2 ratios directly without allocating intermediate vector
+    # Use Float64 accumulator to handle Rational inputs
+    s = 0.0
+    @inbounds for i in 1:(n - 1)
+        s += log2(error_vals[i + 1] / error_vals[i])
     end
-    return (Pair(key, abs.(mean(S, dims = 1))))
+    return Pair(key, abs(s / (n - 1)))
 end
 
 """

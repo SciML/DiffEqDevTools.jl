@@ -29,3 +29,6 @@ end
 @time @testset "Plot Recipes (Nonlinearsolve WP-diagrams)" begin
     include("nonlinearsolve_wpdiagram_tests.jl")
 end
+@time @testset "Allocation Tests" begin
+    include("alloc_tests.jl")
+end
