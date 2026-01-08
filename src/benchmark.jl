@@ -11,6 +11,34 @@ __default_name(alg) = string(nameof(typeof(alg)))
 
 ## Shootouts
 
+"""
+    Shootout
+
+Results of an algorithm shootout: comparing multiple algorithms on a single problem
+at a fixed timestep or tolerance settings.
+
+# Fields
+- `setups`: Vector of algorithm configuration dictionaries
+- `times`: Execution times for each algorithm
+- `errors`: Errors for each algorithm
+- `effs`: Efficiency (1 / (error × time)) for each algorithm
+- `effratios`: Matrix of efficiency ratios between algorithms
+- `solutions`: Solutions from each algorithm
+- `names`: Names of the algorithms
+- `N`: Number of algorithms tested
+- `bestidx`: Index of the best (most efficient) algorithm
+- `winner`: Name of the winning algorithm
+
+# Example
+```julia
+using OrdinaryDiffEq, DiffEqDevTools
+
+prob = ODEProblem((u,p,t) -> 1.01u, 1/2, (0.0, 1.0))
+setups = [Dict(:alg => Euler()), Dict(:alg => RK4())]
+shoot = Shootout(prob, setups, dt = 0.1)
+println("Winner: ", shoot.winner)
+```
+"""
 mutable struct Shootout
     setups::Vector{Dict{Symbol, Any}}
     times::Any #::Vector{Float64}
@@ -166,6 +194,34 @@ Base.lastindex(shoot::ShootoutSet) = lastindex(shoot.shootouts)
 
 ## WorkPrecisions
 
+"""
+    WorkPrecision
+
+Work-precision results for a single algorithm: measures how execution time (work)
+relates to error (precision) across different tolerance settings.
+
+# Fields
+- `prob`: The problem being solved
+- `abstols`: Absolute tolerances tested
+- `reltols`: Relative tolerances tested
+- `errors`: Errors at each tolerance setting
+- `times`: Execution times at each tolerance setting
+- `dts`: Timesteps used (for fixed timestep methods)
+- `stats`: Additional statistics
+- `name`: Name of the algorithm
+- `error_estimate`: Error metric used (e.g., `:final`, `:l2`)
+- `N`: Number of tolerance settings tested
+
+# Example
+```julia
+using OrdinaryDiffEq, DiffEqDevTools
+
+prob = ODEProblem((u,p,t) -> 1.01u, 1/2, (0.0, 1.0))
+abstols = 1 ./ 10 .^ (3:8)
+reltols = 1 ./ 10 .^ (3:8)
+wp = WorkPrecision(prob, Tsit5(), abstols, reltols)
+```
+"""
 mutable struct WorkPrecision
     prob::Any
     abstols::Any
@@ -179,6 +235,35 @@ mutable struct WorkPrecision
     N::Int
 end
 
+"""
+    WorkPrecisionSet
+
+Collection of work-precision results for multiple algorithms on the same problem.
+Useful for generating comparative work-precision diagrams.
+
+# Fields
+- `wps`: Vector of `WorkPrecision` results, one per algorithm
+- `N`: Number of algorithms
+- `abstols`: Absolute tolerances (may vary per algorithm)
+- `reltols`: Relative tolerances (may vary per algorithm)
+- `prob`: The problem(s) being solved
+- `setups`: Algorithm configuration dictionaries
+- `names`: Names of the algorithms
+- `error_estimate`: Error metric used
+- `numruns`: Number of benchmark runs for timing
+
+# Example
+```julia
+using OrdinaryDiffEq, DiffEqDevTools, Plots
+
+prob = ODEProblem((u,p,t) -> 1.01u, 1/2, (0.0, 1.0))
+abstols = 1 ./ 10 .^ (3:8)
+reltols = 1 ./ 10 .^ (3:8)
+setups = [Dict(:alg => Tsit5()), Dict(:alg => Vern7())]
+wp_set = WorkPrecisionSet(prob, abstols, reltols, setups)
+plot(wp_set)  # Create work-precision diagram
+```
+"""
 mutable struct WorkPrecisionSet
     wps::Vector{WorkPrecision}
     N::Int
