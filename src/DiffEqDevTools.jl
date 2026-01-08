@@ -38,10 +38,10 @@ const ALL_ERRORS = union(
     TIMESERIES_ERRORS, DENSE_ERRORS, WEAK_TIMESERIES_ERRORS, WEAK_DENSE_ERRORS, WEAK_ERRORS
 )
 
+include("test_solution.jl")
 include("benchmark.jl")
 include("convergence.jl")
 include("plotrecipes.jl")
-include("test_solution.jl")
 include("ode_tableaus.jl")
 include("tableau_info.jl")
 
@@ -50,7 +50,7 @@ export ConvergenceSimulation, Shootout, ShootoutSet, TestSolution
 #Benchmark Functions
 export Shootout, ShootoutSet, WorkPrecision, WorkPrecisionSet
 
-export test_convergence, analyticless_test_convergence, appxtrue!, appxtrue
+export test_convergence, analyticless_test_convergence, appxtrue!, appxtrue, default_reduction
 
 export get_sample_errors
 

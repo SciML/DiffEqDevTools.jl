@@ -29,3 +29,6 @@ end
 @time @testset "Plot Recipes (Nonlinearsolve WP-diagrams)" begin
     include("nonlinearsolve_wpdiagram_tests.jl")
 end
+@time @testset "Error Reduction Function Tests" begin
+    include("error_reduction_tests.jl")
+end

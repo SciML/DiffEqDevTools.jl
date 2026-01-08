@@ -45,47 +45,69 @@ function hasinterp(
     return hi
 end
 """
-`appxtrue(sol::AbstractODESolution,sol2::TestSolution)`
+    default_reduction(x)
+
+Default reduction function for error calculation. Returns the input unchanged,
+allowing the standard error metrics to compute errors over all components.
+"""
+default_reduction(x) = x
+
+"""
+`appxtrue(sol::AbstractODESolution,sol2::TestSolution; reduction=default_reduction)`
 
 Uses the interpolant from the higher order solution sol2 to approximate
 errors for sol. If sol2 has no interpolant, only the final error is
 calculated.
+
+## Arguments
+- `sol`: The solution to compute errors for
+- `sol2`: The reference (higher-order) solution
+- `reduction`: A function to reduce/transform the solution difference before
+  computing error metrics. Defaults to `default_reduction` (identity).
+  For example, to compute error only on the third component of a system,
+  use `reduction = x -> x[3]`. To compute error on a function of the solution,
+  use `reduction = x -> some_function(x)`.
 """
-function appxtrue(sol::AbstractODESolution, sol2::TestSolution)
+function appxtrue(sol::AbstractODESolution, sol2::TestSolution; reduction = default_reduction)
     if sol2.u == nothing && hasinterp(sol2)
         _sol = TestSolution(sol.t, sol2(sol.t).u, sol2)
     else
         _sol = sol2
     end
 
-    errors = Dict(:final => recursive_mean(abs.(sol.u[end] - _sol.u[end])))
+    # Apply reduction to the final difference
+    final_diff = reduction(sol.u[end] - _sol.u[end])
+    errors = Dict(:final => recursive_mean(abs.(final_diff)))
     if _sol.dense
         timeseries_analytic = _sol(sol.t)
-        errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
+        # Apply reduction to each difference in the timeseries
+        reduced_diff = vecvecapply(reduction, sol - timeseries_analytic)
+        errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), reduced_diff))
         errors[:l2] = sqrt(
             recursive_mean(
                 vecvecapply(
                     (x) -> float(x) .^ 2,
-                    sol - timeseries_analytic
+                    reduced_diff
                 )
             )
         )
         densetimes = collect(range(sol.t[1], stop = sol.t[end], length = 100))
         interp_u = sol(densetimes)
         interp_analytic = _sol(densetimes)
+        # Apply reduction to dense interpolation differences
+        reduced_interp_diff = vecvecapply(reduction, interp_u - interp_analytic)
         interp_errors = Dict(
             :L∞ => maximum(
                 vecvecapply(
                     (x) -> abs.(x),
-                    interp_u - interp_analytic
+                    reduced_interp_diff
                 )
             ),
             :L2 => sqrt(
                 recursive_mean(
                     vecvecapply(
                         (x) -> float(x) .^ 2,
-                        interp_u -
-                            interp_analytic
+                        reduced_interp_diff
                     )
                 )
             )
@@ -94,12 +116,14 @@ function appxtrue(sol::AbstractODESolution, sol2::TestSolution)
     else
         timeseries_analytic = sol2.u
         if sol.t == sol2.t
-            errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
+            # Apply reduction to each difference in the timeseries
+            reduced_diff = vecvecapply(reduction, sol - timeseries_analytic)
+            errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), reduced_diff))
             errors[:l2] = sqrt(
                 recursive_mean(
                     vecvecapply(
                         (x) -> float(x) .^ 2,
-                        sol - timeseries_analytic
+                        reduced_diff
                     )
                 )
             )
@@ -109,25 +133,41 @@ function appxtrue(sol::AbstractODESolution, sol2::TestSolution)
 end
 
 """
-`appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution)`
+`appxtrue(sol::AbstractODESolution,sol2::AbstractODESolution; reduction=default_reduction)`
 
 Uses the interpolant from the higher order solution sol2 to approximate
 errors for sol. If sol2 has no interpolant, only the final error is
 calculated.
+
+## Arguments
+- `sol`: The solution to compute errors for
+- `sol2`: The reference (higher-order) solution
+- `timeseries_errors`: Whether to compute timeseries errors (default: sol2.dense)
+- `dense_errors`: Whether to compute dense interpolation errors (default: sol2.dense)
+- `reduction`: A function to reduce/transform the solution difference before
+  computing error metrics. Defaults to `default_reduction` (identity).
+  For example, to compute error only on the third component of a system,
+  use `reduction = x -> x[3]`. To compute error on a function of the solution,
+  use `reduction = x -> some_function(x)`.
 """
 function appxtrue(
         sol::AbstractODESolution, sol2::AbstractODESolution;
-        timeseries_errors::Bool = sol2.dense, dense_errors::Bool = sol2.dense
+        timeseries_errors::Bool = sol2.dense, dense_errors::Bool = sol2.dense,
+        reduction = default_reduction
     )
-    errors = Dict(:final => recursive_mean(abs.(sol.u[end] - sol2.u[end])))
+    # Apply reduction to the final difference
+    final_diff = reduction(sol.u[end] - sol2.u[end])
+    errors = Dict(:final => recursive_mean(abs.(final_diff)))
     if sol2.dense
         timeseries_analytic = sol2(sol.t)
-        errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
+        # Apply reduction to each difference in the timeseries
+        reduced_diff = vecvecapply(reduction, sol - timeseries_analytic)
+        errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), reduced_diff))
         errors[:l2] = sqrt(
             recursive_mean(
                 vecvecapply(
                     (x) -> float(x) .^ 2,
-                    sol - timeseries_analytic
+                    reduced_diff
                 )
             )
         )
@@ -135,19 +175,20 @@ function appxtrue(
             densetimes = collect(range(sol.t[1], stop = sol.t[end], length = 100))
             interp_u = sol(densetimes)
             interp_analytic = sol2(densetimes)
+            # Apply reduction to dense interpolation differences
+            reduced_interp_diff = vecvecapply(reduction, interp_u - interp_analytic)
             interp_errors = Dict(
                 :L∞ => maximum(
                     vecvecapply(
                         (x) -> abs.(x),
-                        interp_u - interp_analytic
+                        reduced_interp_diff
                     )
                 ),
                 :L2 => sqrt(
                     recursive_mean(
                         vecvecapply(
                             (x) -> float(x) .^ 2,
-                            interp_u -
-                                interp_analytic
+                            reduced_interp_diff
                         )
                     )
                 )
@@ -157,12 +198,14 @@ function appxtrue(
     else
         timeseries_analytic = sol2.u
         if timeseries_errors && sol.t == sol2.t
-            errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), sol - timeseries_analytic))
+            # Apply reduction to each difference in the timeseries
+            reduced_diff = vecvecapply(reduction, sol - timeseries_analytic)
+            errors[:l∞] = maximum(vecvecapply((x) -> abs.(x), reduced_diff))
             errors[:l2] = sqrt(
                 recursive_mean(
                     vecvecapply(
                         (x) -> float(x) .^ 2,
-                        sol - timeseries_analytic
+                        reduced_diff
                     )
                 )
             )

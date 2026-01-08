@@ -131,7 +131,7 @@ function analyticless_test_convergence(
         timeseries_errors = save_everystep, adaptive = false,
         weak_timeseries_errors = false,
         weak_dense_errors = false, use_noise_grid = true,
-        verbose = true,
+        verbose = true, reduction = default_reduction,
         kwargs...
     )
     _solutions = []
@@ -209,7 +209,7 @@ function analyticless_test_convergence(
 
             for i in 1:length(dts)
                 sol = solve(_prob, alg; dt = dts[i], adaptive = adaptive)
-                err_sol = appxtrue(sol, true_sol)
+                err_sol = appxtrue(sol, true_sol; reduction = reduction)
                 tmp_solutions[j, i] = err_sol
             end
         else
@@ -233,7 +233,7 @@ function analyticless_test_convergence(
                     noise = W1, noise_rate_prototype = prob.noise_rate_prototype
                 )
                 sol = solve(_prob, alg; dt = dts[i], adaptive = adaptive)
-                err_sol = appxtrue(sol, true_sol)
+                err_sol = appxtrue(sol, true_sol; reduction = reduction)
                 tmp_solutions[j, i] = err_sol
             end
         end
@@ -278,7 +278,7 @@ end
 function analyticless_test_convergence(
         dts::AbstractArray, prob::AbstractODEProblem,
         alg, appxsol_setup;
-        save_everystep = true, adaptive = false, kwargs...
+        save_everystep = true, adaptive = false, reduction = default_reduction, kwargs...
     )
     true_sol = solve(prob, appxsol_setup[:alg]; appxsol_setup...)
     N = length(dts)
@@ -288,7 +288,7 @@ function analyticless_test_convergence(
                 adaptive = adaptive, kwargs...
             ) for i in 1:N
     ]
-    solutions = [appxtrue(sol, true_sol) for sol in _solutions]
+    solutions = [appxtrue(sol, true_sol; reduction = reduction) for sol in _solutions]
     auxdata = Dict(:dts => dts)
     return ConvergenceSimulation(solutions, dts, auxdata = auxdata)
 end

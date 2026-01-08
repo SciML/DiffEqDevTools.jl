@@ -39,7 +39,7 @@ end
 
 function Shootout(
         prob, setups; appxsol = nothing, names = nothing, error_estimate = :final,
-        numruns = 20, seconds = 2, kwargs...
+        numruns = 20, seconds = 2, reduction = default_reduction, kwargs...
     )
     N = length(setups)
     @assert names === nothing || length(setups) == length(names)
@@ -68,7 +68,7 @@ function Shootout(
         end
 
         if cur_appxsol !== nothing
-            errsol = appxtrue(sol, cur_appxsol)
+            errsol = appxtrue(sol, cur_appxsol; reduction = reduction)
             errors[i] = errsol.errors[error_estimate]
             solutions[i] = errsol
         else
@@ -121,7 +121,8 @@ end
 
 function ShootoutSet(
         probs, setups; probaux = nothing,
-        names = nothing, print_names = false, kwargs...
+        names = nothing, print_names = false,
+        reduction = default_reduction, kwargs...
     )
     N = length(probs)
     @assert names === nothing || length(setups) == length(names)
@@ -138,7 +139,9 @@ function ShootoutSet(
     end
     for i in eachindex(probs)
         print_names && println(names[i])
-        shootouts[i] = Shootout(probs[i], setups; names = names, kwargs..., probaux[i]...)
+        shootouts[i] = Shootout(
+            probs[i], setups; names = names, reduction = reduction, kwargs..., probaux[i]...
+        )
         winners[i] = shootouts[i].winner
     end
     return ShootoutSet(shootouts, probs, probaux, N, winners)
@@ -194,7 +197,7 @@ end
 function WorkPrecision(
         prob, alg, abstols, reltols, dts = nothing;
         name = nothing, appxsol = nothing, error_estimate = :final,
-        numruns = 20, seconds = 2, kwargs...
+        numruns = 20, seconds = 2, reduction = default_reduction, kwargs...
     )
     N = length(abstols)
     errors = Vector{Dict{Symbol, Float64}}(undef, N)
@@ -243,7 +246,7 @@ function WorkPrecision(
                 end
 
                 if cur_appxsol !== nothing
-                    errsol = appxtrue(sol, cur_appxsol)
+                    errsol = appxtrue(sol, cur_appxsol; reduction = reduction)
                     errors[i] = Dict{Symbol, Float64}()
                     for err in keys(errsol.errors)
                         errors[i][err] = mean(errsol.errors[err])
@@ -325,7 +328,7 @@ end
 function WorkPrecision(
         prob::AbstractBVProblem, alg, abstols, reltols, dts = nothing;
         name = nothing, appxsol = nothing, error_estimate = :final,
-        numruns = 20, seconds = 2, kwargs...
+        numruns = 20, seconds = 2, reduction = default_reduction, kwargs...
     )
     N = length(abstols)
     errors = Vector{Dict{Symbol, Float64}}(undef, N)
@@ -373,7 +376,7 @@ function WorkPrecision(
                 end
 
                 if cur_appxsol !== nothing
-                    errsol = appxtrue(sol, cur_appxsol)
+                    errsol = appxtrue(sol, cur_appxsol; reduction = reduction)
                     errors[i] = Dict{Symbol, Float64}()
                     for err in keys(errsol.errors)
                         errors[i][err] = mean(errsol.errors[err])
@@ -519,7 +522,7 @@ function WorkPrecisionSet(
         abstols, reltols, setups;
         print_names = false, names = nothing, appxsol = nothing,
         error_estimate = :final,
-        test_dt = nothing, kwargs...
+        test_dt = nothing, reduction = default_reduction, kwargs...
     )
     N = length(setups)
     @assert names === nothing || length(setups) == length(names)
@@ -538,7 +541,7 @@ function WorkPrecisionSet(
             prob, setups[i][:alg], _abstols, _reltols, _dts;
             appxsol = appxsol,
             error_estimate = error_estimate,
-            name = names[i], kwargs..., filtered_setup...
+            name = names[i], reduction = reduction, kwargs..., filtered_setup...
         )
     end
     return WorkPrecisionSet(
@@ -864,7 +867,7 @@ function WorkPrecisionSet(
         abstols, reltols, setups;
         print_names = false, names = nothing, appxsol = nothing,
         error_estimate = :final,
-        test_dt = nothing, kwargs...
+        test_dt = nothing, reduction = default_reduction, kwargs...
     )
     N = length(setups)
     @assert names === nothing || length(setups) == length(names)
@@ -883,7 +886,7 @@ function WorkPrecisionSet(
             prob, setups[i][:alg], _abstols, _reltols, _dts;
             appxsol = appxsol,
             error_estimate = error_estimate,
-            name = names[i], kwargs..., filtered_setup...
+            name = names[i], reduction = reduction, kwargs..., filtered_setup...
         )
     end
     return WorkPrecisionSet(
