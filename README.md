@@ -5,10 +5,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/SciML/DiffEqDevTools.jl/badge.svg)](https://coveralls.io/github/SciML/DiffEqDevTools.jl)
 [![codecov.io](http://codecov.io/github/SciML/DiffEqDevTools.jl/coverage.svg?branch=master)](http://codecov.io/github/SciML/DiffEqDevTools.jl?branch=master)
 
-## Update
-
-This package was moved to be a sublibrary in [OrdinaryDiffEq.jl](https://github.com/SciML/OrdinaryDiffEq.jl). The migration is a maintanance change but should have no functional
-change to the library.
+> [!IMPORTANT] 
+>
+> This package was moved to be a sublibrary in [OrdinaryDiffEq.jl](https://github.com/SciML/OrdinaryDiffEq.jl). The migration is a maintanance change but should have no functional
+> change to the library.
 
 ## Previous Stuff
 
